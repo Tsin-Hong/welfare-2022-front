@@ -33,22 +33,19 @@
                 @click:append="passwordShow = !passwordShow"
               ></v-text-field>
               <v-switch v-model="firstLogin" label="首次登入"></v-switch>
-              <!-- <v-btn rounded block class="mx-auto" href="./index"
-                >進入遊戲</v-btn -->
-                <v-btn rounded block class="mx-auto"
-                >進入遊戲</v-btn
-              >
+              <v-btn rounded block class="mx-auto">進入遊戲</v-btn>
             </form>
           </v-list-item-content>
         </v-list-item>
       </v-card>
-      <span :class="{connected: user.connected}"></span>
+      <span :class="{ connected: user.connected }"></span>
     </div>
   </div>
 </template>
 
 <script>
 import axios from 'axios'
+import { mapMutations, mapState } from 'vuex'
 
 export default {
   name: 'Login',
@@ -60,21 +57,13 @@ export default {
     passwordCheck: ''
   }),
   computed: {
-    user () {
-      return this.$store.state.user
-    }
+    ...mapState(['user'])
   },
   updated: function () {
-    if (this.user.connected) {
-      this.$router.push('Index')
-    }
-  },
-  mounted: function () {
-    if (this.user.connected) {
-      this.$router.push('Index')
-    }
+    this.checkLoginStaus()
   },
   methods: {
+    ...mapMutations(['ChangeState']),
     change: function () {
       this.$store.commit('user/changeState', ['code', this.account])
       this.$store.commit('user/changeState', ['pwd', this.password])
@@ -86,7 +75,7 @@ export default {
         data.pwdre = this.passwordCheck
         // var registerUrl = `${setting.getSocketLocation()}login`
         var registerUrl = 'http://172.16.20.73:20221/login'
-        axios.post(registerUrl, data).then(e => {
+        axios.post(registerUrl, data).then((e) => {
           console.log(e)
           if (e.status === 200) {
             window.alert('註冊成功 請登入.')
@@ -97,6 +86,14 @@ export default {
         })
       } else {
         this.$socket.emit('AUTHORIZE', data)
+      }
+      this.checkLoginStaus()
+    },
+    checkLoginStaus: function () {
+      if (this.user.connected) {
+        this.ChangeState(['tempName', 'Home'])
+      } else {
+        this.ChangeState(['tempName', 'Login'])
       }
     }
   },

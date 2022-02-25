@@ -11,6 +11,7 @@
               class="btn-group"
               @mouseover="currMainMenu = item.title"
               @mouseleave="currMainMenu = ''"
+              @click="chickBtn(item.is_click, item.title, index + '-' + index)"
             >
               <v-list-item class="main-btn">
                 <v-list-item-icon>
@@ -20,13 +21,13 @@
                   <v-list-item-title v-text="item.title"></v-list-item-title>
                 </v-list-item-content>
               </v-list-item>
-              <v-list class="sub-menu-area" v-if="currMainMenu == item.title">
+              <v-list class="sub-menu-area" v-if="item.items && currMainMenu == item.title">
                 <template v-for="(child, child_i) in item.items">
                   <v-list-item
                     :key="index + '-' + child_i"
                     v-if="item.is_show && child.is_show"
                     class="sub-btn"
-                    @click="chickBtn(child.title, index + '-' + child_i)"
+                    @click="chickBtn(true, child.title, index + '-' + child_i)"
                   >
                     <v-list-item-icon>
                       <v-icon v-text="'mdi-' + child.icon"></v-icon>
@@ -62,6 +63,7 @@ export default Vue.extend({
         title: '內政',
         icon: 'home-flood',
         is_show: true,
+        is_click: false,
         items: [
           { icon: '', title: '商業', is_show: false },
           { icon: '', title: '增兵', is_show: true },
@@ -73,6 +75,7 @@ export default Vue.extend({
         title: '論功',
         icon: '',
         is_show: false,
+        is_click: false,
         items: [
           { icon: '', title: '任命', is_show: false },
           { icon: '', title: '解任', is_show: false },
@@ -85,6 +88,7 @@ export default Vue.extend({
         title: '攻略',
         icon: 'baseball-diamond',
         is_show: true,
+        is_click: false,
         items: [
           { icon: '', title: '入仕', is_show: true },
           { icon: '', title: '下野', is_show: true },
@@ -99,6 +103,7 @@ export default Vue.extend({
         title: '外交',
         icon: '',
         is_show: false,
+        is_click: false,
         items: [
           { icon: '', title: '親善', is_show: false },
           { icon: '', title: '同盟', is_show: false },
@@ -109,11 +114,18 @@ export default Vue.extend({
         title: '軍議',
         icon: 'axe-battle',
         is_show: true,
+        is_click: false,
         items: [
           { icon: '', title: '移動', is_show: true },
           { icon: '', title: '出征', is_show: false },
           { icon: '', title: '探索', is_show: false }
         ]
+      },
+      {
+        title: '離開',
+        icon: 'arrow-left-top-bold',
+        is_show: true,
+        is_click: true
       }
     ]
   }),
@@ -139,8 +151,10 @@ export default Vue.extend({
 
   methods: {
     ...mapMutations(['ChangeState', 'ChangeApiCheck']),
-    chickBtn: function (key = '', index = '') {
-      this.ChangeApiCheck({ key: key, index: index })
+    chickBtn: function (go: any, key = '', index = '') {
+      if (go) {
+        this.ChangeApiCheck({ key: key, index: index })
+      }
     }
   },
 
@@ -149,8 +163,6 @@ export default Vue.extend({
       const token = window.localStorage.getItem('_token_')
       if (token) {
         this.$socket.emit('AUTHORIZE', { token })
-      } else {
-        this.$router.push('/')
       }
     }
   }
