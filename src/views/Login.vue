@@ -33,7 +33,7 @@
                 @click:append="passwordShow = !passwordShow"
               ></v-text-field>
               <v-switch v-model="firstLogin" label="首次登入"></v-switch>
-              <v-btn rounded block class="mx-auto">進入遊戲</v-btn>
+              <v-btn rounded block class="mx-auto" @click="login">進入遊戲</v-btn>
             </form>
           </v-list-item-content>
         </v-list-item>
@@ -46,6 +46,7 @@
 <script>
 import axios from 'axios'
 import { mapMutations, mapState } from 'vuex'
+import setting from '@/unit/setting'
 
 export default {
   name: 'Login',
@@ -73,8 +74,8 @@ export default {
       var data = { code: this.account.toUpperCase(), pwd: this.password }
       if (this.firstLogin) {
         data.pwdre = this.passwordCheck
-        // var registerUrl = `${setting.getSocketLocation()}login`
-        var registerUrl = 'http://172.16.20.73:20221/login'
+        var registerUrl = `${setting.getSocketLocation()}login`
+        // var registerUrl = 'http://172.16.20.73:20221/login'
         axios.post(registerUrl, data).then((e) => {
           console.log(e)
           if (e.status === 200) {
@@ -96,15 +97,15 @@ export default {
         this.ChangeState(['tempName', 'Login'])
       }
     }
-  },
-  sockets: {
-    connect: function () {
-      const token = window.localStorage.getItem('_token_')
-      if (token) {
-        this.$socket.emit('AUTHORIZE', { token })
-      }
-    }
   }
+  // sockets: {
+  //   connect: function () {
+  //     const token = window.localStorage.getItem('_token_')
+  //     if (token) {
+  //       this.$socket.emit('AUTHORIZE', { token })
+  //     }
+  //   }
+  // }
 }
 </script>
 

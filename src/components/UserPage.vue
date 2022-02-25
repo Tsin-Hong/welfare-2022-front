@@ -1,7 +1,7 @@
 <template>
   <v-container id="userPage" class="user-page" ref="userPage" fluid @mousedown="onMouseDown($event)" @mousemove="onMouseMove($event)" @mouseup="onMouseUp()" @mouseleave="onMouseUp()">
-    <div id="mapArea" class="map-area">
-      <img class="map" src="../assets/images/map.jpg" alt="" :style="{ transform: `translate(${viewX}px, ${viewY}px)` }" />
+    <div id="mapArea" class="map-area" style="overflow: hidden;">
+      <img class="map" src="../assets/images/map.jpg" alt="" :style="{ transform: `translate(${viewX}px, ${viewY}px)`, transition: 'transform 0.1s cubic-bezier(0.05, 0.95, 0.11, 0.99)' }" />
       <div class="user-area">
         <div class="user-info">
           <div class="img-area">
@@ -43,7 +43,7 @@
           </div>
         </div>
       </div>
-      <div class="stronghold-list" :style="{ transform: `translate(${viewX}px, ${viewY}px)` }">
+      <div class="stronghold-list" :style="{ transform: `translate(${viewX}px, ${viewY}px)`, transition: 'transform 0.1s cubic-bezier(0.05, 0.95, 0.11, 0.99)' }">
         <template v-for="(stronghold, stronghold_i) in strongholds">
           <div
             v-if="client.status_type == '' || ((client.status_type == 'move' && client.could_be_move_to.indexOf(stronghold.id) !== -1) || user.mapNowId === stronghold.id)"
@@ -171,7 +171,7 @@ export default Vue.extend({
   }),
 
   computed: {
-    ...mapState(['user', 'global', 'client']),
+    ...mapState(['user', 'global', 'client', 'info']),
     strongholds: function () {
       const state = this.$store.state
       const hashMapIdUser = {}
@@ -272,22 +272,22 @@ export default Vue.extend({
         case '增兵':
           this.actIncreaseSoldier()
           content = ''
-          this.ApiRes({ content: content })
+          // this.ApiRes({ content: content })
           break
         case '入仕':
           this.actEnterCountry()
           content = ''
-          this.ApiRes({ content: content })
+          // this.ApiRes({ content: content })
           break
         case '下野':
           this.actLeaveCountry()
           content = ''
-          this.ApiRes({ content: content })
+          // this.ApiRes({ content: content })
           break
         case '探索':
           this.actSearchWild()
           content = ''
-          this.ApiRes({ content: content })
+          // this.ApiRes({ content: content })
           break
         case '離開':
           this.onClickLogout()
@@ -307,15 +307,22 @@ export default Vue.extend({
       window.location.reload()
     },
     goToXY: function (index = 0) {
+      const maps = this.global.maps
       this.$nextTick(() => {
-        const strongholdId = '#stronghold_' + index
-        this.inCurrStrongholdIndex = index
-        this.$scrollTo(strongholdId, 500, {
-          container: '#userPage',
-          offset: -450,
-          x: true
-        })
+        // const strongholdId = '#stronghold_' + index
+        // this.inCurrStrongholdIndex = index
+        // this.$scrollTo(strongholdId, 500, {
+        //   container: '#userPage',
+        //   offset: -450,
+        //   x: true
+        // })
         // element.$scrollTo(stronghold.x, stronghold.y)
+        const mapData = maps[index]
+        const x = -(mapData.x) + Math.round(window.innerWidth / 2)
+        const y = -(mapData.y) + Math.round(window.innerHeight / 2)
+        const xy = this.getParsedXY([x, y])
+        this.viewX = xy[0]
+        this.viewY = xy[1]
       })
     },
     clickThisStronghold: function (index = 0) {
@@ -334,27 +341,34 @@ export default Vue.extend({
       }
     },
     onMouseDown: function (evt) {
+      evt.preventDefault()
       const x = evt.clientX
       const y = evt.clientY
       this._mouse_dataset = { start: { x, y }, go: true, origin: { x: this.viewX, y: this.viewY } }
+      console.log(this._mouse_dataset)
     },
     onMouseUp: function () {
       this._mouse_dataset.go = false
     },
     onMouseMove: function (evt) {
+      evt.preventDefault()
       const md = this._mouse_dataset || {}
       if (md.go) {
         const x = evt.clientX
         const y = evt.clientY
-        let moveX = x - md.start.x + md.origin.x
-        let moveY = y - md.start.y + md.origin.y
-        moveX = Math.max(moveX, -2800 + window.innerWidth - 152)
-        moveX = Math.min(moveX, 0)
-        moveY = Math.max(moveY, -2200 + window.innerHeight - 152)
-        moveY = Math.min(moveY, 0)
-        this.viewX = moveX
-        this.viewY = moveY
+        const moveX = x - md.start.x + md.origin.x
+        const moveY = y - md.start.y + md.origin.y
+        console.log('moveX: ', moveX, 'y: ', moveY)
+        const xy = this.getParsedXY([moveX, moveY])
+        console.log(xy)
+        this.viewX = xy[0]
+        this.viewY = xy[1]
       }
+    },
+    getParsedXY: function (xy: any): any {
+      const nextx = Math.max(-(3014 - window.innerWidth), xy[0])
+      const nexty = Math.max(-(2089 - window.innerHeight), xy[1])
+      return [Math.min(0, nextx), Math.min(0, nexty)]
     }
   }
 })

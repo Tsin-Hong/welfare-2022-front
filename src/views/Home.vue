@@ -8,7 +8,7 @@
             <div
               v-if="
                 item.is_show &&
-                (item.title === '離開' || (item.title !== '離開' && user.actPoint > 1)) &&
+                (item.title === '離開' || (item.title !== '離開' && user.actPoint > 0)) &&
                 item.couldBeUseRoleIds.indexOf(user.role) !== -1 &&
                 (item.couldBeUseByCity === user.mapNowIsCity ||
                   item.couldBeUseByOther !== user.mapNowIsCity)
@@ -325,12 +325,12 @@ export default Vue.extend({
   },
 
   mounted: function () {
-    if (!this.user.connected) {
-      const token = window.localStorage.getItem('_token_')
-      if (token) {
-        this.$socket.emit('AUTHORIZE', { token })
-      }
-    }
+    // if (!this.user.connected) {
+    //   const token = window.localStorage.getItem('_token_')
+    //   if (token) {
+    //     this.$socket.emit('AUTHORIZE', { token })
+    //   }
+    // }
   },
 
   methods: {
@@ -338,6 +338,7 @@ export default Vue.extend({
     ...mapActions(['ApiMove']),
     chickBtn: function (go: any, key = '', index = '') {
       if (go) {
+        console.log(key, index)
         this.ChangeApiCheck({ key: key, index: index })
         switch (key) {
           case '移動':
@@ -348,16 +349,16 @@ export default Vue.extend({
         }
       }
     }
-  },
-
-  sockets: {
-    connect: function () {
-      const token = window.localStorage.getItem('_token_')
-      if (token) {
-        this.$socket.emit('AUTHORIZE', { token })
-      }
-    }
   }
+
+  // sockets: {
+  //   connect: function () {
+  //     const token = window.localStorage.getItem('_token_')
+  //     if (token) {
+  //       this.$socket.emit('AUTHORIZE', { token })
+  //     }
+  //   }
+  // }
 })
 </script>
 

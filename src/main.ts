@@ -16,7 +16,7 @@ Vue.use(new VueSocketIO({
   connection: io,
   vuex: {
     store,
-    actionPrefix: 'wsEmit',
+    actionPrefix: 'wsOnReceive',
     mutationPrefix: 'wsOn'
   }
 }))

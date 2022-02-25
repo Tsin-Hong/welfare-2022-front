@@ -43,9 +43,9 @@ const global = {
             })
           })
         } break
-        case enums.ALERT:
-          window.alert(payload.msg)
-          break
+        // case enums.ALERT:
+        //   window.alert(payload.msg)
+        //   break
         default:
       }
     },
