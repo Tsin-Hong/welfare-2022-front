@@ -44,6 +44,7 @@ export default Vue.extend({
       if (token) {
         this.$socket.emit('AUTHORIZE', { token })
       }
+      this.$store.dispatch('loadSocketio', this.$socket)
     }
   }
 })
