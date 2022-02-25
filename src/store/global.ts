@@ -7,7 +7,8 @@ const global = {
     users: [],
     maps: [],
     cities: [],
-    countries: []
+    countries: [],
+    io: null
   },
   mutations: {
     wsOnMESSAGE: (state: any, message: any) => {
@@ -36,14 +37,32 @@ const global = {
               return {}
             }, state)
             console.log('pointer: ', pointer)
-            pointer[_.key] = _.value
+            Object.keys(_.update).map((key) => {
+              const value = _.update[key]
+              pointer[key] = value
+            })
           })
         } break
+        case enums.ALERT:
+          window.alert(payload.msg)
+          break
         default:
       }
+    },
+    setIO: (state: any, io: any) => {
+      state.io = io
     }
   },
   actions: {
+    loadSocketio: (content: any, io: any) => {
+      content.commit('setIO', io)
+    },
+    emitMessage: (content: any, message: any) => {
+      content.state.io && content.state.io.emit('MESSAGE', message)
+    },
+    actMove: (content: any, message: any) => {
+      content.dispatch('emitMessage', { act: enums.ACT_MOVE, payload: message })
+    }
   },
   getters: {
   }

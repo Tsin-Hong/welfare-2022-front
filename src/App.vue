@@ -18,8 +18,9 @@ export default Vue.extend({
   methods: {
   },
   sockets: {
-    // connect: function () {
-    // }
+    connect: function () {
+      this.$store.dispatch('loadSocketio', this.$socket)
+    }
   }
 })
 </script>
