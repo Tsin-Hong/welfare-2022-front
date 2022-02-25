@@ -6,7 +6,11 @@
         <v-list-item-group>
           <template v-for="(item, index) in items">
             <div
-              v-if="item.is_show"
+              v-if="
+                item.is_show &&
+                (item.couldBeUseByCity === user.mapNowIsCity ||
+                  item.couldBeUseByOther !== user.mapNowIsCity)
+              "
               :key="index"
               class="btn-group"
               @mouseover="currMainMenu = item.title"
@@ -28,7 +32,13 @@
                 <template v-for="(child, child_i) in item.items">
                   <v-list-item
                     :key="index + '-' + child_i"
-                    v-if="item.is_show && child.is_show && child.couldBeUseRoleIds.indexOf(user.role) !== -1"
+                    v-if="
+                      item.is_show &&
+                      child.is_show &&
+                      child.couldBeUseRoleIds.indexOf(user.role) !== -1 &&
+                      (child.couldBeUseByCity === user.mapNowIsCity ||
+                        child.couldBeUseByOther !== user.mapNowIsCity)
+                    "
                     class="sub-btn"
                     @click="chickBtn(true, child.title, index + '-' + child_i)"
                   >
@@ -69,11 +79,41 @@ export default Vue.extend({
         icon: 'home-flood',
         is_show: true,
         is_click: false,
+        couldBeUseByCity: true,
+        couldBeUseByOther: false,
         items: [
-          { icon: '', title: '商業', is_show: false, couldBeUseRoleIds: [] },
-          { icon: '', title: '增兵', is_show: true, couldBeUseRoleIds: [1, 2, 3] },
-          { icon: '', title: '政策', is_show: false, couldBeUseRoleIds: [] },
-          { icon: '', title: '擁立', is_show: false, couldBeUseRoleIds: [] }
+          {
+            icon: '',
+            title: '商業',
+            is_show: false,
+            couldBeUseRoleIds: [],
+            couldBeUseByCity: true,
+            couldBeUseByOther: false
+          },
+          {
+            icon: '',
+            title: '增兵',
+            is_show: true,
+            couldBeUseRoleIds: [1, 2, 3],
+            couldBeUseByCity: true,
+            couldBeUseByOther: false
+          },
+          {
+            icon: '',
+            title: '政策',
+            is_show: false,
+            couldBeUseRoleIds: [],
+            couldBeUseByCity: true,
+            couldBeUseByOther: false
+          },
+          {
+            icon: '',
+            title: '擁立',
+            is_show: false,
+            couldBeUseRoleIds: [],
+            couldBeUseByCity: true,
+            couldBeUseByOther: false
+          }
         ]
       },
       {
@@ -81,12 +121,49 @@ export default Vue.extend({
         icon: '',
         is_show: false,
         is_click: false,
+        couldBeUseByCity: true,
+        couldBeUseByOther: false,
         items: [
-          { icon: '', title: '任命', is_show: false, couldBeUseRoleIds: [] },
-          { icon: '', title: '解任', is_show: false, couldBeUseRoleIds: [] },
-          { icon: '', title: '招募', is_show: false, couldBeUseRoleIds: [] },
-          { icon: '', title: '配給', is_show: false, couldBeUseRoleIds: [] },
-          { icon: '', title: '進貢', is_show: false, couldBeUseRoleIds: [] }
+          {
+            icon: '',
+            title: '任命',
+            is_show: false,
+            couldBeUseRoleIds: [],
+            couldBeUseByCity: true,
+            couldBeUseByOther: false
+          },
+          {
+            icon: '',
+            title: '解任',
+            is_show: false,
+            couldBeUseRoleIds: [],
+            couldBeUseByCity: true,
+            couldBeUseByOther: false
+          },
+          {
+            icon: '',
+            title: '招募',
+            is_show: false,
+            couldBeUseRoleIds: [],
+            couldBeUseByCity: true,
+            couldBeUseByOther: false
+          },
+          {
+            icon: '',
+            title: '配給',
+            is_show: false,
+            couldBeUseRoleIds: [],
+            couldBeUseByCity: true,
+            couldBeUseByOther: false
+          },
+          {
+            icon: '',
+            title: '進貢',
+            is_show: false,
+            couldBeUseRoleIds: [],
+            couldBeUseByCity: true,
+            couldBeUseByOther: false
+          }
         ]
       },
       {
@@ -94,14 +171,65 @@ export default Vue.extend({
         icon: 'baseball-diamond',
         is_show: true,
         is_click: false,
+        couldBeUseByCity: true,
+        couldBeUseByOther: false,
         items: [
-          { icon: '', title: '入仕', is_show: true, couldBeUseRoleIds: [3] },
-          { icon: '', title: '下野', is_show: true, couldBeUseRoleIds: [1, 2] },
-          { icon: '', title: '起義', is_show: false, couldBeUseRoleIds: [] },
-          { icon: '', title: '釋放', is_show: false, couldBeUseRoleIds: [] },
-          { icon: '', title: '交易', is_show: false, couldBeUseRoleIds: [] },
-          { icon: '', title: '裁判', is_show: false, couldBeUseRoleIds: [] },
-          { icon: '', title: '叛亂', is_show: false, couldBeUseRoleIds: [] }
+          {
+            icon: '',
+            title: '入仕',
+            is_show: true,
+            couldBeUseRoleIds: [3],
+            couldBeUseByCity: true,
+            couldBeUseByOther: false
+          },
+          {
+            icon: '',
+            title: '下野',
+            is_show: true,
+            couldBeUseRoleIds: [1, 2],
+            couldBeUseByCity: true,
+            couldBeUseByOther: false
+          },
+          {
+            icon: '',
+            title: '起義',
+            is_show: false,
+            couldBeUseRoleIds: [],
+            couldBeUseByCity: true,
+            couldBeUseByOther: false
+          },
+          {
+            icon: '',
+            title: '釋放',
+            is_show: false,
+            couldBeUseRoleIds: [],
+            couldBeUseByCity: true,
+            couldBeUseByOther: false
+          },
+          {
+            icon: '',
+            title: '交易',
+            is_show: false,
+            couldBeUseRoleIds: [],
+            couldBeUseByCity: true,
+            couldBeUseByOther: false
+          },
+          {
+            icon: '',
+            title: '裁判',
+            is_show: false,
+            couldBeUseRoleIds: [],
+            couldBeUseByCity: true,
+            couldBeUseByOther: false
+          },
+          {
+            icon: '',
+            title: '叛亂',
+            is_show: false,
+            couldBeUseRoleIds: [],
+            couldBeUseByCity: true,
+            couldBeUseByOther: false
+          }
         ]
       },
       {
@@ -109,10 +237,33 @@ export default Vue.extend({
         icon: '',
         is_show: false,
         is_click: false,
+        couldBeUseByCity: true,
+        couldBeUseByOther: false,
         items: [
-          { icon: '', title: '親善', is_show: false, couldBeUseRoleIds: [] },
-          { icon: '', title: '同盟', is_show: false, couldBeUseRoleIds: [] },
-          { icon: '', title: '請求攻擊', is_show: false, couldBeUseRoleIds: [] }
+          {
+            icon: '',
+            title: '親善',
+            is_show: false,
+            couldBeUseRoleIds: [],
+            couldBeUseByCity: true,
+            couldBeUseByOther: false
+          },
+          {
+            icon: '',
+            title: '同盟',
+            is_show: false,
+            couldBeUseRoleIds: [],
+            couldBeUseByCity: true,
+            couldBeUseByOther: false
+          },
+          {
+            icon: '',
+            title: '請求攻擊',
+            is_show: false,
+            couldBeUseRoleIds: [],
+            couldBeUseByCity: true,
+            couldBeUseByOther: false
+          }
         ]
       },
       {
@@ -120,17 +271,42 @@ export default Vue.extend({
         icon: 'axe-battle',
         is_show: true,
         is_click: false,
+        couldBeUseByCity: true,
+        couldBeUseByOther: true,
         items: [
-          { icon: '', title: '移動', is_show: true, couldBeUseRoleIds: [1, 2, 3] },
-          { icon: '', title: '出征', is_show: false, couldBeUseRoleIds: [] },
-          { icon: '', title: '探索', is_show: true, couldBeUseRoleIds: [1, 2, 3] }
+          {
+            icon: '',
+            title: '移動',
+            is_show: true,
+            couldBeUseRoleIds: [1, 2, 3],
+            couldBeUseByCity: true,
+            couldBeUseByOther: true
+          },
+          {
+            icon: '',
+            title: '出征',
+            is_show: false,
+            couldBeUseRoleIds: [],
+            couldBeUseByCity: true,
+            couldBeUseByOther: false
+          },
+          {
+            icon: '',
+            title: '探索',
+            is_show: true,
+            couldBeUseRoleIds: [1, 2, 3],
+            couldBeUseByCity: false,
+            couldBeUseByOther: true
+          }
         ]
       },
       {
         title: '離開',
         icon: 'arrow-left-top-bold',
         is_show: true,
-        is_click: true
+        is_click: true,
+        couldBeUseByCity: true,
+        couldBeUseByOther: true
       }
     ]
   }),

@@ -47,7 +47,7 @@ const client = {
   actions: {
     ApiMove: function ({ commit, rootState }, payload) {
       const user = rootState.user
-      const res = mapAlgorithm.getAllowedPosition(user.mapNowIndex, user.actPoint)
+      const res = mapAlgorithm.getAllowedPosition(user.mapNowId, user.actPoint)
       commit('ChangeState', ['status_type', 'move'])
       commit('ChangeState', ['could_be_move_to', res.all])
     },
