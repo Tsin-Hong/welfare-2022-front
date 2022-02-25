@@ -1,4 +1,6 @@
-const clinet = {
+import mapAlgorithm from '@/unit/mapAlgorithm'
+
+const client = {
   state: {
     tempName: 'None',
     dialog: false,
@@ -13,8 +15,11 @@ const clinet = {
       index: ''
     },
     dialog_check_content: {
-      title: ''
-    }
+      title: '',
+      content: ''
+    },
+    status_type: '',
+    could_be_move_to: []
   },
   mutations: {
     ChangeState: function (state: any, payload = []) {
@@ -22,13 +27,16 @@ const clinet = {
       const key = payload[0]
       state[key] = payload[1]
     },
-    ChangeApiCheck: function (state: any, payload = { key: '', index: '' }) {
+    ChangeDialogCheck: function (state: any, payload = { content: '' }) {
+      console.log(payload)
+      state.dialog_check_content.content = payload.content
       state.dialog_check = true
-      state.dialog_check_content.title = payload.key
+    },
+    ChangeApiCheck: function (state: any, payload = { key: '', index: '' }) {
       state.dialog_check_curr.key = payload.key
       state.dialog_check_curr.index = payload.index
     },
-    ChangeApiResult: function (state: any, payload = {}) {
+    ChangeApiResult: function (state: any, payload = { }) {
       state.dialog_content = payload
       state.dialog = true
     }
@@ -37,13 +45,18 @@ const clinet = {
 
   },
   actions: {
+    ApiMove: function ({ commit, rootState }, payload) {
+      const user = rootState.user
+      const res = mapAlgorithm.getAllowedPosition(user.mapNowIndex, user.actPoint)
+      commit('ChangeState', ['status_type', 'move'])
+      commit('ChangeState', ['could_be_move_to', res.all])
+    },
     ApiJoinCountry: function ({ state, commit }: { state: any, commit: any }) {
       const res = {
         img: state.dialog_check_curr.index + '.jpg',
         title: '入仕成功',
         text: '你已加入 叡迅君主 謝小白 麾下，為國家建立豐功偉業是臣子光榮的義務。'
       }
-
       commit('ChangeApiResult', res)
     },
     ApiAddTroops: function ({ state, commit }: { state: any, commit: any }) {
@@ -58,4 +71,4 @@ const clinet = {
   }
 }
 
-export default clinet
+export default client

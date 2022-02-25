@@ -28,7 +28,7 @@
                 <template v-for="(child, child_i) in item.items">
                   <v-list-item
                     :key="index + '-' + child_i"
-                    v-if="item.is_show && child.is_show"
+                    v-if="item.is_show && child.is_show && child.couldBeUseRoleIds.indexOf(user.role) !== -1"
                     class="sub-btn"
                     @click="chickBtn(true, child.title, index + '-' + child_i)"
                   >
@@ -70,10 +70,10 @@ export default Vue.extend({
         is_show: true,
         is_click: false,
         items: [
-          { icon: '', title: '商業', is_show: false },
-          { icon: '', title: '增兵', is_show: true },
-          { icon: '', title: '政策', is_show: false },
-          { icon: '', title: '擁立', is_show: false }
+          { icon: '', title: '商業', is_show: false, couldBeUseRoleIds: [] },
+          { icon: '', title: '增兵', is_show: true, couldBeUseRoleIds: [1, 2, 3] },
+          { icon: '', title: '政策', is_show: false, couldBeUseRoleIds: [] },
+          { icon: '', title: '擁立', is_show: false, couldBeUseRoleIds: [] }
         ]
       },
       {
@@ -82,11 +82,11 @@ export default Vue.extend({
         is_show: false,
         is_click: false,
         items: [
-          { icon: '', title: '任命', is_show: false },
-          { icon: '', title: '解任', is_show: false },
-          { icon: '', title: '招募', is_show: false },
-          { icon: '', title: '配給', is_show: false },
-          { icon: '', title: '進貢', is_show: false }
+          { icon: '', title: '任命', is_show: false, couldBeUseRoleIds: [] },
+          { icon: '', title: '解任', is_show: false, couldBeUseRoleIds: [] },
+          { icon: '', title: '招募', is_show: false, couldBeUseRoleIds: [] },
+          { icon: '', title: '配給', is_show: false, couldBeUseRoleIds: [] },
+          { icon: '', title: '進貢', is_show: false, couldBeUseRoleIds: [] }
         ]
       },
       {
@@ -95,13 +95,13 @@ export default Vue.extend({
         is_show: true,
         is_click: false,
         items: [
-          { icon: '', title: '入仕', is_show: true },
-          { icon: '', title: '下野', is_show: true },
-          { icon: '', title: '起義', is_show: false },
-          { icon: '', title: '釋放', is_show: false },
-          { icon: '', title: '交易', is_show: false },
-          { icon: '', title: '裁判', is_show: false },
-          { icon: '', title: '叛亂', is_show: false }
+          { icon: '', title: '入仕', is_show: true, couldBeUseRoleIds: [3] },
+          { icon: '', title: '下野', is_show: true, couldBeUseRoleIds: [1, 2] },
+          { icon: '', title: '起義', is_show: false, couldBeUseRoleIds: [] },
+          { icon: '', title: '釋放', is_show: false, couldBeUseRoleIds: [] },
+          { icon: '', title: '交易', is_show: false, couldBeUseRoleIds: [] },
+          { icon: '', title: '裁判', is_show: false, couldBeUseRoleIds: [] },
+          { icon: '', title: '叛亂', is_show: false, couldBeUseRoleIds: [] }
         ]
       },
       {
@@ -110,9 +110,9 @@ export default Vue.extend({
         is_show: false,
         is_click: false,
         items: [
-          { icon: '', title: '親善', is_show: false },
-          { icon: '', title: '同盟', is_show: false },
-          { icon: '', title: '請求攻擊', is_show: false }
+          { icon: '', title: '親善', is_show: false, couldBeUseRoleIds: [] },
+          { icon: '', title: '同盟', is_show: false, couldBeUseRoleIds: [] },
+          { icon: '', title: '請求攻擊', is_show: false, couldBeUseRoleIds: [] }
         ]
       },
       {
@@ -121,9 +121,9 @@ export default Vue.extend({
         is_show: true,
         is_click: false,
         items: [
-          { icon: '', title: '移動', is_show: true },
-          { icon: '', title: '出征', is_show: false },
-          { icon: '', title: '探索', is_show: true }
+          { icon: '', title: '移動', is_show: true, couldBeUseRoleIds: [1, 2, 3] },
+          { icon: '', title: '出征', is_show: false, couldBeUseRoleIds: [] },
+          { icon: '', title: '探索', is_show: true, couldBeUseRoleIds: [1, 2, 3] }
         ]
       },
       {
@@ -149,10 +149,18 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapMutations(['ChangeState', 'ChangeApiCheck']),
+    ...mapMutations(['ChangeState', 'ChangeApiCheck', 'ChangeDialogCheck']),
+    ...mapActions(['ApiMove']),
     chickBtn: function (go: any, key = '', index = '') {
       if (go) {
         this.ChangeApiCheck({ key: key, index: index })
+        switch (key) {
+          case '移動':
+            this.ApiMove()
+            break
+          default:
+            this.ChangeDialogCheck({ content: key })
+        }
       }
     }
   },

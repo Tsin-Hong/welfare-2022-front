@@ -44,63 +44,66 @@
         </div>
       </div>
       <div class="stronghold-list" :style="{ transform: `translate(${viewX}px, ${viewY}px)` }">
-        <div
-          v-for="(stronghold, stronghold_i) in strongholds"
-          :class="[
-            'stronghold',
-            { castle: stronghold.type == 1 },
-            { jungle: stronghold.type == 2 },
-            { here: stronghold.is_here }
-          ]"
-          :style="{ left: stronghold.x + 'px', top: stronghold.y + 'px' }"
-          :id="'stronghold_' + stronghold_i"
-          :key="stronghold_i"
-          @click="showThisStronghold(stronghold_i)"
-        >
-          <div class="stronghold-area">
-            <div class="stronghold-context">
-              <div class="country">
-                <span
-                  class="country-name"
-                  :style="{
-                    background: stronghold.conutry.color,
-                    color: stronghold.conutry.t_color
-                  }"
-                  >{{ stronghold.conutry.name }}</span
-                >
-                <span class="bottom"></span>
-              </div>
-              <div class="stronghold-info-area">
-                <div class="stronghold-name">{{ stronghold.name }}</div>
-                <div class="stronghold-info">
-                  武 {{ stronghold.generals_num }}、兵
-                  {{ stronghold.military_strength }}、浪
-                  {{ stronghold.ronin_num }}
+        <template v-for="(stronghold, stronghold_i) in strongholds">
+          <div
+            v-if="client.status_type == '' || (client.status_type == 'move' && client.could_be_move_to.indexOf(stronghold.id) !== -1)"
+            :class="[
+              'stronghold',
+              { castle: stronghold.type == 1 },
+              { jungle: stronghold.type == 2 },
+              { here: stronghold.is_here },
+              { moveTo: client.status_type == 'move' && client.could_be_move_to.indexOf(stronghold.id) !== -1 }
+            ]"
+            :style="{ left: stronghold.x + 'px', top: stronghold.y + 'px' }"
+            :id="'stronghold_' + stronghold_i"
+            :key="stronghold_i"
+            @click="clickThisStronghold(stronghold_i)"
+          >
+            <div class="stronghold-area">
+              <div class="stronghold-context">
+                <div class="country">
+                  <span
+                    class="country-name"
+                    :style="{
+                      background: stronghold.conutry.color,
+                      color: stronghold.conutry.t_color
+                    }"
+                    >{{ stronghold.conutry.name }}</span
+                  >
+                  <span class="bottom"></span>
+                </div>
+                <div class="stronghold-info-area">
+                  <div class="stronghold-name">{{ stronghold.name }}</div>
+                  <div class="stronghold-info">
+                    武 {{ stronghold.generals_num }}、兵
+                    {{ stronghold.military_strength }}、浪
+                    {{ stronghold.ronin_num }}
+                  </div>
                 </div>
               </div>
+              <img
+                v-if="stronghold.type == 1"
+                :src="
+                  require('../assets/images/' +
+                    (stronghold.is_main ? 'castle_main' : 'castle') +
+                    '.png')
+                "
+                alt=""
+              />
+              <div
+                v-else
+                class="jungle-img"
+                :style="{ background: stronghold.conutry.color }"
+              ></div>
             </div>
-            <img
-              v-if="stronghold.type == 1"
-              :src="
-                require('../assets/images/' +
-                  (stronghold.is_main ? 'castle_main' : 'castle') +
-                  '.png')
-              "
-              alt=""
-            />
-            <div
-              v-else
-              class="jungle-img"
-              :style="{ background: stronghold.conutry.color }"
-            ></div>
           </div>
-        </div>
+        </template>
       </div>
     </div>
-    <v-dialog v-model="clinet.dialog_check" persistent max-width="290">
+    <v-dialog v-model="client.dialog_check" persistent max-width="500">
       <v-card dark class="dialog-card">
         <v-card-title>
-          確定要執行 {{ clinet.dialog_check_curr.key }} ?
+          確定要執行 {{ client.dialog_check_content.content }} ?
         </v-card-title>
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -108,7 +111,7 @@
           <v-btn
             color="green darken-1"
             text
-            @click="ChangeState(['dialog_check', false])"
+            @click="cencel()"
           >
             放棄
           </v-btn>
@@ -116,18 +119,18 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog v-model="clinet.dialog" persistent width="500">
+    <v-dialog v-model="client.dialog" persistent width="500">
       <v-card dark class="dialog-card">
         <v-img
-          v-if="clinet.dialog_content.img"
-          :src="require('../assets/images/dialog/' + clinet.dialog_content.img)"
+          v-if="client.dialog_content.img"
+          :src="require('../assets/images/dialog/' + client.dialog_content.img)"
           height="200px"
           top
         />
         <v-card-title>
-          {{ clinet.dialog_content.title }}
+          {{ client.dialog_content.title }}
         </v-card-title>
-        <v-card-text>{{ clinet.dialog_content.text }}</v-card-text>
+        <v-card-text>{{ client.dialog_content.text }}</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="white" text @click="ChangeState(['dialog', false])">
@@ -141,7 +144,7 @@
 
 <script lang="ts">
 // import router from '@/router'
-// import clinet from '@/store/client'
+// import client from '@/store/client'
 import Vue from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -162,11 +165,12 @@ export default Vue.extend({
       3: {
         name: '浪人'
       }
-    }
+    },
+    goToCityId: 0
   }),
 
   computed: {
-    ...mapState(['user', 'global', 'clinet']),
+    ...mapState(['user', 'global', 'client']),
     strongholds: function () {
       const state = this.$store.state
       const hashMapIdUser = {}
@@ -237,11 +241,16 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapMutations(['ChangeState', 'ChangeApiCheck']),
-    ...mapActions(['ApiAddTroops', 'ApiJoinCountry']),
-    goDoApi: function (evt) {
-      console.log(this.clinet.dialog_check_curr)
-      switch (this.clinet.dialog_check_curr.key) {
+    ...mapMutations(['ChangeState', 'ChangeApiCheck', 'ChangeDialogCheck']),
+    ...mapActions(['ApiAddTroops', 'ApiJoinCountry', 'actMove']),
+    cencel: function () {
+      this.ChangeState(['status_type', ''])
+      this.ChangeState(['could_be_move_to', []])
+      this.ChangeState(['dialog_check', false])
+    },
+    goDoApi: function () {
+      console.log(this.client.dialog_check_curr)
+      switch (this.client.dialog_check_curr.key) {
         case '增兵':
           this.ApiAddTroops()
           break
@@ -250,6 +259,12 @@ export default Vue.extend({
           break
         case '離開':
           this.onClickLogout()
+          break
+        case '移動':
+          this.actMove(this.goToCityId)
+          this.goToCityId = 0
+          this.ChangeState(['status_type', ''])
+          this.ChangeState(['could_be_move_to', []])
           break
       }
       this.ChangeState(['dialog_check', false])
@@ -270,8 +285,15 @@ export default Vue.extend({
         // element.$scrollTo(stronghold.x, stronghold.y)
       })
     },
-    showThisStronghold: function (index = 0) {
-      this.goToXY(index)
+    clickThisStronghold: function (index = 0) {
+      if (this.client.status_type === 'move') {
+        const city = this.strongholds[index]
+        this.goToCityId = this.strongholds[index].id
+        console.log(city)
+        this.ChangeDialogCheck({ content: '移動到 ' + city.name })
+      } else {
+        this.goToXY(index)
+      }
     },
     checkLoginStaus: function () {
       if (this.user.connected) {
@@ -344,7 +366,6 @@ html {
           position: absolute;
           z-index: 10;
           cursor: pointer;
-
           .stronghold-area {
             position: relative;
             .stronghold-context {
@@ -420,6 +441,10 @@ html {
             .stronghold-name {
               color: #eac927;
             }
+          }
+          &.moveTo {
+            filter: drop-shadow(0px 0px 4px #cabca6);
+            z-index: 14;
           }
           &:hover {
             filter: drop-shadow(0px 0px 4px #cabca6);

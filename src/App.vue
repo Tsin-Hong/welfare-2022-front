@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-main>
-      <component :is="clinet.tempName"></component>
+      <component :is="client.tempName"></component>
     </v-main>
   </v-app>
 </template>
@@ -22,7 +22,7 @@ export default Vue.extend({
     Home
   },
   computed: {
-    ...mapState(['user', 'global', 'clinet'])
+    ...mapState(['user', 'global', 'client'])
   },
   mounted: function () {
     this.changePage()
