@@ -1,7 +1,7 @@
 <template>
   <v-container id="userPage" class="user-page" ref="userPage" fluid @mousedown="onMouseDown($event)" @mousemove="onMouseMove($event)" @mouseup="onMouseUp()" @mouseleave="onMouseUp()">
     <div id="mapArea" class="map-area" style="overflow: hidden;">
-      <img class="map" src="../assets/images/map.jpg" alt="" :style="{ transform: `translate(${viewX}px, ${viewY}px)`, transition: 'transform 0.1s cubic-bezier(0.05, 0.95, 0.11, 0.99)' }" />
+      <img class="map" src="../assets/images/map.jpg" alt="" :style="{ transform: `translate(${viewX}px, ${viewY}px)`, transition: 'transform 0.1s linear' }" />
       <div class="user-area">
         <div class="user-info">
           <div class="img-area">
@@ -27,15 +27,15 @@
                 <div class="date">2022年2月21日 星期一</div>
                 <div class="user">
                   <div class="block block-1">
-                    <span class="name">{{ currUser.nickname }}</span
+                    <span class="name">{{ user.nickname }}</span
                     ><span class="type">{{ currUser.roleName }}</span>
                   </div>
                   <div class="block resource">
-                    <span class="class-1">兵力 {{ currUser.soldier }}</span>
+                    <span class="class-1">兵力 {{ user.soldier }}</span>
                   </div>
                   <div class="block block-3">
                     <span class="place">{{ currUser.mapNowName }}</span
-                    ><span class="power">行動力 {{ currUser.actPoint }}</span>
+                    ><span class="power">行動力 {{ user.actPoint }}</span>
                   </div>
                 </div>
               </div>
@@ -43,7 +43,7 @@
           </div>
         </div>
       </div>
-      <div class="stronghold-list" :style="{ transform: `translate(${viewX}px, ${viewY}px)`, transition: 'transform 0.1s cubic-bezier(0.05, 0.95, 0.11, 0.99)' }">
+      <div class="stronghold-list" :style="{ transform: `translate(${viewX}px, ${viewY}px)`, transition: 'transform 0.1s linear' }">
         <template v-for="(stronghold, stronghold_i) in strongholds">
           <div
             v-if="client.status_type == '' || ((client.status_type == 'move' && client.could_be_move_to.indexOf(stronghold.id) !== -1) || user.mapNowId === stronghold.id)"
@@ -210,26 +210,31 @@ export default Vue.extend({
     },
     currUser: function () {
       const state = this.$store.state
-      const user = this.user
+      const user = {
+        role: this.user.role,
+        mapNowId: this.user.mapNowId,
+        roleName: '',
+        mapNowName: '',
+        mapNowIndex: -1,
+        mapNowIsCity: false,
+        countryColors: '#fff',
+        countryColorsT: '#000',
+        countryName: ''
+      }
       user.roleName = user.role === 0 ? '' : this.rolesObj[user.role].name
-      user.mapNowName = ''
-      user.mapNowIndex = -1
       for (const i in state.global.maps) {
         const curr = state.global.maps[i]
         if (curr.id === user.mapNowId) {
           user.mapNowName = curr.name
           user.mapNowIsCity = curr.cityId > 0
-          user.mapNowIndex = i
+          user.mapNowIndex = parseInt(i)
         }
       }
-      if (user.countryId === 0) {
-        user.countryColors = '#fff'
-        user.countryColorsT = '#000'
-        user.countryName = ''
+      if (this.user.countryId === 0) {
       } else {
         for (const i in state.global.countries) {
           const curr = state.global.countries[i]
-          if (curr.id === user.countryId) {
+          if (curr.id === this.user.countryId) {
             const countryColors = curr.color.split(',')
             user.countryColors = countryColors[0]
             user.countryColorsT = countryColors[1]
@@ -344,8 +349,7 @@ export default Vue.extend({
       evt.preventDefault()
       const x = evt.clientX
       const y = evt.clientY
-      this._mouse_dataset = { start: { x, y }, go: true, origin: { x: this.viewX, y: this.viewY } }
-      console.log(this._mouse_dataset)
+      this._mouse_dataset = { start: { x, y }, go: true, origin: { x: this.viewX, y: this.viewY }, timestamp: new Date().getTime() }
     },
     onMouseUp: function () {
       this._mouse_dataset.go = false
@@ -354,15 +358,17 @@ export default Vue.extend({
       evt.preventDefault()
       const md = this._mouse_dataset || {}
       if (md.go) {
-        const x = evt.clientX
-        const y = evt.clientY
-        const moveX = x - md.start.x + md.origin.x
-        const moveY = y - md.start.y + md.origin.y
-        console.log('moveX: ', moveX, 'y: ', moveY)
-        const xy = this.getParsedXY([moveX, moveY])
-        console.log(xy)
-        this.viewX = xy[0]
-        this.viewY = xy[1]
+        const nextTimestamp = new Date().getTime()
+        if (nextTimestamp - 100 > md.timestamp) {
+          const x = evt.clientX
+          const y = evt.clientY
+          const moveX = x - md.start.x + md.origin.x
+          const moveY = y - md.start.y + md.origin.y
+          const xy = this.getParsedXY([moveX, moveY])
+          this.viewX = xy[0]
+          this.viewY = xy[1]
+          md.timestamp = nextTimestamp
+        }
       }
     },
     getParsedXY: function (xy: any): any {

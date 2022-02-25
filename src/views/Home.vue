@@ -338,7 +338,6 @@ export default Vue.extend({
     ...mapActions(['ApiMove']),
     chickBtn: function (go: any, key = '', index = '') {
       if (go) {
-        console.log(key, index)
         this.ChangeApiCheck({ key: key, index: index })
         switch (key) {
           case '移動':

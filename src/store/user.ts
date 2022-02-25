@@ -40,14 +40,13 @@ const user = {
           window.alert(parsedMsg.reason)
           break
         }
-        case enums.AUTHORIZE: {
+        case enums.AUTHORIZE:
+        default:
           Object.keys(payload).map(key => {
             state[key] = payload[key]
           })
           state.connected = true
           break
-        }
-        default:
       }
 
       if (parsedMsg.redirect) {

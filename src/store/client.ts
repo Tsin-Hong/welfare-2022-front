@@ -51,14 +51,14 @@ const client = {
         res.all = res.all.filter((id: any) => mapIds.includes(id))
       }
 
-      console.log('res: ', res)
       commit('ChangeState', ['status_type', 'move'])
       commit('ChangeState', ['could_be_move_to', res.all])
     },
     ApiRes: function ({ state, commit }, payload) {
       const res = {
         img: state.dialog_check_curr.index + '.jpg',
-        title: state.dialog_check_curr.key + '成功',
+        // title: state.dialog_check_curr.key + '成功',
+        title: state.dialog_check_curr.key,
         text: payload.content
       }
       // '你已加入 叡迅君主 謝小白 麾下，為國家建立豐功偉業是臣子光榮的義務。'
