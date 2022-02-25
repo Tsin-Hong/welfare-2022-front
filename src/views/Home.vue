@@ -21,7 +21,10 @@
                   <v-list-item-title v-text="item.title"></v-list-item-title>
                 </v-list-item-content>
               </v-list-item>
-              <v-list class="sub-menu-area" v-if="item.items && currMainMenu == item.title">
+              <v-list
+                class="sub-menu-area"
+                v-if="item.items && currMainMenu == item.title"
+              >
                 <template v-for="(child, child_i) in item.items">
                   <v-list-item
                     :key="index + '-' + child_i"
@@ -55,7 +58,9 @@ import UserPage from '../components/UserPage.vue'
 
 export default Vue.extend({
   name: 'Home',
-
+  components: {
+    UserPage
+  },
   data: () => ({
     currMainMenu: '',
     items: [
@@ -118,7 +123,7 @@ export default Vue.extend({
         items: [
           { icon: '', title: '移動', is_show: true },
           { icon: '', title: '出征', is_show: false },
-          { icon: '', title: '探索', is_show: false }
+          { icon: '', title: '探索', is_show: true }
         ]
       },
       {
@@ -130,6 +135,10 @@ export default Vue.extend({
     ]
   }),
 
+  computed: {
+    ...mapState(['user'])
+  },
+
   mounted: function () {
     if (!this.user.connected) {
       const token = window.localStorage.getItem('_token_')
@@ -137,16 +146,6 @@ export default Vue.extend({
         this.$socket.emit('AUTHORIZE', { token })
       }
     }
-  },
-
-  computed: {
-    user: function () {
-      return this.$store.state.user
-    }
-  },
-
-  components: {
-    UserPage
   },
 
   methods: {

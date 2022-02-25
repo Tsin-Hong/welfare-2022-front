@@ -1,7 +1,7 @@
 <template>
-  <v-container id="userPage" class="user-page" ref="userPage" fluid>
+  <v-container id="userPage" class="user-page" ref="userPage" fluid @mousedown="onMouseDown($event)" @mousemove="onMouseMove($event)" @mouseup="onMouseUp()" @mouseleave="onMouseUp()">
     <div id="mapArea" class="map-area">
-      <img class="map" src="../assets/images/map.jpg" alt="" />
+      <img class="map" src="../assets/images/map.jpg" alt="" :style="{ transform: `translate(${viewX}px, ${viewY}px)` }" />
       <div class="user-area">
         <div class="user-info">
           <div class="img-area">
@@ -43,7 +43,7 @@
           </div>
         </div>
       </div>
-      <div class="stronghold-list">
+      <div class="stronghold-list" :style="{ transform: `translate(${viewX}px, ${viewY}px)` }">
         <div
           v-for="(stronghold, stronghold_i) in strongholds"
           :class="[
@@ -148,6 +148,10 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 export default Vue.extend({
   name: 'UserPage',
   data: () => ({
+    inCurrStrongholdIndex: '',
+    _mouse_dataset: {},
+    viewX: 0,
+    viewY: 0,
     rolesObj: {
       1: {
         name: '君主'
@@ -203,16 +207,33 @@ export default Vue.extend({
       const state = this.$store.state
       const user = this.user
       user.roleName = user.role === 0 ? '' : this.rolesObj[user.role].name
-      user.mapNowName = user.mapNowId === 0 ? '' : state.global.mpas.map((item: any) => {
-        return item.id === user.mapNowId
-      }).name
+      user.mapNowName = ''
+      user.mapNowIndex = -1
+      for (const i in state.global.maps) {
+        const curr = state.global.maps[i]
+        if (curr.id === user.mapNowId) {
+          user.mapNowName = curr.name
+          user.mapNowIndex = i
+        }
+      }
       return user
     }
   },
 
-  created: function () {
-    // 要去得當前使用者所在城池
-    this.goToXY(3)
+  watch: {
+    currUser: {
+      handler: function (val) {
+        if (val && val.mapNowIndex !== -1 && this.inCurrStrongholdIndex !== val.mapNowIndex) {
+          this.goToXY(val.mapNowIndex)
+        }
+      },
+      deep: true,
+      immediate: true
+    }
+  },
+
+  mounted: function () {
+    this._mouse_dataset = {}
   },
 
   methods: {
@@ -240,6 +261,7 @@ export default Vue.extend({
     goToXY: function (index = 0) {
       this.$nextTick(() => {
         const strongholdId = '#stronghold_' + index
+        this.inCurrStrongholdIndex = index
         this.$scrollTo(strongholdId, 500, {
           container: '#userPage',
           offset: -450,
@@ -254,6 +276,29 @@ export default Vue.extend({
     checkLoginStaus: function () {
       if (this.user.connected) {
         this.ChangeState(['tempName', 'Home'])
+      }
+    },
+    onMouseDown: function (evt) {
+      const x = evt.clientX
+      const y = evt.clientY
+      this._mouse_dataset = { start: { x, y }, go: true, origin: { x: this.viewX, y: this.viewY } }
+    },
+    onMouseUp: function () {
+      this._mouse_dataset.go = false
+    },
+    onMouseMove: function (evt) {
+      const md = this._mouse_dataset || {}
+      if (md.go) {
+        const x = evt.clientX
+        const y = evt.clientY
+        let moveX = x - md.start.x + md.origin.x
+        let moveY = y - md.start.y + md.origin.y
+        moveX = Math.max(moveX, -2800 + window.innerWidth - 152)
+        moveX = Math.min(moveX, 0)
+        moveY = Math.max(moveY, -2200 + window.innerHeight - 152)
+        moveY = Math.min(moveY, 0)
+        this.viewX = moveX
+        this.viewY = moveY
       }
     }
   }
