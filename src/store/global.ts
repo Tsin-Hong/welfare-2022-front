@@ -61,7 +61,24 @@ const global = {
       content.state.io && content.state.io.emit('MESSAGE', message)
     },
     actMove: (content: any, message: any) => {
+      // 移動  需要判斷 1.行動力能否抵達 2. 只能是自己的國家 or 是浪人
       content.dispatch('emitMessage', { act: enums.ACT_MOVE, payload: message })
+    },
+    actIncreaseSoldier: (content: any) => {
+      // 徵兵  需要判斷 1.行動點數夠 2. 是否在城市 3. 不能是浪人
+      content.dispatch('emitMessage', { act: enums.ACT_INCREASE_SOLDIER })
+    },
+    actSearchWild: (content: any) => {
+      // 探索  需要判斷 1.行動點數夠 2. 是否在野區 3. 不能是浪人
+      content.dispatch('emitMessage', { act: enums.ACT_SEARCH_WILD })
+    },
+    actLeaveCountry: (content: any) => {
+      // 下野  需要判斷 1.要有行動點 2.身分為武將 3.(效忠主公)loyalUserId=0 或滅過國
+      content.dispatch('emitMessage', { act: enums.ACT_LEAVE_COUNTRY })
+    },
+    actEnterCountry: (content: any) => {
+      // 入仕  需要判斷 1.要有行動點 2.不能被此國家滅過 3.所站之處必須有國家
+      content.dispatch('emitMessage', { act: enums.ACT_ENTER_COUNTRY })
     }
   },
   getters: {
