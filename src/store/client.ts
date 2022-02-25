@@ -36,14 +36,12 @@ const client = {
       state.dialog_check_curr.key = payload.key
       state.dialog_check_curr.index = payload.index
     },
-    ChangeApiResult: function (state: any, payload = { }) {
+    ChangeApiResult: function (state: any, payload = {}) {
       state.dialog_content = payload
       state.dialog = true
     }
   },
-  getters: {
-
-  },
+  getters: {},
   actions: {
     ApiMove: function ({ commit, rootState }, payload) {
       const user = rootState.user
@@ -51,21 +49,13 @@ const client = {
       commit('ChangeState', ['status_type', 'move'])
       commit('ChangeState', ['could_be_move_to', res.all])
     },
-    ApiJoinCountry: function ({ state, commit }: { state: any, commit: any }) {
+    ApiRes: function ({ state, commit }, payload) {
       const res = {
         img: state.dialog_check_curr.index + '.jpg',
-        title: '入仕成功',
-        text: '你已加入 叡迅君主 謝小白 麾下，為國家建立豐功偉業是臣子光榮的義務。'
+        title: state.dialog_check_curr.key + '成功',
+        text: payload.content
       }
-      commit('ChangeApiResult', res)
-    },
-    ApiAddTroops: function ({ state, commit }: { state: any, commit: any }) {
-      const res = {
-        img: state.dialog_check_curr.index + '.jpg',
-        title: '增兵成功',
-        text: '本次有 500 兵力加入你的軍隊。'
-      }
-
+      // '你已加入 叡迅君主 謝小白 麾下，為國家建立豐功偉業是臣子光榮的義務。'
       commit('ChangeApiResult', res)
     }
   }

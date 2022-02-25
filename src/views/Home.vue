@@ -8,6 +8,8 @@
             <div
               v-if="
                 item.is_show &&
+                (item.title === '離開' || (item.title !== '離開' && user.actPoint > 1)) &&
+                item.couldBeUseRoleIds.indexOf(user.role) !== -1 &&
                 (item.couldBeUseByCity === user.mapNowIsCity ||
                   item.couldBeUseByOther !== user.mapNowIsCity)
               "
@@ -35,6 +37,8 @@
                     v-if="
                       item.is_show &&
                       child.is_show &&
+                      (child.title !== '下野' ||
+                        (child.title === '下野' && user.loyalUserId === 0)) &&
                       child.couldBeUseRoleIds.indexOf(user.role) !== -1 &&
                       (child.couldBeUseByCity === user.mapNowIsCity ||
                         child.couldBeUseByOther !== user.mapNowIsCity)
@@ -79,6 +83,7 @@ export default Vue.extend({
         icon: 'home-flood',
         is_show: true,
         is_click: false,
+        couldBeUseRoleIds: [1, 2],
         couldBeUseByCity: true,
         couldBeUseByOther: false,
         items: [
@@ -94,7 +99,7 @@ export default Vue.extend({
             icon: '',
             title: '增兵',
             is_show: true,
-            couldBeUseRoleIds: [1, 2, 3],
+            couldBeUseRoleIds: [1, 2],
             couldBeUseByCity: true,
             couldBeUseByOther: false
           },
@@ -123,6 +128,7 @@ export default Vue.extend({
         is_click: false,
         couldBeUseByCity: true,
         couldBeUseByOther: false,
+        couldBeUseRoleIds: [1, 2],
         items: [
           {
             icon: '',
@@ -173,6 +179,7 @@ export default Vue.extend({
         is_click: false,
         couldBeUseByCity: true,
         couldBeUseByOther: false,
+        couldBeUseRoleIds: [1, 2, 3],
         items: [
           {
             icon: '',
@@ -273,6 +280,7 @@ export default Vue.extend({
         is_click: false,
         couldBeUseByCity: true,
         couldBeUseByOther: true,
+        couldBeUseRoleIds: [1, 2, 3],
         items: [
           {
             icon: '',
@@ -294,7 +302,7 @@ export default Vue.extend({
             icon: '',
             title: '探索',
             is_show: true,
-            couldBeUseRoleIds: [1, 2, 3],
+            couldBeUseRoleIds: [1, 2],
             couldBeUseByCity: false,
             couldBeUseByOther: true
           }
@@ -305,6 +313,7 @@ export default Vue.extend({
         icon: 'arrow-left-top-bold',
         is_show: true,
         is_click: true,
+        couldBeUseRoleIds: [1, 2, 3],
         couldBeUseByCity: true,
         couldBeUseByOther: true
       }

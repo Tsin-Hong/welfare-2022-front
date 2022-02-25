@@ -19,8 +19,8 @@
                 src="../assets/images/旗幟_外.png"
                 alt=""
               />
-              <div class="flag flag-content" style="background-color: #fff">
-                <div class="flag-vertical name" style="color: #111"></div>
+              <div class="flag flag-content" :style="{ background: currUser.countryColors }">
+                <div class="flag-vertical name" :style="{ color: currUser.countryColorsT }"> {{ currUser.countryName }} </div>
                 <img src="../assets/images/旗幟_內.png" alt="" />
               </div>
               <div class="info-block">
@@ -46,7 +46,7 @@
       <div class="stronghold-list" :style="{ transform: `translate(${viewX}px, ${viewY}px)` }">
         <template v-for="(stronghold, stronghold_i) in strongholds">
           <div
-            v-if="client.status_type == '' || (client.status_type == 'move' && client.could_be_move_to.indexOf(stronghold.id) !== -1)"
+            v-if="client.status_type == '' || ((client.status_type == 'move' && client.could_be_move_to.indexOf(stronghold.id) !== -1) || user.mapNowId === stronghold.id)"
             :class="[
               'stronghold',
               { castle: stronghold.type == 1 },
@@ -222,6 +222,21 @@ export default Vue.extend({
           user.mapNowIndex = i
         }
       }
+      if (user.countryId === 0) {
+        user.countryColors = '#fff'
+        user.countryColorsT = '#000'
+        user.countryName = ''
+      } else {
+        for (const i in state.global.countries) {
+          const curr = state.global.countries[i]
+          if (curr.id === user.countryId) {
+            const countryColors = curr.color.split(',')
+            user.countryColors = countryColors[0]
+            user.countryColorsT = countryColors[1]
+            user.countryName = curr.name
+          }
+        }
+      }
       return user
     }
   },
@@ -244,7 +259,7 @@ export default Vue.extend({
 
   methods: {
     ...mapMutations(['ChangeState', 'ChangeApiCheck', 'ChangeDialogCheck']),
-    ...mapActions(['ApiAddTroops', 'ApiJoinCountry', 'actMove']),
+    ...mapActions(['ApiAddTroops', 'ApiJoinCountry', 'actMove', 'actIncreaseSoldier', 'actSearchWild', 'actLeaveCountry', 'actEnterCountry', 'ApiRes']),
     cencel: function () {
       this.ChangeState(['status_type', ''])
       this.ChangeState(['could_be_move_to', []])
@@ -252,12 +267,27 @@ export default Vue.extend({
     },
     goDoApi: function () {
       console.log(this.client.dialog_check_curr)
+      let content: ''
       switch (this.client.dialog_check_curr.key) {
         case '增兵':
-          this.ApiAddTroops()
+          this.actIncreaseSoldier()
+          content = ''
+          this.ApiRes({ content: content })
           break
         case '入仕':
-          this.ApiJoinCountry()
+          this.actEnterCountry()
+          content = ''
+          this.ApiRes({ content: content })
+          break
+        case '下野':
+          this.actLeaveCountry()
+          content = ''
+          this.ApiRes({ content: content })
+          break
+        case '探索':
+          this.actSearchWild()
+          content = ''
+          this.ApiRes({ content: content })
           break
         case '離開':
           this.onClickLogout()
@@ -267,6 +297,7 @@ export default Vue.extend({
           this.goToCityId = 0
           this.ChangeState(['status_type', ''])
           this.ChangeState(['could_be_move_to', []])
+          content = ''
           break
       }
       this.ChangeState(['dialog_check', false])
