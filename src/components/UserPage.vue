@@ -57,6 +57,7 @@
             :style="{ left: stronghold.x + 'px', top: stronghold.y + 'px' }"
             :id="'stronghold_' + stronghold_i"
             :key="stronghold_i"
+            :disabled="client.status_type == 'move' && stronghold.id == user.mapNowId"
             @click="clickThisStronghold(stronghold_i)"
           >
             <div class="stronghold-area">
@@ -217,6 +218,7 @@ export default Vue.extend({
         const curr = state.global.maps[i]
         if (curr.id === user.mapNowId) {
           user.mapNowName = curr.name
+          user.mapNowIsCity = curr.cityId > 0
           user.mapNowIndex = i
         }
       }
@@ -286,12 +288,12 @@ export default Vue.extend({
       })
     },
     clickThisStronghold: function (index = 0) {
-      if (this.client.status_type === 'move') {
-        const city = this.strongholds[index]
+      const city = this.strongholds[index]
+      if (this.client.status_type === 'move' && city.id !== this.user.mapNowId) {
         this.goToCityId = this.strongholds[index].id
         console.log(city)
         this.ChangeDialogCheck({ content: '移動到 ' + city.name })
-      } else {
+      } else if (this.client.status_type === '') {
         this.goToXY(index)
       }
     },
