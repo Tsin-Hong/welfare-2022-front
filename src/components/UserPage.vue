@@ -27,15 +27,15 @@
                 <div class="date">2022年2月21日 星期一</div>
                 <div class="user">
                   <div class="block block-1">
-                    <span class="name">程寶寶</span
-                    ><span class="type">浪人</span>
+                    <span class="name">{{ currUser.nickname }}</span
+                    ><span class="type">{{ currUser.roleName }}</span>
                   </div>
                   <div class="block resource">
-                    <span class="class-1">兵力 0</span>
+                    <span class="class-1">兵力 {{ currUser.soldier }}</span>
                   </div>
                   <div class="block block-3">
-                    <span class="place">天水</span
-                    ><span class="power">行動力 3</span>
+                    <span class="place">{{ currUser.mapNowName }}</span
+                    ><span class="power">行動力 {{ currUser.actPoint }}</span>
                   </div>
                 </div>
               </div>
@@ -97,10 +97,10 @@
         </div>
       </div>
     </div>
-    <v-dialog v-model="dialog_check" persistent max-width="290">
+    <v-dialog v-model="clinet.dialog_check" persistent max-width="290">
       <v-card dark class="dialog-card">
         <v-card-title>
-          確定要執行 {{ this.dialog_check_curr.key }} ?
+          確定要執行 {{ clinet.dialog_check_curr.key }} ?
         </v-card-title>
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -116,18 +116,18 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog v-model="dialog" persistent width="500">
+    <v-dialog v-model="clinet.dialog" persistent width="500">
       <v-card dark class="dialog-card">
         <v-img
-          v-if="dialog_content.img"
-          :src="require('../assets/images/dialog/' + dialog_content.img)"
+          v-if="clinet.dialog_content.img"
+          :src="require('../assets/images/dialog/' + clinet.dialog_content.img)"
           height="200px"
           top
         />
         <v-card-title>
-          {{ dialog_content.title }}
+          {{ clinet.dialog_content.title }}
         </v-card-title>
-        <v-card-text>{{ dialog_content.text }}</v-card-text>
+        <v-card-text>{{ clinet.dialog_content.text }}</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="white" text @click="ChangeState(['dialog', false])">
@@ -140,33 +140,30 @@
 </template>
 
 <script lang="ts">
+// import router from '@/router'
+// import clinet from '@/store/client'
 import Vue from 'vue'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default Vue.extend({
   name: 'UserPage',
   data: () => ({
-    dialog: false,
-    dialog_content: {
-      title: '',
-      text: '',
-      img: ''
-    },
-    dialog_check: false,
-    dialog_check_curr: {
-      key: '',
-      index: ''
-    },
-    dialog_check_content: {
-      title: ''
+    rolesObj: {
+      1: {
+        name: '君主'
+      },
+      2: {
+        name: '武將'
+      },
+      3: {
+        name: '浪人'
+      }
     }
   }),
 
   computed: {
-    clients (): any {
-      return this.$store.state.client
-    },
-    strongholds (): any {
+    ...mapState(['user', 'global', 'clinet']),
+    strongholds: function () {
       const state = this.$store.state
       const hashMapIdUser = {}
       state.global.users.map((user: any) => {
@@ -201,13 +198,16 @@ export default Vue.extend({
         }
       }) : []
       return result
+    },
+    currUser: function () {
+      const state = this.$store.state
+      const user = this.user
+      user.roleName = user.role === 0 ? '' : this.rolesObj[user.role].name
+      user.mapNowName = user.mapNowId === 0 ? '' : state.global.mpas.map((item: any) => {
+        return item.id === user.mapNowId
+      }).name
+      return user
     }
-    // ...mapState([
-    //   'dialog',
-    //   'dialog_content',
-    //   'dialog_check',
-    //   'dialog_check_curr'
-    // ])
   },
 
   created: function () {
@@ -216,20 +216,26 @@ export default Vue.extend({
   },
 
   methods: {
-    ChangeState: function (content: Array<any>) {
-      const key = content[0]
-      const value = content[1]
-      this[key] = value
+    ...mapMutations(['ChangeState', 'ChangeApiCheck']),
+    ...mapActions(['ApiAddTroops', 'ApiJoinCountry']),
+    goDoApi: function (evt) {
+      console.log(this.clinet.dialog_check_curr)
+      switch (this.clinet.dialog_check_curr.key) {
+        case '增兵':
+          this.ApiAddTroops()
+          break
+        case '入仕':
+          this.ApiJoinCountry()
+          break
+        case '離開':
+          this.onClickLogout()
+          break
+      }
+      this.ChangeState(['dialog_check', false])
     },
-    goDoApi: function () {
-      // switch (this.clients.dialog_check_curr.key) {
-      //   case '增兵':
-      //     this.ApiAddTroops()
-      //     break
-      //   case '入仕':
-      //     this.ApiJoinCountry()
-      // }
-      // this.ChangeState(['dialog_check', false])
+    onClickLogout: function () {
+      localStorage.removeItem('_token_')
+      window.location.reload()
     },
     goToXY: function (index = 0) {
       this.$nextTick(() => {
@@ -244,6 +250,11 @@ export default Vue.extend({
     },
     showThisStronghold: function (index = 0) {
       this.goToXY(index)
+    },
+    checkLoginStaus: function () {
+      if (this.user.connected) {
+        this.ChangeState(['tempName', 'Home'])
+      }
     }
   }
 })

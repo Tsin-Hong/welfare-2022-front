@@ -1,21 +1,21 @@
 import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
-import Login from '../views/Login.vue'
-import Home from '../views/Home.vue'
-import QA from '../views/QA.vue'
+// import Login from '../views/Login.vue'
+// import Home from '../views/Home.vue'
+// import QA from '../views/QA.vue'
 Vue.use(VueRouter)
 
 const routes: Array<RouteConfig> = [
-  {
-    path: '/',
-    name: 'Login',
-    component: Login
-  },
-  {
-    path: '/index',
-    name: 'Home',
-    component: Home
-  }
+  // {
+  //   path: '/',
+  //   name: 'Login',
+  //   component: Login
+  // },
+  // {
+  //   path: '/index',
+  //   name: 'Home',
+  //   component: Home
+  // }
   // {
   //   path: '/about',
   //   name: 'About',
