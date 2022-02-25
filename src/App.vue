@@ -8,13 +8,19 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import { mapState } from 'vuex'
 
 export default Vue.extend({
   name: 'App',
-
-  data: () => ({
-    //
-  })
+  computed: {
+    ...mapState(['user'])
+  },
+  methods: {
+  },
+  sockets: {
+    // connect: function () {
+    // }
+  }
 })
 </script>
 

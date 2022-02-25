@@ -144,178 +144,70 @@ import Vue from 'vue'
 import { mapActions, mapMutations, mapState } from 'vuex'
 
 export default Vue.extend({
-  name: 'HelloWorld',
+  name: 'UserPage',
   data: () => ({
-    strongholds: [
-      {
-        id: 1,
-        name: '西涼',
-        x: 213,
-        y: 592,
-        type: 1,
-        generals_num: 8,
-        ronin_num: 0,
-        military_strength: 500,
-        is_main: true,
-        is_here: false,
-        conutry: {
-          id: 1,
-          name: '空幹',
-          color: '#FFF',
-          t_color: '#000'
-        }
-      },
-      {
-        id: 2,
-        name: '天水',
-        x: 378,
-        y: 804,
-        type: 1,
-        generals_num: 0,
-        ronin_num: 0,
-        military_strength: 0,
-        is_main: false,
-        is_here: false,
-        conutry: {
-          id: 0,
-          name: '',
-          color: '#CCC',
-          t_color: '#000'
-        }
-      },
-      {
-        id: 3,
-        name: '天水渡口',
-        x: 272.81,
-        y: 760.03,
-        type: 2,
-        generals_num: 0,
-        ronin_num: 0,
-        military_strength: 0,
-        is_main: false,
-        is_here: false,
-        conutry: {
-          id: 0,
-          name: '',
-          color: '#CCC',
-          t_color: '#000'
-        }
-      },
-      {
-        id: 4,
-        name: '漢中',
-        x: 512,
-        y: 1022,
-        type: 1,
-        generals_num: 15,
-        ronin_num: 0,
-        military_strength: 1500,
-        is_main: true,
-        is_here: true,
-        conutry: {
-          id: 2,
-          name: '叡迅',
-          color: 'green',
-          t_color: 'white'
-        }
-      },
-      {
-        id: 5,
-        name: '漢中道',
-        x: 440.81,
-        y: 934.03,
-        type: 2,
-        generals_num: 3,
-        ronin_num: 0,
-        military_strength: 800,
-        is_here: false,
-        conutry: {
-          id: 2,
-          name: '叡迅',
-          color: 'green',
-          t_color: 'white'
-        }
-      },
-      {
-        id: 5,
-        name: '漢中谷',
-        x: 734.81,
-        y: 1174.03,
-        type: 2,
-        generals_num: 3,
-        ronin_num: 0,
-        military_strength: 800,
-        is_here: false,
-        conutry: {
-          id: 2,
-          name: '叡迅',
-          color: 'green',
-          t_color: 'white'
-        }
-      },
-      {
-        id: 6,
-        name: '梓潼',
-        x: 213,
-        y: 1098,
-        type: 1,
-        generals_num: 15,
-        ronin_num: 0,
-        military_strength: 1500,
-        is_main: false,
-        is_here: false,
-        conutry: {
-          id: 2,
-          name: '叡迅',
-          color: 'green',
-          t_color: 'white'
-        }
-      },
-      {
-        id: 5,
-        name: '梓潼道',
-        x: 372.81,
-        y: 1046.03,
-        type: 2,
-        generals_num: 3,
-        ronin_num: 0,
-        military_strength: 800,
-        is_here: false,
-        conutry: {
-          id: 2,
-          name: '叡迅',
-          color: 'green',
-          t_color: 'white'
-        }
-      },
-      {
-        id: 7,
-        name: '成都',
-        x: 331,
-        y: 1344,
-        type: 1,
-        generals_num: 15,
-        ronin_num: 0,
-        military_strength: 1500,
-        is_main: false,
-        is_here: false,
-        conutry: {
-          id: 2,
-          name: '叡迅',
-          color: 'green',
-          t_color: 'white'
-        }
-      }
-    ]
+    dialog: false,
+    dialog_content: {
+      title: '',
+      text: '',
+      img: ''
+    },
+    dialog_check: false,
+    dialog_check_curr: {
+      key: '',
+      index: ''
+    },
+    dialog_check_content: {
+      title: ''
+    }
   }),
 
   computed: {
-    ...mapState([
-      'dialog',
-      'dialog_content',
-      'dialog_check',
-      'dialog_check_curr'
-    ])
+    clients (): any {
+      return this.$store.state.client
+    },
+    strongholds (): any {
+      const state = this.$store.state
+      const hashMapIdUser = {}
+      state.global.users.map((user: any) => {
+        if (hashMapIdUser[user.mapNowId]) {
+          hashMapIdUser[user.mapNowId].push(user)
+        } else {
+          hashMapIdUser[user.mapNowId] = [user]
+        }
+      })
+      const result = state.global.maps ? state.global.maps.map((m: any) => {
+        const cid = m.ownCountryId
+        const country = state.global.countries.find((e: any) => e.id === cid)
+        // console.log('country: ', country)
+        const cname = country ? country.name : '空'
+        const colors = country ? country.color.split(',') : ['#fff', '#000']
+        const usersInThisMap = hashMapIdUser[m.id] || []
+        // console.log('usersInThisMap: ', usersInThisMap)
+        return {
+          ...m,
+          type: m.cityId > 0 ? 1 : 2,
+          generals_num: usersInThisMap.length || 0,
+          ronin_num: usersInThisMap.filter((e: any) => e.countryId === 0).length,
+          military_strength: usersInThisMap.reduce((last: number, user: any) => { return last + user.soldier }, 0),
+          is_main: true,
+          is_here: m.id === state.user.mapNowId,
+          conutry: {
+            id: cid,
+            name: cname,
+            color: colors[0],
+            t_color: colors[1]
+          }
+        }
+      }) : []
+      return result
+    }
+    // ...mapState([
+    //   'dialog',
+    //   'dialog_content',
+    //   'dialog_check',
+    //   'dialog_check_curr'
+    // ])
   },
 
   created: function () {
@@ -324,17 +216,20 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapMutations(['ChangeState']),
-    ...mapActions(['ApiAddTroops', 'ApiJoinCountry']),
+    ChangeState: function (content: Array<any>) {
+      const key = content[0]
+      const value = content[1]
+      this[key] = value
+    },
     goDoApi: function () {
-      switch (this.dialog_check_curr.key) {
-        case '增兵':
-          this.ApiAddTroops()
-          break
-        case '入仕':
-          this.ApiJoinCountry()
-      }
-      this.ChangeState(['dialog_check', false])
+      // switch (this.clients.dialog_check_curr.key) {
+      //   case '增兵':
+      //     this.ApiAddTroops()
+      //     break
+      //   case '入仕':
+      //     this.ApiJoinCountry()
+      // }
+      // this.ChangeState(['dialog_check', false])
     },
     goToXY: function (index = 0) {
       this.$nextTick(() => {

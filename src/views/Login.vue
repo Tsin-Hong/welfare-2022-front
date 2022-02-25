@@ -33,19 +33,23 @@
                 @click:append="passwordShow = !passwordShow"
               ></v-text-field>
               <v-switch v-model="firstLogin" label="首次登入"></v-switch>
-              <v-btn rounded block class="mx-auto" href="./index"
+              <!-- <v-btn rounded block class="mx-auto" href="./index"
+                >進入遊戲</v-btn -->
+                <v-btn rounded block class="mx-auto"
                 >進入遊戲</v-btn
               >
             </form>
           </v-list-item-content>
         </v-list-item>
       </v-card>
+      <span :class="{connected: user.connected}"></span>
     </div>
   </div>
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import axios from 'axios'
+
 export default {
   name: 'Login',
   data: () => ({
@@ -55,25 +59,54 @@ export default {
     password: '',
     passwordCheck: ''
   }),
-
+  computed: {
+    user () {
+      return this.$store.state.user
+    }
+  },
+  updated: function () {
+    if (this.user.connected) {
+      this.$router.push('Index')
+    }
+  },
+  mounted: function () {
+    if (this.user.connected) {
+      this.$router.push('Index')
+    }
+  },
   methods: {
     change: function () {
       this.$store.commit('user/changeState', ['code', this.account])
       this.$store.commit('user/changeState', ['pwd', this.password])
       this.$store.commit('user/changeState', ['code', this.passwordCheck])
+    },
+    login: function () {
+      var data = { code: this.account.toUpperCase(), pwd: this.password }
+      if (this.firstLogin) {
+        data.pwdre = this.passwordCheck
+        // var registerUrl = `${setting.getSocketLocation()}login`
+        var registerUrl = 'http://172.16.20.73:20221/login'
+        axios.post(registerUrl, data).then(e => {
+          console.log(e)
+          if (e.status === 200) {
+            window.alert('註冊成功 請登入.')
+            this.firstLogin = false
+          } else {
+            window.alert('註冊失敗.')
+          }
+        })
+      } else {
+        this.$socket.emit('AUTHORIZE', data)
+      }
     }
-    // login: function () {
-    //   const data = { code: this.account, pwd: this.password }
-    //   // if (this.firstLogin) {
-    //   //   data.pwdre = this.passwordCheck
-    //   // } else {
-    //   //   if (data.pwdre) {
-    //   //     delete data.pwdre
-    //   //   }
-    //   // }
-    //   // console.log(data)
-    //   // this.$socket.emit('login', data)
-    // }
+  },
+  sockets: {
+    connect: function () {
+      const token = window.localStorage.getItem('_token_')
+      if (token) {
+        this.$socket.emit('AUTHORIZE', { token })
+      }
+    }
   }
 }
 </script>

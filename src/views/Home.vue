@@ -1,7 +1,7 @@
 <template>
   <v-container class="home" fluid>
     <v-card class="left-menu" height="100vh">
-      <user-page />
+      <UserPage />
       <v-list class="menu-area" absolute>
         <v-list-item-group>
           <template v-for="(item, index) in items">
@@ -118,8 +118,19 @@ export default Vue.extend({
     ]
   }),
 
+  mounted: function () {
+    if (!this.user.connected) {
+      const token = window.localStorage.getItem('_token_')
+      if (token) {
+        this.$socket.emit('AUTHORIZE', { token })
+      }
+    }
+  },
+
   computed: {
-    ...mapState(['dialog', 'dialog_imgs'])
+    user: function () {
+      return this.$store.state.user
+    }
   },
 
   components: {
@@ -130,6 +141,17 @@ export default Vue.extend({
     ...mapMutations(['ChangeState', 'ChangeApiCheck']),
     chickBtn: function (key = '', index = '') {
       this.ChangeApiCheck({ key: key, index: index })
+    }
+  },
+
+  sockets: {
+    connect: function () {
+      const token = window.localStorage.getItem('_token_')
+      if (token) {
+        this.$socket.emit('AUTHORIZE', { token })
+      } else {
+        this.$router.push('/')
+      }
     }
   }
 })
