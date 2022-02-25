@@ -39,7 +39,7 @@ const global = {
             console.log('pointer: ', pointer)
             Object.keys(_.update).map((key) => {
               const value = _.update[key]
-              pointer[key] = value
+              if (pointer[key]) { pointer[key] = value }
             })
           })
         } break
