@@ -21,7 +21,7 @@ function arrayBufferToJSON (buffer: ArrayBuffer) {
           c2 = _uint8[_i++]
           c3 = _uint8[_i++]
           _decoded = String.fromCharCode(((c & 0x0F) << 12) | ((c2 & 0x3F) << 6) | ((c3 & 0x3F) << 0))
-        default:
+        // default:
       }
       _str += _decoded
     }
@@ -34,7 +34,7 @@ function arrayBufferToJSON (buffer: ArrayBuffer) {
 
 function parseArraiesToObjects (values: Array<any>, keys: Array<string>) {
   const res: Array<any> = []
-  if (values.length > 0 && keys.length > 0 && values[0].length == keys.length) {
+  if (values.length > 0 && keys.length > 0 && values[0].length === keys.length) {
     values.forEach(val => {
       const _ = {}
       keys.forEach((key, idx) => {

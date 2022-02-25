@@ -1,5 +1,6 @@
 const clinet = {
   state: {
+    tempName: 'None',
     dialog: false,
     dialog_content: {
       title: '',
@@ -17,6 +18,7 @@ const clinet = {
   },
   mutations: {
     ChangeState: function (state: any, payload = []) {
+      // console.log(payload)
       const key = payload[0]
       state[key] = payload[1]
     },
@@ -31,8 +33,11 @@ const clinet = {
       state.dialog = true
     }
   },
+  getters: {
+
+  },
   actions: {
-    ApiJoinCountry: function ({ state, commit } : {state:any, commit: any}) {
+    ApiJoinCountry: function ({ state, commit }: { state: any, commit: any }) {
       const res = {
         img: state.dialog_check_curr.index + '.jpg',
         title: '入仕成功',
@@ -41,7 +46,7 @@ const clinet = {
 
       commit('ChangeApiResult', res)
     },
-    ApiAddTroops: function ({ state, commit } : {state:any, commit: any}) {
+    ApiAddTroops: function ({ state, commit }: { state: any, commit: any }) {
       const res = {
         img: state.dialog_check_curr.index + '.jpg',
         title: '增兵成功',
