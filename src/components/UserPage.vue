@@ -147,7 +147,7 @@
 // import router from '@/router'
 // import client from '@/store/client'
 import Vue from 'vue'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import { mapActions, mapMutations, mapState } from 'vuex'
 
 export default Vue.extend({
   name: 'UserPage',
@@ -345,7 +345,7 @@ export default Vue.extend({
         this.ChangeState(['tempName', 'Home'])
       }
     },
-    onMouseDown: function (evt) {
+    onMouseDown: function (evt: any) {
       evt.preventDefault()
       const x = evt.clientX
       const y = evt.clientY
@@ -354,7 +354,7 @@ export default Vue.extend({
     onMouseUp: function () {
       this._mouse_dataset.go = false
     },
-    onMouseMove: function (evt) {
+    onMouseMove: function (evt: any) {
       evt.preventDefault()
       const md = this._mouse_dataset || {}
       if (md.go) {

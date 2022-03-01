@@ -22,13 +22,11 @@ const client = {
     could_be_move_to: []
   },
   mutations: {
-    ChangeState: function (state: any, payload = []) {
-      // console.log(payload)
+    ChangeState: function (state, payload) {
       const key = payload[0]
       state[key] = payload[1]
     },
-    ChangeDialogCheck: function (state: any, payload = { content: '' }) {
-      console.log(payload)
+    ChangeDialogCheck: function (state, payload) {
       state.dialog_check_content.content = payload.content
       state.dialog_check = true
     },
