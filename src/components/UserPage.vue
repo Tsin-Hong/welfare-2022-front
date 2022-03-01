@@ -122,12 +122,12 @@
     </v-dialog>
     <v-dialog v-model="client.dialog" persistent width="500">
       <v-card dark class="dialog-card">
-        <v-img
+        <!-- <v-img
           v-if="client.dialog_content.img"
           :src="require('../assets/images/dialog/' + client.dialog_content.img)"
           height="200px"
           top
-        />
+        /> -->
         <v-card-title>
           {{ client.dialog_content.title }}
         </v-card-title>
@@ -670,5 +670,8 @@ html {
   );
   font-family: '華康行楷體W5';
   font-size: 16px;
+  .btn {
+    font-size: 15px;
+  }
 }
 </style>
