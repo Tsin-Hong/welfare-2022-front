@@ -6,13 +6,7 @@
         <v-list-item-group>
           <template v-for="(item, index) in items">
             <div
-              v-if="
-                item.is_show &&
-                (item.title === '離開' || (item.title !== '離開' && user.actPoint > 0)) &&
-                item.couldBeUseRoleIds.indexOf(user.role) !== -1 &&
-                (item.couldBeUseByCity === user.mapNowIsCity ||
-                  item.couldBeUseByOther !== user.mapNowIsCity)
-              "
+              v-if="menuShow(item, false)"
               :key="index"
               class="btn-group"
               @mouseover="currMainMenu = item.title"
@@ -34,15 +28,7 @@
                 <template v-for="(child, child_i) in item.items">
                   <v-list-item
                     :key="index + '-' + child_i"
-                    v-if="
-                      item.is_show &&
-                      child.is_show &&
-                      (child.title !== '下野' ||
-                        (child.title === '下野' && user.loyalUserId === 0)) &&
-                      child.couldBeUseRoleIds.indexOf(user.role) !== -1 &&
-                      (child.couldBeUseByCity === user.mapNowIsCity ||
-                        child.couldBeUseByOther !== user.mapNowIsCity)
-                    "
+                    v-if="menuShow(item, child)"
                     class="sub-btn"
                     @click="chickBtn(true, child.title, index + '-' + child_i)"
                   >
@@ -67,7 +53,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import UserPage from '../components/UserPage.vue'
 
 export default Vue.extend({
@@ -246,6 +232,7 @@ export default Vue.extend({
         is_click: false,
         couldBeUseByCity: true,
         couldBeUseByOther: false,
+        couldBeUseRoleIds: [1, 2, 3],
         items: [
           {
             icon: '',
@@ -321,7 +308,11 @@ export default Vue.extend({
   }),
 
   computed: {
-    ...mapState(['user'])
+    ...mapState(['user', 'global', 'client']),
+    ...mapGetters(['getUser']),
+    currUser: function () {
+      return this.getUser()
+    }
   },
 
   mounted: function () {
@@ -336,6 +327,45 @@ export default Vue.extend({
   methods: {
     ...mapMutations(['ChangeState', 'ChangeApiCheck', 'ChangeDialogCheck']),
     ...mapActions(['ApiMove']),
+    menuShow: function (item, child) {
+      let show = false
+      if (item.is_show && this.client.status_type != 'move') {
+        if (child) {
+          if (
+            child.is_show &&
+            child.couldBeUseRoleIds.indexOf(this.currUser.role) !== -1
+          ) {
+            if (
+              child.title !== '下野' ||
+              (child.title === '下野' && this.currUser.loyalUserId === 0)
+            ) {
+              if (
+                (this.currUser.mapNowIsCity && child.couldBeUseByCity) ||
+                (!this.currUser.mapNowIsCity && child.couldBeUseByOther)
+              ) {
+                show = true
+              }
+            }
+          }
+        } else {
+          if (
+            item.title === '離開' ||
+            (item.title !== '離開' &&
+              this.currUser.actPoint > 0 &&
+              item.couldBeUseRoleIds.indexOf(this.currUser.role) !== -1)
+          ) {
+            if (
+              (this.currUser.mapNowIsCity && item.couldBeUseByCity) ||
+              (!this.currUser.mapNowIsCity && item.couldBeUseByOther)
+            ) {
+              show = true
+            }
+          }
+        }
+      }
+
+      return show
+    },
     chickBtn: function (go: any, key = '', index = '') {
       if (go) {
         this.ChangeApiCheck({ key: key, index: index })

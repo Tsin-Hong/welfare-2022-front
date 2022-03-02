@@ -1,7 +1,24 @@
 <template>
-  <v-container id="userPage" class="user-page" ref="userPage" fluid @mousedown="onMouseDown($event)" @mousemove="onMouseMove($event)" @mouseup="onMouseUp()" @mouseleave="onMouseUp()">
-    <div id="mapArea" class="map-area" style="overflow: hidden;">
-      <img class="map" src="../assets/images/map.jpg" alt="" :style="{ transform: `translate(${viewX}px, ${viewY}px)`, transition: 'transform 0.1s linear' }" />
+  <v-container
+    id="userPage"
+    class="user-page"
+    ref="userPage"
+    fluid
+    @mousedown="onMouseDown($event)"
+    @mousemove="onMouseMove($event)"
+    @mouseup="onMouseUp()"
+    @mouseleave="onMouseUp()"
+  >
+    <div id="mapArea" class="map-area" style="overflow: hidden">
+      <img
+        class="map"
+        src="../assets/images/map.jpg"
+        alt=""
+        :style="{
+          transform: `translate(${viewX}px, ${viewY}px)`,
+          transition: 'transform 0.1s linear'
+        }"
+      />
       <div class="user-area">
         <div class="user-info">
           <div class="img-area">
@@ -19,8 +36,16 @@
                 src="../assets/images/旗幟_外.png"
                 alt=""
               />
-              <div class="flag flag-content" :style="{ background: currUser.countryColors }">
-                <div class="flag-vertical name" :style="{ color: currUser.countryColorsT }"> {{ currUser.countryName }} </div>
+              <div
+                class="flag flag-content"
+                :style="{ background: currUser.countryColors }"
+              >
+                <div
+                  class="flag-vertical name"
+                  :style="{ color: currUser.countryColorsT }"
+                >
+                  {{ currUser.countryName }}
+                </div>
                 <img src="../assets/images/旗幟_內.png" alt="" />
               </div>
               <div class="info-block">
@@ -43,21 +68,38 @@
           </div>
         </div>
       </div>
-      <div class="stronghold-list" :style="{ transform: `translate(${viewX}px, ${viewY}px)`, transition: 'transform 0.1s linear' }">
+      <div
+        class="stronghold-list"
+        :style="{
+          transform: `translate(${viewX}px, ${viewY}px)`,
+          transition: 'transform 0.1s linear'
+        }"
+      >
         <template v-for="(stronghold, stronghold_i) in strongholds">
           <div
-            v-if="client.status_type == '' || ((client.status_type == 'move' && client.could_be_move_to.indexOf(stronghold.id) !== -1) || user.mapNowId === stronghold.id)"
+            v-if="
+              client.status_type == '' ||
+              (client.status_type == 'move' &&
+                client.could_be_move_to.indexOf(stronghold.id) !== -1) ||
+              user.mapNowId === stronghold.id
+            "
             :class="[
               'stronghold',
               { castle: stronghold.type == 1 },
               { jungle: stronghold.type == 2 },
               { here: stronghold.is_here },
-              { moveTo: client.status_type == 'move' && client.could_be_move_to.indexOf(stronghold.id) !== -1 }
+              {
+                moveTo:
+                  client.status_type == 'move' &&
+                  client.could_be_move_to.indexOf(stronghold.id) !== -1
+              }
             ]"
             :style="{ left: stronghold.x + 'px', top: stronghold.y + 'px' }"
             :id="'stronghold_' + stronghold_i"
             :key="stronghold_i"
-            :disabled="client.status_type == 'move' && stronghold.id == user.mapNowId"
+            :disabled="
+              client.status_type == 'move' && stronghold.id == user.mapNowId
+            "
             @click="clickThisStronghold(stronghold_i)"
           >
             <div class="stronghold-area">
@@ -109,13 +151,7 @@
         <v-card-actions>
           <v-spacer></v-spacer>
 
-          <v-btn
-            color="green darken-1"
-            text
-            @click="cencel()"
-          >
-            放棄
-          </v-btn>
+          <v-btn color="green darken-1" text @click="cencel()"> 放棄 </v-btn>
           <v-btn color="green darken-1" text @click="goDoApi()"> 執行 </v-btn>
         </v-card-actions>
       </v-card>
@@ -147,7 +183,7 @@
 // import router from '@/router'
 // import client from '@/store/client'
 import Vue from 'vue'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default Vue.extend({
   name: 'UserPage',
@@ -156,22 +192,12 @@ export default Vue.extend({
     _mouse_dataset: {},
     viewX: 0,
     viewY: 0,
-    rolesObj: {
-      1: {
-        name: '君主'
-      },
-      2: {
-        name: '武將'
-      },
-      3: {
-        name: '浪人'
-      }
-    },
     goToCityId: 0
   }),
 
   computed: {
     ...mapState(['user', 'global', 'client', 'info']),
+    ...mapGetters(['getUser']),
     strongholds: function () {
       const state = this.$store.state
       const hashMapIdUser = {}
@@ -182,74 +208,55 @@ export default Vue.extend({
           hashMapIdUser[user.mapNowId] = [user]
         }
       })
-      const result = state.global.maps ? state.global.maps.map((m: any) => {
-        const cid = m.ownCountryId
-        const country = state.global.countries.find((e: any) => e.id === cid)
-        // console.log('country: ', country)
-        const cname = country ? country.name : '空'
-        const colors = country ? country.color.split(',') : ['#fff', '#000']
-        const usersInThisMap = hashMapIdUser[m.id] || []
-        // console.log('usersInThisMap: ', usersInThisMap)
-        return {
-          ...m,
-          type: m.cityId > 0 ? 1 : 2,
-          generals_num: usersInThisMap.length || 0,
-          ronin_num: usersInThisMap.filter((e: any) => e.countryId === 0).length,
-          military_strength: usersInThisMap.reduce((last: number, user: any) => { return last + user.soldier }, 0),
-          is_main: true,
-          is_here: m.id === state.user.mapNowId,
-          conutry: {
-            id: cid,
-            name: cname,
-            color: colors[0],
-            t_color: colors[1]
-          }
-        }
-      }) : []
+      const result = state.global.maps
+        ? state.global.maps.map((m: any) => {
+            const cid = m.ownCountryId
+            const country = state.global.countries.find(
+              (e: any) => e.id === cid
+            )
+            // console.log('country: ', country)
+            const cname = country ? country.name : '空'
+            const colors = country ? country.color.split(',') : ['#fff', '#000']
+            const usersInThisMap = hashMapIdUser[m.id] || []
+            // console.log('usersInThisMap: ', usersInThisMap)
+            return {
+              ...m,
+              type: m.cityId > 0 ? 1 : 2,
+              generals_num: usersInThisMap.length || 0,
+              ronin_num: usersInThisMap.filter((e: any) => e.countryId === 0)
+                .length,
+              military_strength: usersInThisMap.reduce(
+                (last: number, user: any) => {
+                  return last + user.soldier
+                },
+                0
+              ),
+              is_main: true,
+              is_here: m.id === state.user.mapNowId,
+              conutry: {
+                id: cid,
+                name: cname,
+                color: colors[0],
+                t_color: colors[1]
+              }
+            }
+          })
+        : []
       return result
     },
     currUser: function () {
-      const state = this.$store.state
-      const user = {
-        role: this.user.role,
-        mapNowId: this.user.mapNowId,
-        roleName: '',
-        mapNowName: '',
-        mapNowIndex: -1,
-        mapNowIsCity: false,
-        countryColors: '#fff',
-        countryColorsT: '#000',
-        countryName: ''
-      }
-      user.roleName = user.role === 0 ? '' : this.rolesObj[user.role].name
-      for (const i in state.global.maps) {
-        const curr = state.global.maps[i]
-        if (curr.id === user.mapNowId) {
-          user.mapNowName = curr.name
-          user.mapNowIsCity = curr.cityId > 0
-          user.mapNowIndex = parseInt(i)
-        }
-      }
-      if (this.user.countryId === 0) {
-      } else {
-        for (const i in state.global.countries) {
-          const curr = state.global.countries[i]
-          if (curr.id === this.user.countryId) {
-            const countryColors = curr.color.split(',')
-            user.countryColors = countryColors[0]
-            user.countryColorsT = countryColors[1]
-            user.countryName = curr.name
-          }
-        }
-      }
-      return user
+      return this.getUser()
     }
   },
 
   watch: {
     currUser: {
       handler: function (val) {
-        if (val && val.mapNowIndex !== -1 && this.inCurrStrongholdIndex !== val.mapNowIndex) {
+        if (
+          val &&
+          val.mapNowIndex !== -1 &&
+          this.inCurrStrongholdIndex !== val.mapNowIndex
+        ) {
           this.goToXY(val.mapNowIndex)
         }
       },
@@ -264,7 +271,16 @@ export default Vue.extend({
 
   methods: {
     ...mapMutations(['ChangeState', 'ChangeApiCheck', 'ChangeDialogCheck']),
-    ...mapActions(['ApiAddTroops', 'ApiJoinCountry', 'actMove', 'actIncreaseSoldier', 'actSearchWild', 'actLeaveCountry', 'actEnterCountry', 'ApiRes']),
+    ...mapActions([
+      'ApiAddTroops',
+      'ApiJoinCountry',
+      'actMove',
+      'actIncreaseSoldier',
+      'actSearchWild',
+      'actLeaveCountry',
+      'actEnterCountry',
+      'ApiRes'
+    ]),
     cencel: function () {
       this.ChangeState(['status_type', ''])
       this.ChangeState(['could_be_move_to', []])
@@ -314,17 +330,9 @@ export default Vue.extend({
     goToXY: function (index = 0) {
       const maps = this.global.maps
       this.$nextTick(() => {
-        // const strongholdId = '#stronghold_' + index
-        // this.inCurrStrongholdIndex = index
-        // this.$scrollTo(strongholdId, 500, {
-        //   container: '#userPage',
-        //   offset: -450,
-        //   x: true
-        // })
-        // element.$scrollTo(stronghold.x, stronghold.y)
         const mapData = maps[index]
-        const x = -(mapData.x) + Math.round(window.innerWidth / 2)
-        const y = -(mapData.y) + Math.round(window.innerHeight / 2)
+        const x = -mapData.x + Math.round(window.innerWidth / 2)
+        const y = -mapData.y + Math.round(window.innerHeight / 2)
         const xy = this.getParsedXY([x, y])
         this.viewX = xy[0]
         this.viewY = xy[1]
@@ -332,7 +340,10 @@ export default Vue.extend({
     },
     clickThisStronghold: function (index = 0) {
       const city = this.strongholds[index]
-      if (this.client.status_type === 'move' && city.id !== this.user.mapNowId) {
+      if (
+        this.client.status_type === 'move' &&
+        city.id !== this.user.mapNowId
+      ) {
         this.goToCityId = this.strongholds[index].id
         console.log(city)
         this.ChangeDialogCheck({ content: '移動到 ' + city.name })
@@ -349,7 +360,12 @@ export default Vue.extend({
       evt.preventDefault()
       const x = evt.clientX
       const y = evt.clientY
-      this._mouse_dataset = { start: { x, y }, go: true, origin: { x: this.viewX, y: this.viewY }, timestamp: new Date().getTime() }
+      this._mouse_dataset = {
+        start: { x, y },
+        go: true,
+        origin: { x: this.viewX, y: this.viewY },
+        timestamp: new Date().getTime()
+      }
     },
     onMouseUp: function () {
       this._mouse_dataset.go = false
@@ -498,6 +514,10 @@ html {
           &.moveTo {
             filter: drop-shadow(0px 0px 4px #cabca6);
             z-index: 14;
+            &:hover {
+              filter: drop-shadow(0px 0px 4px #cabca6);
+              z-index: 15;
+            }
           }
           &:hover {
             filter: drop-shadow(0px 0px 4px #cabca6);
@@ -669,9 +689,12 @@ html {
     rgba(25, 25, 25, 0.7) 100%
   );
   font-family: '華康行楷體W5';
-  font-size: 16px;
-  .btn {
-    font-size: 15px;
+  font-size: 26px;
+  .v-card__text {
+    font-size: 26px;
+  }
+  .v-btn {
+    font-size: 23px;
   }
 }
 </style>

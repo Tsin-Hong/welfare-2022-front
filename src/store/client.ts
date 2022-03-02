@@ -19,7 +19,18 @@ const client = {
       content: ''
     },
     status_type: '',
-    could_be_move_to: []
+    could_be_move_to: [],
+    rolesObj: {
+      1: {
+        name: '君主'
+      },
+      2: {
+        name: '武將'
+      },
+      3: {
+        name: '浪人'
+      }
+    }
   },
   mutations: {
     ChangeState: function (state, payload) {
