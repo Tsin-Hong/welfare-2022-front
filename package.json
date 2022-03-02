@@ -12,6 +12,7 @@
     "axios": "^0.26.0",
     "cookies": "^0.8.0",
     "core-js": "^3.6.5",
+    "moment": "^2.29.1",
     "socket.io-client": "^4.4.1",
     "vue": "^2.6.11",
     "vue-class-component": "^7.2.3",

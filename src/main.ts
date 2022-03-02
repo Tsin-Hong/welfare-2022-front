@@ -9,6 +9,8 @@ import VueSocketIO from 'vue-socket.io'
 import socketio from 'socket.io-client'
 import setting from './unit/setting'
 
+import moment from "./plugins/moment.js"
+
 const io = socketio(setting.getSocketLocation())
 
 Vue.use(new VueSocketIO({
@@ -22,6 +24,7 @@ Vue.use(new VueSocketIO({
 }))
 
 Vue.use(VueScrollTo)
+Vue.use(moment)
 
 Vue.config.productionTip = false
 

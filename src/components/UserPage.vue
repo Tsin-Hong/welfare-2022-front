@@ -8,6 +8,7 @@
     @mousemove="onMouseMove($event)"
     @mouseup="onMouseUp()"
     @mouseleave="onMouseUp()"
+    v-cloak
   >
     <div id="mapArea" class="map-area" style="overflow: hidden">
       <img
@@ -21,8 +22,13 @@
       />
       <div class="user-area">
         <div class="user-info">
-          <div class="img-area">
-            <img class="user-img" src="../assets/images/user/R064.png" alt="" />
+          <div class="img-area d-inline-block">
+            <img
+              v-if="currUser.code"
+              class="user-img"
+              :src="require('../assets/images/user/' + currUser.code + '.png')"
+              alt=""
+            />
             <img
               class="img-border"
               src="../assets/images/人物頭像框.png"
@@ -49,7 +55,7 @@
                 <img src="../assets/images/旗幟_內.png" alt="" />
               </div>
               <div class="info-block">
-                <div class="date">2022年2月21日 星期一</div>
+                <div class="date">{{ today[0] }}{{ today[1] }}</div>
                 <div class="user">
                   <div class="block block-1">
                     <span class="name">{{ user.nickname }}</span
@@ -57,14 +63,31 @@
                   </div>
                   <div class="block resource">
                     <span class="class-1">兵力 {{ user.soldier }}</span>
+                    <span class="class-1">黃金 {{ user.money }}</span>
                   </div>
                   <div class="block block-3">
-                    <span class="place">{{ currUser.mapNowName }}</span
+                    <span class="place"
+                      >{{ currUser.mapNowName }}
+                      <v-btn
+                        x-small
+                        elevation="2"
+                        color="primary"
+                        @click="goToXY(currUser.mapNowIndex)"
+                        >前往</v-btn
+                      ></span
                     ><span class="power">行動力 {{ user.actPoint }}</span>
                   </div>
                 </div>
               </div>
             </div>
+          </div>
+          <div class="info-btns">
+            <v-checkbox
+              v-model="showCityDetails"
+              label="顯示據點資訊"
+              color="orange darken-3"
+              hide-details
+            ></v-checkbox>
           </div>
         </div>
       </div>
@@ -77,18 +100,17 @@
       >
         <template v-for="(stronghold, stronghold_i) in strongholds">
           <div
-            v-if="
-              client.status_type == '' ||
-              (client.status_type == 'move' &&
-                client.could_be_move_to.indexOf(stronghold.id) !== -1) ||
-              user.mapNowId === stronghold.id
-            "
             :class="[
               'stronghold',
-              { castle: stronghold.type == 1 },
-              { jungle: stronghold.type == 2 },
-              { here: stronghold.is_here },
               {
+                castle: stronghold.type == 1,
+                jungle: stronghold.type == 2,
+                here: stronghold.is_here,
+                show:
+                  client.status_type == '' ||
+                  (client.status_type == 'move' &&
+                    client.could_be_move_to.indexOf(stronghold.id) !== -1) ||
+                  user.mapNowId === stronghold.id,
                 moveTo:
                   client.status_type == 'move' &&
                   client.could_be_move_to.indexOf(stronghold.id) !== -1
@@ -103,7 +125,7 @@
             @click="clickThisStronghold(stronghold_i)"
           >
             <div class="stronghold-area">
-              <div class="stronghold-context">
+              <div v-if="stronghold.conutry.id" class="stronghold-context">
                 <div class="country">
                   <span
                     class="country-name"
@@ -114,14 +136,6 @@
                     >{{ stronghold.conutry.name }}</span
                   >
                   <span class="bottom"></span>
-                </div>
-                <div class="stronghold-info-area">
-                  <div class="stronghold-name">{{ stronghold.name }}</div>
-                  <div class="stronghold-info">
-                    武 {{ stronghold.generals_num }}、兵
-                    {{ stronghold.military_strength }}、浪
-                    {{ stronghold.ronin_num }}
-                  </div>
                 </div>
               </div>
               <img
@@ -138,6 +152,35 @@
                 class="jungle-img"
                 :style="{ background: stronghold.conutry.color }"
               ></div>
+              <div
+                class="stronghold-info-area"
+                :ref="'stronghold-' + stronghold.id"
+                :style="
+                  setLeft(
+                    stronghold.id,
+                    stronghold.type,
+                    'stronghold-' + stronghold.id
+                  )
+                "
+              >
+                <div class="stronghold-name">{{ stronghold.name }}</div>
+              </div>
+              <div
+                class="stronghold-info"
+                :class="{ show: showCityDetails }"
+                :ref="'stronghold-details-' + stronghold.id"
+                :style="
+                  setLeft(
+                    stronghold.id,
+                    stronghold.type,
+                    'stronghold-details-' + stronghold.id
+                  )
+                "
+              >
+                武 {{ stronghold.generals_num }}、兵
+                {{ stronghold.military_strength }}、浪
+                {{ stronghold.ronin_num }}
+              </div>
             </div>
           </div>
         </template>
@@ -192,7 +235,8 @@ export default Vue.extend({
     _mouse_dataset: {},
     viewX: 0,
     viewY: 0,
-    goToCityId: 0
+    goToCityId: 0,
+    showCityDetails: localStorage.getItem('show_city_details') === 'true'
   }),
 
   computed: {
@@ -214,7 +258,6 @@ export default Vue.extend({
             const country = state.global.countries.find(
               (e: any) => e.id === cid
             )
-            // console.log('country: ', country)
             const cname = country ? country.name : '空'
             const colors = country ? country.color.split(',') : ['#fff', '#000']
             const usersInThisMap = hashMapIdUser[m.id] || []
@@ -231,7 +274,7 @@ export default Vue.extend({
                 },
                 0
               ),
-              is_main: true,
+              is_main: country ? country.originCityId === m.cityId : false,
               is_here: m.id === state.user.mapNowId,
               conutry: {
                 id: cid,
@@ -246,6 +289,11 @@ export default Vue.extend({
     },
     currUser: function () {
       return this.getUser()
+    },
+    today: function () {
+      const curr = this.$moment()
+      const days = ['日', '一', '二', '三', '四', '五', '六']
+      return [curr.format('YYYY年 MM月 DD日 星期'), days[curr.day()]]
     }
   },
 
@@ -258,6 +306,18 @@ export default Vue.extend({
           this.inCurrStrongholdIndex !== val.mapNowIndex
         ) {
           this.goToXY(val.mapNowIndex)
+        }
+      },
+      deep: true,
+      immediate: true
+    },
+    showCityDetails: function (val) {
+      localStorage.setItem('show_city_details', val)
+    },
+    'client.dialog_check_curr': {
+      handler: function (val) {
+        if (val.key === '移動') {
+          this.goToXY(this.currUser.mapNowIndex)
         }
       },
       deep: true,
@@ -281,6 +341,29 @@ export default Vue.extend({
       'actEnterCountry',
       'ApiRes'
     ]),
+    setLeft: function (id, is_city, key) {
+      let str = ''
+      let left = 0
+      if (this.$refs[key]) {
+        if (key.indexOf('-details-') === -1) {
+          if (is_city === 2) {
+            left = -(this.$refs[key][0].clientWidth / 2 - 15)
+          } else {
+            left = -(this.$refs[key][0].clientWidth / 4 < 15)
+              ? 15
+              : -(this.$refs[key][0].clientWidth / 4 - 15)
+          }
+        } else {
+          if (is_city === 2) {
+            left = -(this.$refs[key][0].clientWidth / 2 - 15)
+          } else {
+            left = -(this.$refs[key][0].clientWidth / 2 - 30)
+          }
+        }
+        str += 'left: ' + left + 'px;'
+      }
+      return str
+    },
     cencel: function () {
       this.ChangeState(['status_type', ''])
       this.ChangeState(['could_be_move_to', []])
@@ -345,7 +428,6 @@ export default Vue.extend({
         city.id !== this.user.mapNowId
       ) {
         this.goToCityId = this.strongholds[index].id
-        console.log(city)
         this.ChangeDialogCheck({ content: '移動到 ' + city.name })
       } else if (this.client.status_type === '') {
         this.goToXY(index)
@@ -434,12 +516,14 @@ html {
         .stronghold {
           position: absolute;
           z-index: 10;
+          visibility: hidden;
           cursor: pointer;
           .stronghold-area {
             position: relative;
             .stronghold-context {
               position: absolute;
-              top: -50px;
+              top: -35px;
+              left: 8px;
               display: flex;
               font-family: '華康行楷體W5';
               background: -webkit-linear-gradient(
@@ -456,21 +540,21 @@ html {
                 padding: 4px;
                 background: #cabca6;
                 position: relative;
-                height: 47px;
                 .country-name {
-                  display: inline;
+                  display: inline-block;
                   border: 1px solid #413227;
-                  padding: 2px 2px 0px;
+                  padding: 2px;
                   color: #333;
-                  font-size: 14px;
-                  line-height: 16px;
-                  letter-spacing: 3px;
-                  writing-mode: vertical-lr;
+                  font-size: 16px;
+                  line-height: 18px;
+                  // writing-mode: vertical-lr;
                   background: #ccc;
-                  width: 22px;
-                  height: 38px;
+                  width: 42px;
+                  text-align: center;
+                  vertical-align: center;
                 }
                 .bottom {
+                  display: none;
                   position: absolute;
                   top: 47px;
                   left: 0px;
@@ -482,54 +566,100 @@ html {
                   content: '';
                 }
               }
-              .stronghold-info-area {
-                padding: 5px 15px 2px 8px;
-                color: #fff;
-                .stronghold-name {
-                  font-size: 18px;
-                  line-height: 19px;
-                  white-space: nowrap;
-                }
-                .stronghold-info {
-                  font-size: 14px;
-                  white-space: nowrap;
-                }
+            }
+            .stronghold-info {
+              visibility: hidden;
+              position: absolute;
+              font-size: 14px;
+              white-space: nowrap;
+              margin-top: 30px;
+              font-family: '華康行楷體W5';
+              background: -webkit-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.1) 0%,
+                rgba(0, 0, 0, 0.5) 22%,
+                rgb(0, 0, 0) 44%,
+                rgba(0, 0, 0, 0.5) 72%,
+                rgba(0, 0, 0, 0.1) 98%
+              );
+              filter: drop-shadow(0px 0px 2px #201707);
+              & > span {
+                display: inline-block;
               }
+              padding: 5px 15px 2px;
+              color: #fff;
+              &.show {
+                visibility: inherit;
+              }
+            }
+            .stronghold-info-area {
+              position: absolute;
+              margin-top: 2px;
+              text-align: center;
+              display: flex;
+              font-family: '華康行楷體W5';
+              background: -webkit-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.1) 0%,
+                rgba(0, 0, 0, 0.5) 22%,
+                rgb(0, 0, 0) 44%,
+                rgba(0, 0, 0, 0.5) 72%,
+                rgba(0, 0, 0, 0.1) 98%
+              );
+              filter: drop-shadow(0px 0px 2px #201707);
+              & > span {
+                display: inline-block;
+              }
+              padding: 5px 15px 2px;
+              color: #fff;
+              .stronghold-name {
+                font-size: 18px;
+                line-height: 19px;
+                white-space: nowrap;
+              }
+            }
+          }
+          &.show {
+            visibility: inherit;
+          }
+          &.castle {
+            z-index: 11;
+            img {
+              width: 72px;
+              height: 46px;
             }
           }
           &.jungle {
             .stronghold-area {
               .stronghold-context {
-                top: -60px;
-                left: -10px;
+                top: -36px;
+                left: -11px;
               }
             }
           }
           &.here {
-            z-index: 11;
+            z-index: 13;
             .stronghold-name {
               color: #eac927;
             }
           }
           &.moveTo {
             filter: drop-shadow(0px 0px 4px #cabca6);
-            z-index: 14;
+            z-index: 15;
             &:hover {
               filter: drop-shadow(0px 0px 4px #cabca6);
-              z-index: 15;
+              z-index: 17;
             }
           }
           &:hover {
             filter: drop-shadow(0px 0px 4px #cabca6);
-            z-index: 12;
+            z-index: 17;
+            .stronghold-info {
+              visibility: inherit;
+            }
           }
         }
-        .castle {
-          img {
-            width: 72px;
-            height: 46px;
-          }
-        }
+
         .jungle-img {
           border: 1px solid #413d30;
           border-radius: 3px;
@@ -563,8 +693,10 @@ html {
         border-radius: 999px;
         background: #0a293c;
         overflow: hidden;
+        float: left;
+        z-index: 1;
         .user-img {
-          width: 150%;
+          width: 120%;
           position: absolute;
           top: 30%;
           left: 50%;
@@ -581,9 +713,16 @@ html {
       .user-info {
         position: relative;
         width: 100%;
+        &:after {
+          clear: left;
+          content: '.';
+          display: block;
+          height: 0;
+          overflow: hidden;
+        }
         .info-area {
           position: absolute;
-          z-index: -1;
+          z-index: 0;
           top: 15px;
           left: 110px;
           width: 100%;
@@ -652,6 +791,7 @@ html {
                 .block {
                   span {
                     display: inline-block;
+                    width: 50%;
                   }
                 }
                 .name {
@@ -672,6 +812,17 @@ html {
                 }
               }
             }
+          }
+        }
+        .info-btns {
+          position: absolute;
+          bottom: 0px;
+          left: 150px;
+          .v-icon,
+          .v-label {
+            color: #fff;
+            font-family: '華康行楷體W5' !important;
+            text-shadow: 1px 1px 2px #111;
           }
         }
       }
