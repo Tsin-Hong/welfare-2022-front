@@ -54,7 +54,7 @@ const client = {
   actions: {
     ApiMove: function ({ commit, rootState }, payload) {
       const user = rootState.user
-      const res = mapAlgorithm.getAllowedPosition(user.mapNowId, user.actPoint)
+      const res = mapAlgorithm.getAllowedPosition(user.mapNowId, user.actPoint, user.countryId)
       if (user.countryId > 0) {
         const mapIds = rootState.global.maps.filter((e: any) => e.ownCountryId === user.countryId).map((e: any) => e.id)
         res.all = res.all.filter((id: any) => mapIds.includes(id))

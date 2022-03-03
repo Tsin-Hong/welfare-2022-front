@@ -20,11 +20,12 @@ function setData (data: Array<any>) {
   return true
 }
 
-function getAllowedPosition (nowId: any, moveEnergy = 1) {
+function getAllowedPosition (nowId: any, moveEnergy = 1, countryId = 0) {
   const _hash = mapdata.hash
   const _now = _hash[nowId]
   const stpeRoutes = {}
   const allRoutes: Array<number> = []
+  const checkCountry = countryId > 0
   let _step = 0
   if (_now) {
     while (_step++ < moveEnergy) {
@@ -33,7 +34,11 @@ function getAllowedPosition (nowId: any, moveEnergy = 1) {
       if (lastRoutes) {
         lastRoutes.map((rs: any) => {
           const _loc = _hash[rs]
-          _loc.route.map((_next: any) => {
+          let _routes = _loc.route
+          if (checkCountry) {
+            _routes = _routes.filter(r => _hash[r].ownCountryId === countryId);
+          }
+          _routes.map((_next: any) => {
             if (!allRoutes.includes(_next) && _next !== nowId) {
               nextRoutes.push(_next)
               allRoutes.push(_next)
@@ -42,6 +47,9 @@ function getAllowedPosition (nowId: any, moveEnergy = 1) {
         })
       } else {
         nextRoutes = _now.route.slice()
+        if (checkCountry) {
+          nextRoutes = nextRoutes.filter(r => _hash[r].ownCountryId === countryId);
+        }
         nextRoutes.map((r: any) => {
           allRoutes.push(r)
         })
