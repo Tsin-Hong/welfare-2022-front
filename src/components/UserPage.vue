@@ -58,15 +58,13 @@
                 <div class="date">{{ today[0] }}{{ today[1] }}</div>
                 <div class="user">
                   <div class="block block-1">
-                    <span class="name">{{ user.nickname }}</span
-                    ><span class="type">{{ currUser.roleName }}</span>
-                  </div>
-                  <div class="block resource">
-                    <span class="class-1">兵力 {{ user.soldier }}</span>
-                    <span class="class-1">黃金 {{ user.money }}</span>
-                  </div>
-                  <div class="block block-3">
-                    <span class="place"
+                    <span class="name w-33-pct"
+                      >{{ user.nickname }}
+                      <i class="role_type" v-if="currUser.loyalUserId !== 0"
+                        >元老</i
+                      ></span
+                    ><span class="type w-33-pct">{{ currUser.roleName }}</span>
+                    <span class="class-1 w-33-pct"
                       >{{ currUser.mapNowName }}
                       <v-btn
                         x-small
@@ -75,7 +73,21 @@
                         @click="goToXY(currUser.mapNowIndex)"
                         >前往</v-btn
                       ></span
-                    ><span class="power">行動力 {{ user.actPoint }}</span>
+                    >
+                  </div>
+                  <div class="block resource">
+                    <span class="class-1 w-33-pct"
+                      >兵力 {{ user.soldier }}</span
+                    >
+                    <span class="class-1 w-33-pct">黃金 {{ user.money }}</span>
+                  </div>
+                  <div class="block block-3">
+                    <span class="class-1 w-33-pct"
+                      >貢獻 {{ user.contribution }}</span
+                    >
+                    <span class="class-1 w-33-pct"
+                      >行動力 {{ user.actPoint }}</span
+                    >
                   </div>
                 </div>
               </div>
@@ -85,6 +97,12 @@
             <v-checkbox
               v-model="showCityDetails"
               label="顯示據點資訊"
+              color="orange darken-3"
+              hide-details
+            ></v-checkbox>
+            <v-checkbox
+              v-model="showCountyDetails"
+              label="顯示勢力"
               color="orange darken-3"
               hide-details
             ></v-checkbox>
@@ -125,7 +143,10 @@
             @click="clickThisStronghold(stronghold_i)"
           >
             <div class="stronghold-area">
-              <div v-if="stronghold.conutry.id" class="stronghold-context">
+              <div
+                v-if="stronghold.conutry.id && showCountyDetails"
+                class="stronghold-context"
+              >
                 <div class="country">
                   <span
                     class="country-name"
@@ -163,7 +184,17 @@
                   )
                 "
               >
-                <div class="stronghold-name">{{ stronghold.name }}</div>
+                <div class="stronghold-name">
+                  <span
+                    v-if="stronghold.conutry.id"
+                    class="icon-country"
+                    :style="{
+                      background: stronghold.conutry.color,
+                      color: stronghold.conutry.t_color
+                    }"
+                  ></span>
+                  <span class="name">{{ stronghold.name }}</span>
+                </div>
               </div>
               <div
                 class="stronghold-info"
@@ -236,7 +267,8 @@ export default Vue.extend({
     viewX: 0,
     viewY: 0,
     goToCityId: 0,
-    showCityDetails: localStorage.getItem('show_city_details') === 'true'
+    showCityDetails: localStorage.getItem('show_city_details') === 'true',
+    showCountyDetails: localStorage.getItem('show_country_details') === 'true'
   }),
 
   computed: {
@@ -314,6 +346,9 @@ export default Vue.extend({
     showCityDetails: function (val) {
       localStorage.setItem('show_city_details', val)
     },
+    showCountyDetails: function (val) {
+      localStorage.setItem('show_country_details', val)
+    },
     'client.dialog_check_curr': {
       handler: function (val) {
         if (val.key === '移動') {
@@ -327,6 +362,7 @@ export default Vue.extend({
 
   mounted: function () {
     this._mouse_dataset = {}
+    // localStorage.setItem('show_country_details', 'true')
   },
 
   methods: {
@@ -613,9 +649,20 @@ html {
               padding: 5px 15px 2px;
               color: #fff;
               .stronghold-name {
-                font-size: 18px;
-                line-height: 19px;
-                white-space: nowrap;
+                display: flex;
+                .name {
+                  font-size: 20px;
+                  line-height: 22px;
+                  white-space: nowrap;
+                }
+                .icon-country {
+                  display: inline-block;
+                  width: 6px;
+                  height: 6px;
+                  border: 1px solid #7e7e7e;
+                  margin-right: 5px;
+                  margin-top: 8px;
+                }
               }
             }
           }
@@ -628,12 +675,24 @@ html {
               width: 72px;
               height: 46px;
             }
+            .stronghold-area {
+              .stronghold-name {
+                .name {
+                  letter-spacing: 2px;
+                }
+              }
+            }
           }
           &.jungle {
             .stronghold-area {
               .stronghold-context {
                 top: -36px;
                 left: -11px;
+              }
+              .stronghold-name {
+                .name {
+                  font-size: 15px !important;
+                }
               }
             }
           }
@@ -683,7 +742,7 @@ html {
       position: fixed;
       left: 0;
       top: 0;
-      width: 500px;
+      width: 660px;
       padding: 15px;
       z-index: 999;
       .img-area {
@@ -789,9 +848,20 @@ html {
                   padding: 2px 5px 1px;
                 }
                 .block {
+                  .role_type {
+                    font-size: 15px;
+                    padding: 3px 8px;
+                    border: 1px solid #ccc;
+                    border-radius: 10px;
+                  }
                   span {
                     display: inline-block;
                     width: 50%;
+                  }
+                  &.resource {
+                    span {
+                      width: 33%;
+                    }
                   }
                 }
                 .name {
@@ -816,8 +886,22 @@ html {
         }
         .info-btns {
           position: absolute;
-          bottom: 0px;
+          bottom: -5px;
           left: 150px;
+          width: 660px;
+          display: flex;
+          .v-input {
+            margin: 0;
+            margin-right: 5px;
+            padding: 5px 10px;
+            background: -webkit-linear-gradient(
+              -90deg,
+              rgba(25, 25, 25, 0.9) 10%,
+              rgba(25, 25, 25, 0.8) 40%,
+              rgba(25, 25, 25, 0.7) 100%
+            );
+            border-radius: 10px;
+          }
           .v-icon,
           .v-label {
             color: #fff;
