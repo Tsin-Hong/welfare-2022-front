@@ -19,6 +19,7 @@ const info = {
       if (message.byteLength < 0x0400) {
         const received = parser.arrayBufferToJSON(message)
         console.log('[INFO] wsOnReceiveAUTHORIZE recived: ', received)
+        console.log('content.rootState: ', content.rootState)
         if (typeof received.act === 'number') {
           let msg = '成功!'
           switch (received.act) {
@@ -26,17 +27,25 @@ const info = {
               msg = '行軍成功!'
               break
             case enums.ACT_LEAVE_COUNTRY:
-              msg = '下野成功!'
+              msg = '下野成功! 可以開始浪跡天涯'
               break
-            case enums.ACT_ENTER_COUNTRY:
-              msg = '入仕成功!'
-              break
-            case enums.ACT_SEARCH_WILD:
-              msg = '探索成功!'
-              break
-            case enums.ACT_INCREASE_SOLDIER:
-              msg = '徵兵成功!'
-              break
+            case enums.ACT_ENTER_COUNTRY: {
+              const cid = received.payload.countryId || 0;
+              const conntry = content.rootState.global.countries.find(c => c.id == cid)
+              if (cid > 0) {
+                msg = `入仕成功! 成功加入國家 [ ${conntry ? conntry.name : ''} ] `
+              } else {
+                msg = '入仕失敗, 請恢復行動力後再嘗次'
+              }
+            }  break
+            case enums.ACT_SEARCH_WILD: {
+              const adds = received.payload.money - content.rootState.user.money
+              msg = `探索成功! 找到了 [黃金] [ ${adds} ]`
+            } break
+            case enums.ACT_INCREASE_SOLDIER: {
+              const adds = received.payload.soldier - content.rootState.user.soldier
+              msg = `徵兵成功! 有 [ ${adds} ] 位士兵願意追隨您`
+            } break
             default:
           }
           content.dispatch('showClientDialog', msg)
