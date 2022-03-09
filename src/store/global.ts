@@ -8,6 +8,7 @@ const global = {
     maps: [],
     cities: [],
     countries: [],
+    notifications: [],
     io: null
   },
   mutations: {
@@ -22,6 +23,10 @@ const global = {
           state.cities = parser.parseArraiesToObjects(payload.cities, enums.CityGlobalAttributes)
           state.countries = parser.parseArraiesToObjects(payload.countries, enums.CountryGlobalAttributes)
           algorithm.setData(state.maps)
+          if (payload.notifications) {
+            state.notifications = payload.notifications.map((e: any) => [new Date(e[0]), e[1]])
+            state.notifications.sort((a: any, b: any) => b[0] - a[0])
+          }
           break
         case enums.ACT_GET_GLOBAL_CHANGE_DATA: {
           const dataset = payload.dataset
@@ -36,12 +41,16 @@ const global = {
               }
               return {}
             }, state)
-            console.log('pointer: ', pointer)
+            // console.log('pointer: ', pointer)
             Object.keys(_.update).map((key) => {
               const value = _.update[key]
               if (pointer[key]) { pointer[key] = value }
             })
           })
+        } break
+        case enums.ACT_NOTIFICATION: {
+          const newNoti = [new Date(payload[0]), payload[1]]
+          state.notifications = [newNoti].concat(state.notifications);
         } break
         // case enums.ALERT:
         //   window.alert(payload.msg)

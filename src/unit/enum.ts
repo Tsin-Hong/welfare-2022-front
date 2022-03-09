@@ -16,10 +16,23 @@ const enums = {
   ACT_ENTER_COUNTRY: 16,
   ACT_SEARCH_WILD: 17,
   ACT_INCREASE_SOLDIER: 18,
+  ACT_NOTIFICATION: 19,
+  ACT_BATTLE: 20,
   UserGlobalAttributes: ['id', 'code', 'nickname', 'countryId', 'loyalty', 'loyalUserId', 'contribution', 'occupationId', 'role', 'mapNowId', 'soldier', 'captiveDate'],
   MapsGlobalAttributes: ['id', 'name', 'x', 'y', 'route', 'cityId', 'ownCountryId'],
   CityGlobalAttributes: ['id', 'money', 'addResource', 'timeBeAttacked', 'jsonConstruction'],
-  CountryGlobalAttributes: ['id', 'name', 'money', 'emperorId', 'peopleMax', 'color', 'originCityId']
+  CountryGlobalAttributes: ['id', 'name', 'money', 'emperorId', 'peopleMax', 'color', 'originCityId'],
+  EVENT_LEAVE_COUNTRY: '_LEAVE_COUNTRY_',
+  EVENT_ENTER_COUNTRY: '_ENTER_COUNTRY_',
+  EVENT_WAR: '_WAR_',
+  EVENT_WAR_WILD: '_WAR_WILD_',
+  EVENT_WAR_CITY: '_WAR_CITY_',
+  EVENT_CREATE_COUNTRY: '_CREATE_COUNTRY_',
+  EVENT_CHAOS: '_CHAOS_',
+  EVENT_DESTROY_COUNTRY: '_DESTROY_COUNTRY_',
+  EVENT_GROUP_UP: '_GROUP_UP_',
+  EVENT_COUNTRY_RELATIONSHIP: '_COUNTRY_RELATIONSHIP_',
+  EVENT_OCCUPATION: '_OCCUPATION_'
 }
 
 export default enums
