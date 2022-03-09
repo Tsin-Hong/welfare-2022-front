@@ -117,7 +117,6 @@ html {
 .login-page {
   height: 100vh;
   background-color: #ca6b2b;
-
   padding: 1px;
   overflow-y: hidden !important;
   .login-area {
@@ -128,6 +127,7 @@ html {
     background-image: url('../assets/images/bg_220119.jpg');
     background-repeat: no-repeat;
     background-position: center center;
+    background-size: 1024px;
   }
   &::before {
     content: ' ';
@@ -141,6 +141,7 @@ html {
     background-image: url('../assets/images/bg_220119.jpg');
     background-repeat: repeat-x;
     background-position: center bottom;
+    background-size: 1024px;
     z-index: 0;
   }
   img {
