@@ -117,11 +117,11 @@
       </div>
       <div class="right-top-area">
         <div class="btn-group">
-          <span class="notice">
+          <span class="notice" @click="showInfoArea(0)">
             <img src="../assets/images/公告.png" alt="" />
             <div class="text">活動公告</div>
           </span>
-          <span class="game-book">
+          <span class="game-book" @click="showInfoArea(1)">
             <img src="../assets/images/說明書.png" alt="" />
             <div class="text">遊戲說明</div>
           </span>
@@ -326,6 +326,13 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog dark v-model="client.dialog_info" scrollable width="800px">
+      <v-card class="dialog_info">
+        <v-card-title>{{ infoTitle }}</v-card-title>
+        <v-divider></v-divider>
+        <v-card-text>放圖片的地方</v-card-text>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -345,12 +352,20 @@ export default Vue.extend({
     goToCityId: 0,
     showCityDetails: localStorage.getItem('show_city_details') === 'true',
     showCountyDetails: localStorage.getItem('show_country_details') === 'true',
-    showRoninDetails: localStorage.getItem('show_ronin_details') === 'true'
+    showRoninDetails: localStorage.getItem('show_ronin_details') === 'true',
+    infoTypeNow: 0
   }),
 
   computed: {
     ...mapState(['user', 'global', 'client', 'info']),
     ...mapGetters(['getUser']),
+    infoTitle: function () {
+      let text = '活動公告'
+      if (this.infoTypeNow == 1) {
+        text = '遊戲說明'
+      }
+      return text
+    },
     strongholds: function () {
       const state = this.$store.state
       const hashMapIdUser = {}
@@ -459,6 +474,9 @@ export default Vue.extend({
       'actEnterCountry',
       'ApiRes'
     ]),
+    showInfoArea: function (type) {
+      this.ChangeState(['dialog_info', true])
+    },
     setLeft: function (is_main, is_city, key) {
       let str = ''
       let left = 0
@@ -1228,12 +1246,6 @@ html {
   }
 }
 .dialog-card {
-  // background: -webkit-linear-gradient(
-  //   -90deg,
-  //   rgba(25, 25, 25, 0.9) 10%,
-  //   rgba(25, 25, 25, 0.8) 40%,
-  //   rgba(25, 25, 25, 0.7) 100%
-  // );
   background: url('../assets/images/dialog/bg.png') no-repeat center center;
   background-size: contain;
   height: 380px;
@@ -1256,6 +1268,36 @@ html {
     }
     .v-btn {
       font-size: 23px;
+    }
+  }
+}
+.dialog_info {
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  &::before {
+    content: '';
+    background: url('../assets/images/公告背景.jpg') repeat-x center center;
+    background-size: cover;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    opacity: 0.8;
+  }
+  &.v-card {
+    background: transparent !important;
+    .v-card__title {
+      font-family: '華康行楷體W5';
+      padding-top: 45px !important;
+      padding-bottom: 30px !important;
+      font-size: 28px !important;
+    }
+    .v-card__text {
+      height: 800px;
+      text-align: center;
+    }
+    .v-card__actions {
     }
   }
 }

@@ -3,6 +3,7 @@ import mapAlgorithm from '@/unit/mapAlgorithm'
 const client = {
   state: {
     tempName: 'None',
+    dialog_info: false,
     dialog: false,
     dialog_content: {
       title: '',
