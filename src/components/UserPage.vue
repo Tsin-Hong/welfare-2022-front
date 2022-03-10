@@ -95,14 +95,20 @@
           </div>
           <div class="info-btns">
             <v-checkbox
-              v-model="showCityDetails"
-              label="顯示據點資訊"
+              v-model="showCountyDetails"
+              label="顯示勢力"
               color="orange darken-3"
               hide-details
             ></v-checkbox>
             <v-checkbox
-              v-model="showCountyDetails"
-              label="顯示勢力"
+              v-model="showCityDetails"
+              label="顯示武力"
+              color="orange darken-3"
+              hide-details
+            ></v-checkbox>
+            <v-checkbox
+              v-model="showRoninDetails"
+              label="顯示浪人"
               color="orange darken-3"
               hide-details
             ></v-checkbox>
@@ -124,6 +130,7 @@
                 castle: stronghold.type == 1,
                 jungle: stronghold.type == 2,
                 here: stronghold.is_here,
+                main: stronghold.is_main,
                 show:
                   client.status_type == '' ||
                   (client.status_type == 'move' &&
@@ -131,7 +138,17 @@
                   user.mapNowId === stronghold.id,
                 moveTo:
                   client.status_type == 'move' &&
-                  client.could_be_move_to.indexOf(stronghold.id) !== -1
+                  client.could_be_move_to.indexOf(stronghold.id) !== -1,
+                power0:
+                  0 < stronghold.military_strength &&
+                  stronghold.military_strength < 1000,
+                power1:
+                  1000 <= stronghold.military_strength &&
+                  stronghold.military_strength < 5600,
+                power2:
+                  5600 <= stronghold.military_strength &&
+                  stronghold.military_strength < 11200,
+                power3: 11200 <= stronghold.military_strength
               }
             ]"
             :style="{ left: stronghold.x + 'px', top: stronghold.y + 'px' }"
@@ -151,14 +168,40 @@
                   <span
                     class="country-name"
                     :style="{
-                      background: stronghold.conutry.color,
-                      color: stronghold.conutry.t_color
+                      color: stronghold.conutry.color
                     }"
                     >{{ stronghold.conutry.name }}</span
                   >
                   <span class="bottom"></span>
                 </div>
               </div>
+              <img
+                v-if="showCityDetails"
+                class="hose soldier"
+                src="../assets/images/兵力.png"
+                alt=""
+              />
+              <img
+                v-if="showCityDetails"
+                class="hose hose1"
+                src="../assets/images/武力.gif"
+                alt=""
+              />
+              <img
+                v-if="showCityDetails"
+                class="hose hose2"
+                src="../assets/images/武力.gif"
+                alt=""
+              />
+              <img
+                v-if="showCityDetails"
+                class="hose hose3"
+                src="../assets/images/武力.gif"
+                alt=""
+              />
+              <span class="here-icon"
+                ><img src="../assets/images/here.png" alt=""
+              /></span>
               <img
                 v-if="stronghold.type == 1"
                 :src="
@@ -178,22 +221,37 @@
                 :ref="'stronghold-' + stronghold.id"
                 :style="
                   setLeft(
-                    stronghold.id,
+                    stronghold.is_main,
                     stronghold.type,
                     'stronghold-' + stronghold.id
                   )
                 "
               >
-                <div class="stronghold-name">
+                <div
+                  class="stronghold-name"
+                  :style="{
+                    background: stronghold.conutry.color
+                  }"
+                >
                   <span
-                    v-if="stronghold.conutry.id"
-                    class="icon-country"
-                    :style="{
-                      background: stronghold.conutry.color,
-                      color: stronghold.conutry.t_color
-                    }"
-                  ></span>
-                  <span class="name">{{ stronghold.name }}</span>
+                    class="name"
+                    :style="[
+                      stronghold.type == 1
+                        ? { color: stronghold.conutry.t_color }
+                        : { color: '#FFF' }
+                    ]"
+                  >
+                    {{ stronghold.name }}
+                  </span>
+                  <div
+                    v-if="showRoninDetails && stronghold.ronin_num > 0"
+                    class="ronin-icon-area"
+                  >
+                    <span>{{ stronghold.ronin_num }}x</span
+                    ><span
+                      ><img src="../assets/images/浪人icon.png" alt=""
+                    /></span>
+                  </div>
                 </div>
               </div>
               <div
@@ -202,15 +260,21 @@
                 :ref="'stronghold-details-' + stronghold.id"
                 :style="
                   setLeft(
-                    stronghold.id,
+                    stronghold.is_main,
                     stronghold.type,
                     'stronghold-details-' + stronghold.id
                   )
                 "
               >
-                武 {{ stronghold.generals_num }}、兵
-                {{ stronghold.military_strength }}、浪
-                {{ stronghold.ronin_num }}
+                <div
+                  v-if="
+                    stronghold.generals_num !== 0 &&
+                    stronghold.military_strength !== 0
+                  "
+                >
+                  武 {{ stronghold.generals_num }}、兵
+                  {{ stronghold.military_strength }}
+                </div>
               </div>
             </div>
           </div>
@@ -268,7 +332,8 @@ export default Vue.extend({
     viewY: 0,
     goToCityId: 0,
     showCityDetails: localStorage.getItem('show_city_details') === 'true',
-    showCountyDetails: localStorage.getItem('show_country_details') === 'true'
+    showCountyDetails: localStorage.getItem('show_country_details') === 'true',
+    showRoninDetails: localStorage.getItem('show_ronin_details') === 'true'
   }),
 
   computed: {
@@ -291,7 +356,9 @@ export default Vue.extend({
               (e: any) => e.id === cid
             )
             const cname = country ? country.name : '空'
-            const colors = country ? country.color.split(',') : ['#fff', '#000']
+            const colors = country
+              ? country.color.split(',')
+              : ['#A1A1A1', '#000']
             const usersInThisMap = hashMapIdUser[m.id] || []
             // console.log('usersInThisMap: ', usersInThisMap)
             return {
@@ -349,6 +416,9 @@ export default Vue.extend({
     showCountyDetails: function (val) {
       localStorage.setItem('show_country_details', val)
     },
+    showRoninDetails: function (val) {
+      localStorage.setItem('show_ronin_details', val)
+    },
     'client.dialog_check_curr': {
       handler: function (val) {
         if (val.key === '移動') {
@@ -377,7 +447,7 @@ export default Vue.extend({
       'actEnterCountry',
       'ApiRes'
     ]),
-    setLeft: function (id, is_city, key) {
+    setLeft: function (is_main, is_city, key) {
       let str = ''
       let left = 0
       if (this.$refs[key]) {
@@ -385,15 +455,24 @@ export default Vue.extend({
           if (is_city === 2) {
             left = -(this.$refs[key][0].clientWidth / 2 - 15)
           } else {
-            left = -(this.$refs[key][0].clientWidth / 4 < 15)
-              ? 15
-              : -(this.$refs[key][0].clientWidth / 4 - 15)
+            left = -(this.$refs[key][0].clientWidth / 4 < 20
+              ? 20
+              : this.$refs[key][0].clientWidth / 4 - 20)
           }
         } else {
           if (is_city === 2) {
             left = -(this.$refs[key][0].clientWidth / 2 - 15)
           } else {
-            left = -(this.$refs[key][0].clientWidth / 2 - 30)
+            if (is_main) {
+              console.log(this.$refs[key][0].clientWidth / 4)
+              left = -(this.$refs[key][0].clientWidth / 4 < 20
+                ? 20
+                : this.$refs[key][0].clientWidth / 4 - 20)
+            } else {
+              left = -(this.$refs[key][0].clientWidth / 4 < 10
+                ? 10
+                : this.$refs[key][0].clientWidth / 4 - 10)
+            }
           }
         }
         str += 'left: ' + left + 'px;'
@@ -534,6 +613,29 @@ html {
 .flag-vertical {
   writing-mode: vertical-lr;
 }
+.ronin-icon-area {
+  position: absolute;
+  left: 100%;
+  top: 0;
+  padding: 0 6px;
+  min-width: 50px;
+  text-align: left;
+  height: 100%;
+  background: #0a293c;
+  color: #fff;
+  letter-spacing: 2px;
+  display: flex;
+  align-items: center;
+  span {
+    &:nth-child(2) {
+      padding: 4px 2px 0px;
+    }
+  }
+  img {
+    width: 16px !important;
+    height: 16px !important;
+  }
+}
 .container {
   &.user-page {
     width: 100vw;
@@ -557,18 +659,11 @@ html {
           .stronghold-area {
             position: relative;
             .stronghold-context {
+              display: none;
               position: absolute;
-              top: -35px;
-              left: 8px;
-              display: flex;
+              top: -50px;
+              left: 15px;
               font-family: '華康行楷體W5';
-              background: -webkit-linear-gradient(
-                0deg,
-                rgb(0, 0, 0) 44%,
-                rgba(0, 0, 0, 0.5) 72%,
-                rgba(0, 0, 0, 0.1) 98%
-              );
-              filter: drop-shadow(0px 0px 2px #201707);
               & > span {
                 display: inline-block;
               }
@@ -576,18 +671,21 @@ html {
                 padding: 4px;
                 background: #cabca6;
                 position: relative;
+                z-index: -1;
+                background: url('../assets/images/大旗.png') no-repeat;
+                background-size: contain;
+                height: 130px;
+                width: 80px;
                 .country-name {
                   display: inline-block;
-                  border: 1px solid #413227;
+                  text-shadow: 0px 0px 1px #1f1e1c;
                   padding: 2px;
-                  color: #333;
-                  font-size: 16px;
-                  line-height: 18px;
-                  // writing-mode: vertical-lr;
-                  background: #ccc;
-                  width: 42px;
-                  text-align: center;
-                  vertical-align: center;
+                  color: #111;
+                  font-size: 18px;
+                  line-height: 20px;
+                  padding: 20px 3px;
+                  writing-mode: vertical-lr;
+                  letter-spacing: 1px;
                 }
                 .bottom {
                   display: none;
@@ -608,7 +706,7 @@ html {
               position: absolute;
               font-size: 14px;
               white-space: nowrap;
-              margin-top: 30px;
+              margin-top: 23px;
               font-family: '華康行楷體W5';
               background: -webkit-linear-gradient(
                 0deg,
@@ -628,40 +726,34 @@ html {
                 visibility: inherit;
               }
             }
+            $golden: #313131;
+            .here-icon {
+              position: absolute;
+              bottom: calc(100% - 14px);
+              left: 8px;
+              transform: rotate(15deg);
+              display: none;
+              img {
+                width: 32px !important;
+              }
+            }
             .stronghold-info-area {
               position: absolute;
               margin-top: 2px;
               text-align: center;
               display: flex;
               font-family: '華康行楷體W5';
-              background: -webkit-linear-gradient(
-                0deg,
-                rgba(0, 0, 0, 0.1) 0%,
-                rgba(0, 0, 0, 0.5) 22%,
-                rgb(0, 0, 0) 44%,
-                rgba(0, 0, 0, 0.5) 72%,
-                rgba(0, 0, 0, 0.1) 98%
-              );
-              filter: drop-shadow(0px 0px 2px #201707);
-              & > span {
-                display: inline-block;
-              }
-              padding: 5px 15px 2px;
-              color: #fff;
+              flex-direction: row;
+              justify-content: space-around;
+              align-content: center;
+              align-items: center;
               .stronghold-name {
                 display: flex;
                 .name {
-                  font-size: 20px;
-                  line-height: 22px;
                   white-space: nowrap;
-                }
-                .icon-country {
-                  display: inline-block;
-                  width: 6px;
-                  height: 6px;
-                  border: 1px solid #7e7e7e;
-                  margin-right: 5px;
-                  margin-top: 8px;
+                  position: relative;
+                  color: #fff;
+                  border-radius: 0;
                 }
               }
             }
@@ -672,34 +764,169 @@ html {
           &.castle {
             z-index: 11;
             img {
-              width: 72px;
-              height: 46px;
+              width: 80px;
             }
             .stronghold-area {
+              .here-icon {
+                left: 55px;
+                bottom: 20px;
+              }
+              .stronghold-info-area {
+                top: 36px;
+                padding: 0;
+              }
               .stronghold-name {
+                padding: 3px;
+                opacity: 0.9;
                 .name {
                   letter-spacing: 2px;
+                  box-sizing: border-box;
+                  text-align: center;
+                  padding: 4px;
+                  width: 79px;
+                  height: 29px;
+                  background-image: url('../assets/images/邊框.png');
+                  background-size: contain;
+                  background-repeat: no-repeat;
+                  line-height: 22px;
+                  box-shadow: 0px 0px 4px #1f1f1f;
                 }
+              }
+            }
+            .hose {
+              &.soldier {
+                left: 5px;
+                bottom: 25px;
+              }
+            }
+            &.main {
+              .here-icon {
+                left: 63px;
+                bottom: 50px;
+              }
+              .stronghold-context {
+                display: flex;
+              }
+              .stronghold-area {
+                top: -20px;
+                left: -10px;
+                .stronghold-info-area {
+                  top: 66px;
+                  left: 10px !important;
+                }
+                .stronghold-info {
+                  margin-top: 10px;
+                }
+              }
+              .hose {
+                left: 5px;
+                bottom: 35px;
+                &.soldier {
+                  left: 15px;
+                  bottom: 45px;
+                }
+                &.hose2 {
+                  left: -15px;
+                  bottom: 35px;
+                  z-index: 0;
+                }
+                &.hose3 {
+                  left: 20px;
+                  bottom: 20px;
+                  z-index: 2;
+                }
+              }
+              img {
+                width: 90px;
               }
             }
           }
           &.jungle {
             .stronghold-area {
-              .stronghold-context {
-                top: -36px;
-                left: -11px;
+              .stronghold-info-area {
+                padding: 0;
               }
               .stronghold-name {
+                opacity: 0.8;
+                background: -webkit-linear-gradient(
+                  0deg,
+                  rgba(0, 0, 0, 0.1) 0%,
+                  rgba(0, 0, 0, 0.5) 22%,
+                  rgb(0, 0, 0) 44%,
+                  rgba(0, 0, 0, 0.5) 72%,
+                  rgba(0, 0, 0, 0.1) 98%
+                ) !important;
                 .name {
-                  font-size: 15px !important;
+                  padding: 0px 16px;
+                  font-size: 16px !important;
                 }
+              }
+            }
+            .hose {
+              left: -30px;
+              bottom: -5px;
+              &.hose2 {
+                left: -25px;
+                bottom: 10px;
+                z-index: 0;
+              }
+              &.hose3 {
+                left: -5px;
+                bottom: 0px;
+                z-index: 2;
               }
             }
           }
           &.here {
             z-index: 13;
-            .stronghold-name {
-              color: #eac927;
+            .here-icon {
+              display: block !important;
+            }
+          }
+          .hose {
+            display: none;
+            position: absolute;
+            bottom: 20px;
+            left: -10px;
+            width: 70px !important;
+            z-index: 1;
+            filter: drop-shadow(0px 0px 4px #830b0b);
+            // box-shadow: 1px 1px 5px #CCC;
+            &.soldier {
+              width: 50px !important;
+              left: -21px;
+              bottom: 3px;
+            }
+            &.hose2 {
+              left: -15px;
+              bottom: 35px;
+              z-index: 0;
+            }
+            &.hose3 {
+              left: 20px;
+              bottom: 20px;
+              z-index: 2;
+            }
+          }
+          &.power0 {
+            .soldier {
+              display: block;
+            }
+          }
+          &.power1 {
+            .hose1 {
+              display: block;
+            }
+          }
+          &.power2 {
+            .hose1,
+            .hose2 {
+              display: block;
+            }
+          }
+          &.power3 {
+            .hose {
+              display: block;
             }
           }
           &.moveTo {
@@ -720,12 +947,10 @@ html {
         }
 
         .jungle-img {
-          border: 1px solid #413d30;
+          border: 1px solid #1f1e1c;
           border-radius: 3px;
           width: 25.13px;
           height: 15.53px;
-          box-shadow: 0 10px 25px #9898988a, 0px -10px 25px #ffffffb8,
-            inset 0 -5px 10px #9898988a, inset 0 5px 10px #ffffffb8;
         }
       }
       .map {
