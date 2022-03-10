@@ -115,6 +115,18 @@
           </div>
         </div>
       </div>
+      <div class="right-top-area">
+        <div class="btn-group">
+          <span class="notice">
+            <img src="../assets/images/公告.png" alt="" />
+            <div class="text">活動公告</div>
+          </span>
+          <span class="game-book">
+            <img src="../assets/images/說明書.png" alt="" />
+            <div class="text">遊戲說明</div>
+          </span>
+        </div>
+      </div>
       <div
         class="stronghold-list"
         :style="{
@@ -596,10 +608,10 @@ export default Vue.extend({
 <style lang="scss" scope>
 @keyframes herebg {
   from {
-    transform: scale(0);
+    transform: scale(2);
   }
   to {
-    transform: scale(3);
+    transform: scale(4);
   }
 }
 @keyframes herebgcastle {
@@ -994,6 +1006,49 @@ html {
         z-index: 10;
       }
     }
+    .right-top-area {
+      position: fixed;
+      right: 0;
+      top: 0;
+      z-index: 999;
+      padding: 30px;
+      .btn-group {
+        display: flex;
+      }
+      span {
+        cursor: pointer;
+        text-align: center;
+        display: inline-block;
+        width: 100px;
+        .text {
+          width: 100px;
+          height: 26px;
+          background: url('../assets/images/right-top-btn.png') no-repeat center
+            center;
+          background-size: contain;
+          color: #fff;
+          font-size: 12px;
+          padding-top: 4px;
+          display: none;
+        }
+        &:hover {
+          .text {
+            display: block;
+          }
+        }
+      }
+      img {
+        width: 70px;
+        margin: 0 auto;
+      }
+      // .notice {
+      // }
+      // .game-book {
+      //   text-align: center;
+      //   display: inline-block;
+      //   width: 100px;
+      // }
+    }
     .user-area {
       position: fixed;
       left: 0;
@@ -1173,19 +1228,35 @@ html {
   }
 }
 .dialog-card {
-  background: -webkit-linear-gradient(
-    -90deg,
-    rgba(25, 25, 25, 0.9) 10%,
-    rgba(25, 25, 25, 0.8) 40%,
-    rgba(25, 25, 25, 0.7) 100%
-  );
+  // background: -webkit-linear-gradient(
+  //   -90deg,
+  //   rgba(25, 25, 25, 0.9) 10%,
+  //   rgba(25, 25, 25, 0.8) 40%,
+  //   rgba(25, 25, 25, 0.7) 100%
+  // );
+  background: url('../assets/images/dialog/bg.png') no-repeat center center;
+  background-size: contain;
+  height: 380px;
   font-family: '華康行楷體W5';
   font-size: 26px;
-  .v-card__text {
-    font-size: 26px;
-  }
-  .v-btn {
-    font-size: 23px;
+  &.v-card {
+    .v-card__title {
+      padding: 50px 70px !important;
+    }
+    .v-card__text {
+      font-size: 22px;
+      text-align: center;
+      line-height: 36px;
+    }
+    .v-card__actions {
+      width: 100%;
+      position: absolute;
+      bottom: 50px;
+      padding-right: 50px !important;
+    }
+    .v-btn {
+      font-size: 23px;
+    }
   }
 }
 </style>
