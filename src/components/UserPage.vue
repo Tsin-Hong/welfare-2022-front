@@ -160,6 +160,9 @@
             @click="clickThisStronghold(stronghold_i)"
           >
             <div class="stronghold-area">
+              <div class="here-bg">
+                <img src="../assets/images/黃框.png" alt="" />
+              </div>
               <div
                 v-if="stronghold.conutry.id && showCountyDetails"
                 class="stronghold-context"
@@ -199,9 +202,6 @@
                 src="../assets/images/武力.gif"
                 alt=""
               />
-              <span class="here-icon"
-                ><img src="../assets/images/here.png" alt=""
-              /></span>
               <img
                 v-if="stronghold.type == 1"
                 :src="
@@ -256,7 +256,12 @@
               </div>
               <div
                 class="stronghold-info"
-                :class="{ show: showCityDetails }"
+                :class="{
+                  show:
+                    showCityDetails &&
+                    stronghold.generals_num !== 0 &&
+                    stronghold.military_strength !== 0
+                }"
                 :ref="'stronghold-details-' + stronghold.id"
                 :style="
                   setLeft(
@@ -266,12 +271,7 @@
                   )
                 "
               >
-                <div
-                  v-if="
-                    stronghold.generals_num !== 0 &&
-                    stronghold.military_strength !== 0
-                  "
-                >
+                <div>
                   武 {{ stronghold.generals_num }}、兵
                   {{ stronghold.military_strength }}
                 </div>
@@ -594,6 +594,31 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scope>
+@keyframes herebg {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(3);
+  }
+}
+@keyframes herebgcastle {
+  from {
+    transform: scale(3);
+  }
+  to {
+    transform: scale(6);
+  }
+}
+@keyframes herebgcastlemain {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(2);
+  }
+}
+
 html {
   overflow: hidden !important;
 }
@@ -658,6 +683,19 @@ html {
           cursor: pointer;
           .stronghold-area {
             position: relative;
+            .here-bg {
+              position: absolute;
+              z-index: -1;
+              bottom: -5px;
+              left: -2px;
+              display: none;
+              img {
+                width: 30px;
+                animation-name: herebg;
+                animation-duration: 2s;
+                animation-iteration-count: infinite;
+              }
+            }
             .stronghold-context {
               display: none;
               position: absolute;
@@ -727,16 +765,6 @@ html {
               }
             }
             $golden: #313131;
-            .here-icon {
-              position: absolute;
-              bottom: calc(100% - 14px);
-              left: 8px;
-              transform: rotate(15deg);
-              display: none;
-              img {
-                width: 32px !important;
-              }
-            }
             .stronghold-info-area {
               position: absolute;
               margin-top: 2px;
@@ -763,13 +791,16 @@ html {
           }
           &.castle {
             z-index: 11;
-            img {
-              width: 80px;
-            }
             .stronghold-area {
-              .here-icon {
-                left: 55px;
-                bottom: 20px;
+              & > img {
+                width: 80px;
+              }
+              .here-bg {
+                left: 28px;
+                bottom: 30px;
+                img {
+                  animation-name: herebgcastle;
+                }
               }
               .stronghold-info-area {
                 top: 36px;
@@ -800,12 +831,15 @@ html {
               }
             }
             &.main {
-              .here-icon {
-                left: 63px;
-                bottom: 50px;
+              .here-bg {
+                left: 28px;
+                bottom: 40px;
               }
               .stronghold-context {
                 display: flex;
+                & > img {
+                  width: 90px;
+                }
               }
               .stronghold-area {
                 top: -20px;
@@ -835,9 +869,6 @@ html {
                   bottom: 20px;
                   z-index: 2;
                 }
-              }
-              img {
-                width: 90px;
               }
             }
           }
@@ -879,7 +910,7 @@ html {
           }
           &.here {
             z-index: 13;
-            .here-icon {
+            .here-bg {
               display: block !important;
             }
           }
