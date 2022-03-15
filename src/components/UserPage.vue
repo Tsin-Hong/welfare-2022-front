@@ -326,11 +326,64 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog dark v-model="client.dialog_info" scrollable width="800px">
+    <v-dialog
+      class="dialog_info-area"
+      dark
+      v-model="client.dialog_info"
+      width="1280"
+    >
       <v-card class="dialog_info">
         <v-card-title>{{ infoTitle }}</v-card-title>
         <v-divider></v-divider>
-        <v-card-text>放圖片的地方</v-card-text>
+        <v-card-text class="d-flex">
+          <div class="left-list">
+            <v-list dense class="w-480-px">
+              <v-list-item-group v-model="selectedItem" color="primary">
+                <v-list-item
+                  v-for="(item, i) in leftList"
+                  :key="i"
+                  :disabled="item.disabled"
+                >
+                  <v-list-item-content>
+                    <v-list-item-subtitle
+                      v-text="item.no"
+                    ></v-list-item-subtitle>
+                    <v-list-item-title
+                      class="fz-20-px"
+                      v-text="item.title"
+                    ></v-list-item-title>
+                    <v-list-item-subtitle
+                      v-text="item.date"
+                    ></v-list-item-subtitle>
+                  </v-list-item-content>
+                </v-list-item>
+              </v-list-item-group>
+            </v-list>
+          </div>
+          <div class="right-content">
+            <div class="d-flex mb-1">
+              <div class="title">{{ leftList[selectedItem].title }}</div>
+              <div class="link">
+                <v-btn
+                  color="cyan darken-4"
+                  dark
+                  :href="leftList[selectedItem].link"
+                  target="_brank"
+                  >詳細規則</v-btn
+                >
+              </div>
+            </div>
+            <div class="img-area">
+              <img
+                :src="
+                  require('../assets/images/active/' +
+                    this.leftList[this.selectedItem].title +
+                    '活動海報.jpg')
+                "
+              />
+            </div>
+          </div>
+        </v-card-text>
       </v-card>
     </v-dialog>
   </v-container>
@@ -353,7 +406,122 @@ export default Vue.extend({
     showCityDetails: localStorage.getItem('show_city_details') === 'true',
     showCountyDetails: localStorage.getItem('show_country_details') === 'true',
     showRoninDetails: localStorage.getItem('show_ronin_details') === 'true',
-    infoTypeNow: 0
+    infoTypeNow: 0,
+    selectedItem: 2,
+    leftList: [
+      {
+        no: '壹',
+        title: '群雄割據',
+        date: '一月二十四日',
+        img: '',
+        link: 'https://rv.rv88.tw/office/oo/r/nsBsVWpYGhTV56l0dRiQqBceROWzDRnA',
+        disabled: false
+      },
+      {
+        no: '貳',
+        title: '初出茅廬',
+        date: '三月一日',
+        img: '',
+        link: 'https://rv.rv88.tw/office/oo/r/nsBvDLb0fBI2Ja4eYwsh2X4QUjhP1TQs',
+        disabled: false
+      },
+      {
+        no: '叁',
+        title: '萬箭齊發',
+        date: '三月三十日',
+        img: '',
+        link: 'https://rv.rv88.tw/office/oo/r/nra5tiN6BmPCC9aYX3APBe3Be6Dgd9Tg',
+        disabled: false
+      },
+      {
+        no: '肆',
+        title: '知己知彼',
+        date: '四月三十日',
+        img: '',
+        link: 'https://rv.rv88.tw/office/oo/r/nsBxWlzg4HdV9UVYeYSCS6GWGu6tMpte',
+        disabled: true
+      },
+      {
+        no: '伍',
+        title: '草船借箭',
+        date: '五月',
+        img: '',
+        link: 'https://rv.rv88.tw/office/oo/r/nsBxSMVAEtR80U5KRxePjV6SjAhJzd8i',
+        disabled: true
+      },
+      {
+        no: '陸',
+        title: '唉唷我的媽',
+        date: '五月六日',
+        img: '',
+        link: 'https://rv.rv88.tw/office/oo/r/nsBxNZJ934Tb85BxKYU9B3t1QxMQvr9z',
+        disabled: true
+      },
+      {
+        no: '柒',
+        title: '赤壁之戰',
+        date: '六月',
+        img: '',
+        link: 'https://rv.rv88.tw/office/oo/r/nsBxIADfzbZhAe83qj8XhyxnDINSIkBI',
+        disabled: true
+      },
+      {
+        no: '捌',
+        title: '官渡之戰',
+        date: '七月',
+        img: '',
+        link: 'https://rv.rv88.tw/office/oo/r/nsBxEc5kcNUP2TZ42jSf0SD0PnPZXuPC',
+        disabled: true
+      },
+      {
+        no: '玖',
+        title: '甲巴霸找爸爸',
+        date: '八月五日',
+        img: '',
+        link: 'https://rv.rv88.tw/office/oo/r/nsBx7OAjMGPQx27PtwPWexyFSKWBoGPW',
+        disabled: true
+      },
+      {
+        no: '拾',
+        title: '兵不厭詐、這是戰爭',
+        date: '八月',
+        img: '',
+        link: 'https://rv.rv88.tw/office/oo/r/nsBwz6XZUFxz55M77H9T81Mh3dZ9GzZq',
+        disabled: true
+      },
+      {
+        no: '壹拾壹',
+        title: '草木皆兵',
+        date: '九月',
+        img: '',
+        link: 'https://rv.rv88.tw/office/oo/r/nsBwvtPxjpmrowgnhlpfWks5grEjs9Kg',
+        disabled: true
+      },
+      {
+        no: '壹拾貳',
+        title: '四面楚歌',
+        date: '十月七日',
+        img: '',
+        link: 'https://rv.rv88.tw/office/oo/r/nsBwt3iGDhu30Kf0LGLniSrcc47a22W5',
+        disabled: true
+      },
+      {
+        no: '壹拾叁',
+        title: '一夫當關之我不是拖椅子',
+        date: '十一月',
+        img: '',
+        link: 'https://rv.rv88.tw/office/oo/r/nsBwps9RgaGOPJ37b71i0D2DTuPZNIqJ',
+        disabled: true
+      },
+      {
+        no: '壹拾肆',
+        title: '睿訊群英傳結算',
+        date: '十二月二十三日',
+        img: '',
+        link: 'https://rv.rv88.tw/office/oo/r/nsBwhtxoE2kTWi2YHK8xVnXW3lRR9akW',
+        disabled: true
+      }
+    ]
   }),
 
   computed: {
@@ -475,7 +643,14 @@ export default Vue.extend({
       'ApiRes'
     ]),
     showInfoArea: function (type) {
-      this.ChangeState(['dialog_info', true])
+      if (type == 1) {
+        window.open(
+          'https://rv.rv88.tw/office/oo/r/nrm1TkHLbICx14kHvgvv7DETQQijFfjC',
+          '_blank'
+        )
+      } else {
+        this.ChangeState(['dialog_info', true])
+      }
     },
     setLeft: function (is_main, is_city, key) {
       let str = ''
@@ -494,7 +669,6 @@ export default Vue.extend({
             left = -(this.$refs[key][0].clientWidth / 2 - 15)
           } else {
             if (is_main) {
-              console.log(this.$refs[key][0].clientWidth / 4)
               left = -(this.$refs[key][0].clientWidth / 4 < 20
                 ? 20
                 : this.$refs[key][0].clientWidth / 4 - 20)
@@ -1271,31 +1445,74 @@ html {
     }
   }
 }
+.dialog_info_area {
+  overflow: hidden;
+}
 .dialog_info {
   position: relative;
   align-items: center;
   justify-content: center;
-  &::before {
-    content: '';
-    background: url('../assets/images/公告背景.jpg') repeat-x center center;
-    background-size: cover;
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    opacity: 0.8;
-  }
+  height: 90vh;
   &.v-card {
-    background: transparent !important;
+    // background: transparent !important;
+    background: #000000a1;
+    // border: 2px solid #b69a1c;
     .v-card__title {
       font-family: '華康行楷體W5';
-      padding-top: 45px !important;
-      padding-bottom: 30px !important;
+      padding-top: 25px !important;
+      padding-bottom: 20px !important;
       font-size: 28px !important;
     }
     .v-card__text {
-      height: 800px;
+      height: calc(100% - 78px);
       text-align: center;
+      overflow: hidden;
+      .v-list {
+        background: transparent !important;
+      }
+      .v-list-item {
+        display: inline-block;
+        width: calc(50% - 6px);
+        margin: 3px;
+        background: #1b252aeb;
+      }
+      .v-list-item__title {
+        font-family: '華康行楷體W5';
+      }
+      .left-list {
+        padding-top: 28px;
+        flex: 580px 0;
+      }
+      .right-content {
+        height: 100%;
+        flex-grow: 1;
+        justify-content: center;
+        align-items: center;
+        padding: 10px;
+        border: 1px solid #6d6d6d;
+        .title,
+        .link {
+          padding: 10px;
+          background: #000;
+        }
+        .title {
+          width: 60%;
+          font-family: '華康行楷體W5' !important;
+          font-size: 32px !important;
+          line-height: 32px;
+        }
+        .link {
+          flex-grow: 1;
+        }
+        .img-area {
+          overflow-y: auto;
+          height: calc(100% - 66px);
+          img {
+            width: 100%;
+            display: inline-block;
+          }
+        }
+      }
     }
     .v-card__actions {
     }
