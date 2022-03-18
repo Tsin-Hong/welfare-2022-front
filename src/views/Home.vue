@@ -83,7 +83,7 @@ export default Vue.extend({
           },
           {
             icon: '',
-            title: '增兵',
+            title: '徵兵',
             is_show: true,
             couldBeUseRoleIds: [1, 2],
             couldBeUseByCity: true,

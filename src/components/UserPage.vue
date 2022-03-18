@@ -371,10 +371,19 @@
                   target="_brank"
                   >詳細規則</v-btn
                 >
+                <v-btn
+                  v-if="leftList[selectedItem].link_res"
+                  color="cyan darken-4"
+                  dark
+                  :href="leftList[selectedItem].link_res"
+                  target="_brank"
+                  >活動結果</v-btn
+                >
               </div>
             </div>
             <div class="img-area">
               <img
+                v-if="leftList[selectedItem].hasImg"
                 :src="
                   require('../assets/images/active/' +
                     this.leftList[this.selectedItem].title +
@@ -415,7 +424,8 @@ export default Vue.extend({
         date: '一月二十四日',
         img: '',
         link: 'https://rv.rv88.tw/office/oo/r/nsBsVWpYGhTV56l0dRiQqBceROWzDRnA',
-        disabled: false
+        disabled: false,
+        hasImg: true
       },
       {
         no: '貳',
@@ -423,7 +433,8 @@ export default Vue.extend({
         date: '三月一日',
         img: '',
         link: 'https://rv.rv88.tw/office/oo/r/nsBvDLb0fBI2Ja4eYwsh2X4QUjhP1TQs',
-        disabled: false
+        disabled: false,
+        hasImg: false
       },
       {
         no: '叁',
@@ -431,7 +442,9 @@ export default Vue.extend({
         date: '三月三十日',
         img: '',
         link: 'https://rv.rv88.tw/office/oo/r/nra5tiN6BmPCC9aYX3APBe3Be6Dgd9Tg',
-        disabled: false
+        link_res: '',
+        disabled: false,
+        hasImg: true
       },
       {
         no: '肆',
@@ -439,7 +452,8 @@ export default Vue.extend({
         date: '四月三十日',
         img: '',
         link: 'https://rv.rv88.tw/office/oo/r/nsBxWlzg4HdV9UVYeYSCS6GWGu6tMpte',
-        disabled: true
+        disabled: true,
+        hasImg: true
       },
       {
         no: '伍',
@@ -447,7 +461,8 @@ export default Vue.extend({
         date: '五月',
         img: '',
         link: 'https://rv.rv88.tw/office/oo/r/nsBxSMVAEtR80U5KRxePjV6SjAhJzd8i',
-        disabled: true
+        disabled: true,
+        hasImg: true
       },
       {
         no: '陸',
@@ -455,7 +470,8 @@ export default Vue.extend({
         date: '五月六日',
         img: '',
         link: 'https://rv.rv88.tw/office/oo/r/nsBxNZJ934Tb85BxKYU9B3t1QxMQvr9z',
-        disabled: true
+        disabled: true,
+        hasImg: true
       },
       {
         no: '柒',
@@ -463,7 +479,8 @@ export default Vue.extend({
         date: '六月',
         img: '',
         link: 'https://rv.rv88.tw/office/oo/r/nsBxIADfzbZhAe83qj8XhyxnDINSIkBI',
-        disabled: true
+        disabled: true,
+        hasImg: true
       },
       {
         no: '捌',
@@ -471,7 +488,8 @@ export default Vue.extend({
         date: '七月',
         img: '',
         link: 'https://rv.rv88.tw/office/oo/r/nsBxEc5kcNUP2TZ42jSf0SD0PnPZXuPC',
-        disabled: true
+        disabled: true,
+        hasImg: true
       },
       {
         no: '玖',
@@ -479,7 +497,8 @@ export default Vue.extend({
         date: '八月五日',
         img: '',
         link: 'https://rv.rv88.tw/office/oo/r/nsBx7OAjMGPQx27PtwPWexyFSKWBoGPW',
-        disabled: true
+        disabled: true,
+        hasImg: true
       },
       {
         no: '拾',
@@ -487,7 +506,8 @@ export default Vue.extend({
         date: '八月',
         img: '',
         link: 'https://rv.rv88.tw/office/oo/r/nsBwz6XZUFxz55M77H9T81Mh3dZ9GzZq',
-        disabled: true
+        disabled: true,
+        hasImg: true
       },
       {
         no: '壹拾壹',
@@ -495,7 +515,8 @@ export default Vue.extend({
         date: '九月',
         img: '',
         link: 'https://rv.rv88.tw/office/oo/r/nsBwvtPxjpmrowgnhlpfWks5grEjs9Kg',
-        disabled: true
+        disabled: true,
+        hasImg: true
       },
       {
         no: '壹拾貳',
@@ -503,7 +524,8 @@ export default Vue.extend({
         date: '十月七日',
         img: '',
         link: 'https://rv.rv88.tw/office/oo/r/nsBwt3iGDhu30Kf0LGLniSrcc47a22W5',
-        disabled: true
+        disabled: true,
+        hasImg: true
       },
       {
         no: '壹拾叁',
@@ -511,7 +533,8 @@ export default Vue.extend({
         date: '十一月',
         img: '',
         link: 'https://rv.rv88.tw/office/oo/r/nsBwps9RgaGOPJ37b71i0D2DTuPZNIqJ',
-        disabled: true
+        disabled: true,
+        hasImg: true
       },
       {
         no: '壹拾肆',
@@ -519,7 +542,8 @@ export default Vue.extend({
         date: '十二月二十三日',
         img: '',
         link: 'https://rv.rv88.tw/office/oo/r/nsBwhtxoE2kTWi2YHK8xVnXW3lRR9akW',
-        disabled: true
+        disabled: true,
+        hasImg: true
       }
     ]
   }),
@@ -689,7 +713,6 @@ export default Vue.extend({
       this.ChangeState(['dialog_check', false])
     },
     goDoApi: function () {
-      console.log(this.client.dialog_check_curr)
       let content: ''
       switch (this.client.dialog_check_curr.key) {
         case '增兵':

@@ -27,6 +27,16 @@ export default Vue.extend({
   mounted: function () {
     this.changePage()
   },
+  watch: {
+    'client.tempName': function (val, oldVal) {
+      console.log(oldVal)
+      if (oldVal === 'Login') {
+        this.$nextTick(function () {
+          this.ChangeState(['dialog_info', true])
+        })
+      }
+    }
+  },
   methods: {
     ...mapMutations(['ChangeState']),
     changePage: function () {
