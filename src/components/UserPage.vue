@@ -727,6 +727,7 @@ export default Vue.extend({
     },
     goDoApi: function () {
       let content: ''
+      console.log('goDoApi this.client.dialog_check_curr: ', this.client.dialog_check_curr)
       switch (this.client.dialog_check_curr.id) {
         case 1002:
           this.actIncreaseSoldier()
