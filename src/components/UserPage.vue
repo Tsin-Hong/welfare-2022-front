@@ -127,6 +127,19 @@
           </span>
         </div>
       </div>
+      <div class="bottom-area">
+        <div class="d-flex">
+          <div class="flex-block flex-1"></div>
+          <div class="flex-block flex-2">
+            <div v-if="client.status_type == 'move'" class="btn-area">
+              <div class="btn-title">請選擇移動目的地</div>
+              <div class="btn-info">只能在勢力所在據點間移動</div>
+              <v-btn block dark @click="cencel()">取消</v-btn>
+            </div>
+          </div>
+          <div class="flex-block flex-3"></div>
+        </div>
+      </div>
       <div
         class="stronghold-list"
         :style="{
@@ -1439,6 +1452,36 @@ html {
       img {
         width: 100%;
       }
+    }
+  }
+}
+.bottom-area {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  width: 100vw;
+  .d-flex {
+    flex-direction: row-reverse;
+  }
+  .flex-block {
+    width: calc(100% / 3);
+  }
+  .btn-area {
+    width: 200px;
+    margin: 0 auto 60px;
+    text-align: center;
+    .btn-title {
+      font-weight: bolder;
+      font-size: 18px;
+      color: #fff;
+      text-shadow: 0 0 10px #272727;
+    }
+    .btn-info {
+      color: #fff;
+      text-shadow: 0 0 10px #272727;
+      font-size: 14px;
+      margin-bottom: 8px;
     }
   }
 }
