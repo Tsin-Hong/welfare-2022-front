@@ -18,6 +18,13 @@ const enums = {
   ACT_INCREASE_SOLDIER: 18,
   ACT_NOTIFICATION: 19,
   ACT_BATTLE: 20,
+  ACT_BATTLE_ADD: 21,
+  ACT_BATTLE_DONE: 22,
+  ACT_BATTLE_JOIN: 23,
+  ACT_BATTLE_JUDGE: 24,
+  ACT_BUSINESS: 25,
+  ACT_APPOINTMENT: 26,
+  ACT_DISMISS: 27,
   UserGlobalAttributes: ['id', 'code', 'nickname', 'countryId', 'loyalty', 'loyalUserId', 'contribution', 'occupationId', 'role', 'mapNowId', 'soldier', 'captiveDate'],
   MapsGlobalAttributes: ['id', 'name', 'x', 'y', 'route', 'cityId', 'ownCountryId'],
   CityGlobalAttributes: ['id', 'money', 'addResource', 'timeBeAttacked', 'jsonConstruction'],
@@ -32,7 +39,12 @@ const enums = {
   EVENT_DESTROY_COUNTRY: '_DESTROY_COUNTRY_',
   EVENT_GROUP_UP: '_GROUP_UP_',
   EVENT_COUNTRY_RELATIONSHIP: '_COUNTRY_RELATIONSHIP_',
-  EVENT_OCCUPATION: '_OCCUPATION_'
+  EVENT_OCCUPATION: '_OCCUPATION_',
+  NUM_BATTLE_SOLDIER_MIN: 1000,
+  NUM_BATTLE_MONEY_MIN: 100,
+  NUM_BATTLE_ACTION_MIN: 1,
+  NUM_BATTLE_CONTRUBUTION: 6,
+  NUM_BATTLE_TOOLMANS_CONTRUBUTION: 12
 }
 
 export default enums
