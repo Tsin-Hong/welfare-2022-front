@@ -107,6 +107,7 @@ const global = {
       const validatedMessage = valication.validate(content.rootState.user , message, content.state)
       if (validatedMessage) {
         // window.alert(validatedMessage)
+        console.log('validatedMessage: ', validatedMessage, ' | message: ', message)
         content.dispatch('showClientDialog', validatedMessage)
       } else {
         content.state.io && content.state.io.emit('MESSAGE', message)
@@ -114,15 +115,15 @@ const global = {
     },
     actMove: (content: any, message: any) => {
       // 移動  需要判斷 1.行動力能否抵達 2. 只能是自己的國家 or 是浪人
-      content.dispatch('emitMessage', { act: enums.ACT_MOVE, payload: message })
+      return content.dispatch('emitMessage', { act: enums.ACT_MOVE, payload: message })
     },
     actIncreaseSoldier: (content: any) => {
       // 徵兵  需要判斷 1.行動點數夠 2. 是否在城市 3. 不能是浪人
-      content.dispatch('emitMessage', { act: enums.ACT_INCREASE_SOLDIER })
+      return content.dispatch('emitMessage', { act: enums.ACT_INCREASE_SOLDIER })
     },
     actSearchWild: (content: any) => {
       // 探索  需要判斷 1.行動點數夠 2. 是否在野區 3. 不能是浪人
-      content.dispatch('emitMessage', { act: enums.ACT_SEARCH_WILD })
+      return content.dispatch('emitMessage', { act: enums.ACT_SEARCH_WILD })
     },
     actLeaveCountry: (content: any) => {
       // 下野  需要判斷 1.要有行動點 2.身分為武將 3.(效忠主公)loyalUserId=0 或滅過國

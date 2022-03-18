@@ -727,8 +727,10 @@ export default Vue.extend({
     },
     goDoApi: function () {
       let content: ''
+      console.log('goDoApi this.client.dialog_check_curr: ', this.client.dialog_check_curr)
       switch (this.client.dialog_check_curr.key) {
         case '增兵':
+        case '徵兵':
           this.actIncreaseSoldier()
           content = ''
           // this.ApiRes({ content: content })

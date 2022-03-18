@@ -14,7 +14,7 @@ const hash = {
 
 
 function isNoTarget(user) {
-  return user.mapTargetId == 0 ? '' : '正在前往目標'
+  return user.mapTargetId == 0 ? '' : '已經有其他目標'
 }
 
 function isRoleEmperor(user) {
@@ -116,6 +116,12 @@ export default {
     const act = args.act
     const payload = args.payload || {}
     switch (act) {
+      case enums.ACT_INCREASE_SOLDIER: {
+        return havePoint(user, 1) || isInCity(user, global)
+      }
+      case enums.ACT_MOVE: {
+        return isNoTarget(user)
+      }
       case enums.ACT_BATTLE: {
         const mapId = payload.mapId;
         return isNoTarget(user) || isExistMap(mapId, global) || isEnemyMap(user, mapId, global) || hasNoBattlefield(mapId, global) || haveNoWorking(user, global)
