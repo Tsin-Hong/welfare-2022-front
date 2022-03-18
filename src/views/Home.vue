@@ -6,14 +6,20 @@
         <v-list-item-group>
           <template v-for="(item, index) in items">
             <div
-              v-if="menuShow(item, false)"
               :key="index"
               class="btn-group"
               @mouseover="currMainMenu = item.title"
               @mouseleave="currMainMenu = ''"
-              @click="chickBtn(item.is_click, item.title, index + '-' + index)"
+              @click="
+                chickBtn(
+                  item.is_click,
+                  item.title,
+                  index + '-' + index,
+                  item.id
+                )
+              "
             >
-              <v-list-item class="main-btn">
+              <v-list-item class="main-btn" :disabled="!menuShow(item, false)">
                 <v-list-item-icon>
                   <v-icon v-text="'mdi-' + item.icon"></v-icon>
                 </v-list-item-icon>
@@ -28,9 +34,16 @@
                 <template v-for="(child, child_i) in item.items">
                   <v-list-item
                     :key="index + '-' + child_i"
-                    v-if="menuShow(item, child)"
+                    :disabled="!menuShow(item, child)"
                     class="sub-btn"
-                    @click="chickBtn(true, child.title, index + '-' + child_i)"
+                    @click="
+                      chickBtn(
+                        true,
+                        child.title,
+                        index + '-' + child_i,
+                        child.id
+                      )
+                    "
                   >
                     <v-list-item-icon>
                       <v-icon v-text="'mdi-' + child.icon"></v-icon>
@@ -65,6 +78,7 @@ export default Vue.extend({
     currMainMenu: '',
     items: [
       {
+        id: 1,
         title: '內政',
         icon: 'home-flood',
         is_show: true,
@@ -74,6 +88,7 @@ export default Vue.extend({
         couldBeUseByOther: false,
         items: [
           {
+            id: 1001,
             icon: '',
             title: '商業',
             is_show: false,
@@ -82,6 +97,7 @@ export default Vue.extend({
             couldBeUseByOther: false
           },
           {
+            id: 1002,
             icon: '',
             title: '徵兵',
             is_show: true,
@@ -90,6 +106,7 @@ export default Vue.extend({
             couldBeUseByOther: false
           },
           {
+            id: 1003,
             icon: '',
             title: '政策',
             is_show: false,
@@ -98,6 +115,7 @@ export default Vue.extend({
             couldBeUseByOther: false
           },
           {
+            id: 1004,
             icon: '',
             title: '擁立',
             is_show: false,
@@ -108,8 +126,9 @@ export default Vue.extend({
         ]
       },
       {
+        id: 2,
         title: '論功',
-        icon: '',
+        icon: 'hops',
         is_show: false,
         is_click: false,
         couldBeUseByCity: true,
@@ -117,6 +136,7 @@ export default Vue.extend({
         couldBeUseRoleIds: [1, 2],
         items: [
           {
+            id: 2001,
             icon: '',
             title: '任命',
             is_show: false,
@@ -125,6 +145,7 @@ export default Vue.extend({
             couldBeUseByOther: false
           },
           {
+            id: 2002,
             icon: '',
             title: '解任',
             is_show: false,
@@ -133,6 +154,7 @@ export default Vue.extend({
             couldBeUseByOther: false
           },
           {
+            id: 2003,
             icon: '',
             title: '招募',
             is_show: false,
@@ -141,6 +163,7 @@ export default Vue.extend({
             couldBeUseByOther: false
           },
           {
+            id: 2004,
             icon: '',
             title: '配給',
             is_show: false,
@@ -149,6 +172,7 @@ export default Vue.extend({
             couldBeUseByOther: false
           },
           {
+            id: 2005,
             icon: '',
             title: '進貢',
             is_show: false,
@@ -159,6 +183,7 @@ export default Vue.extend({
         ]
       },
       {
+        id: 3,
         title: '攻略',
         icon: 'baseball-diamond',
         is_show: true,
@@ -168,6 +193,7 @@ export default Vue.extend({
         couldBeUseRoleIds: [1, 2, 3],
         items: [
           {
+            id: 3001,
             icon: '',
             title: '入仕',
             is_show: true,
@@ -176,6 +202,7 @@ export default Vue.extend({
             couldBeUseByOther: false
           },
           {
+            id: 3002,
             icon: '',
             title: '下野',
             is_show: true,
@@ -184,6 +211,7 @@ export default Vue.extend({
             couldBeUseByOther: false
           },
           {
+            id: 3003,
             icon: '',
             title: '起義',
             is_show: false,
@@ -192,6 +220,7 @@ export default Vue.extend({
             couldBeUseByOther: false
           },
           {
+            id: 3004,
             icon: '',
             title: '釋放',
             is_show: false,
@@ -200,6 +229,7 @@ export default Vue.extend({
             couldBeUseByOther: false
           },
           {
+            id: 3005,
             icon: '',
             title: '交易',
             is_show: false,
@@ -208,6 +238,7 @@ export default Vue.extend({
             couldBeUseByOther: false
           },
           {
+            id: 3006,
             icon: '',
             title: '裁判',
             is_show: false,
@@ -216,6 +247,7 @@ export default Vue.extend({
             couldBeUseByOther: false
           },
           {
+            id: 3007,
             icon: '',
             title: '叛亂',
             is_show: false,
@@ -226,8 +258,9 @@ export default Vue.extend({
         ]
       },
       {
+        id: 4,
         title: '外交',
-        icon: '',
+        icon: 'hexagon-multiple',
         is_show: false,
         is_click: false,
         couldBeUseByCity: true,
@@ -235,6 +268,7 @@ export default Vue.extend({
         couldBeUseRoleIds: [1, 2, 3],
         items: [
           {
+            id: 4001,
             icon: '',
             title: '親善',
             is_show: false,
@@ -243,6 +277,7 @@ export default Vue.extend({
             couldBeUseByOther: false
           },
           {
+            id: 4002,
             icon: '',
             title: '同盟',
             is_show: false,
@@ -251,6 +286,7 @@ export default Vue.extend({
             couldBeUseByOther: false
           },
           {
+            id: 4003,
             icon: '',
             title: '請求攻擊',
             is_show: false,
@@ -261,6 +297,7 @@ export default Vue.extend({
         ]
       },
       {
+        id: 5,
         title: '軍議',
         icon: 'axe-battle',
         is_show: true,
@@ -270,6 +307,7 @@ export default Vue.extend({
         couldBeUseRoleIds: [1, 2, 3],
         items: [
           {
+            id: 5001,
             icon: '',
             title: '移動',
             is_show: true,
@@ -278,6 +316,7 @@ export default Vue.extend({
             couldBeUseByOther: true
           },
           {
+            id: 5002,
             icon: '',
             title: '出征',
             is_show: false,
@@ -286,6 +325,7 @@ export default Vue.extend({
             couldBeUseByOther: false
           },
           {
+            id: 5003,
             icon: '',
             title: '探索',
             is_show: true,
@@ -296,6 +336,7 @@ export default Vue.extend({
         ]
       },
       {
+        id: 6,
         title: '離開',
         icon: 'arrow-left-top-bold',
         is_show: true,
@@ -366,9 +407,9 @@ export default Vue.extend({
 
       return show
     },
-    chickBtn: function (go: any, key = '', index = '') {
+    chickBtn: function (go: any, key = '', index = '', id = 0) {
       if (go) {
-        this.ChangeApiCheck({ key: key, index: index })
+        this.ChangeApiCheck({ key: key, index: index, id: id })
         switch (key) {
           case '移動':
             this.ApiMove()
@@ -433,6 +474,17 @@ export default Vue.extend({
             line-height: 30px !important;
           }
         }
+
+        .main-btn,
+        .sub-btn {
+          &.v-list-item--disabled {
+            color: rgba(0, 0, 0, 0.38) !important;
+            background: #a1a1a1 !important;
+            .v-icon {
+              color: rgba(0, 0, 0, 0.38) !important;
+            }
+          }
+        }
         .sub-menu-area {
           position: absolute;
           z-index: 98;
@@ -452,6 +504,9 @@ export default Vue.extend({
               rgb(239 234 209 / 80%) 40%,
               rgb(239 234 209 / 100%) 60%
             );
+            &.v-list-item--disabled {
+              background: #a1a1a1a2 !important;
+            }
             &:last-child {
               border: none;
             }
@@ -459,7 +514,6 @@ export default Vue.extend({
               margin-right: 30px;
             }
             .v-list-item__title {
-              color: #2b323f;
               font-size: 26px !important;
               letter-spacing: 2px;
             }

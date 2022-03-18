@@ -653,7 +653,7 @@ export default Vue.extend({
     },
     'client.dialog_check_curr': {
       handler: function (val) {
-        if (val.key === '移動') {
+        if (val.id === 5001) {
           this.goToXY(this.currUser.mapNowIndex)
         }
       },
@@ -727,31 +727,31 @@ export default Vue.extend({
     },
     goDoApi: function () {
       let content: ''
-      switch (this.client.dialog_check_curr.key) {
-        case '增兵':
+      switch (this.client.dialog_check_curr.id) {
+        case 1002:
           this.actIncreaseSoldier()
           content = ''
           // this.ApiRes({ content: content })
           break
-        case '入仕':
+        case 3001:
           this.actEnterCountry()
           content = ''
           // this.ApiRes({ content: content })
           break
-        case '下野':
+        case 3002:
           this.actLeaveCountry()
           content = ''
           // this.ApiRes({ content: content })
           break
-        case '探索':
+        case 5003:
           this.actSearchWild()
           content = ''
           // this.ApiRes({ content: content })
           break
-        case '離開':
+        case 6:
           this.onClickLogout()
           break
-        case '移動':
+        case 5001:
           this.actMove(this.goToCityId)
           this.goToCityId = 0
           this.ChangeState(['status_type', ''])

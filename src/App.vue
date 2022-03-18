@@ -29,7 +29,6 @@ export default Vue.extend({
   },
   watch: {
     'client.tempName': function (val, oldVal) {
-      console.log(oldVal)
       if (oldVal === 'Login') {
         this.$nextTick(function () {
           this.ChangeState(['dialog_info', true])

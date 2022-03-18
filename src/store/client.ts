@@ -42,9 +42,10 @@ const client = {
       state.dialog_check_content.content = payload.content
       state.dialog_check = true
     },
-    ChangeApiCheck: function (state: any, payload = { key: '', index: '' }) {
+    ChangeApiCheck: function (state: any, payload = { key: '', index: '', id: 0 }) {
       state.dialog_check_curr.key = payload.key
       state.dialog_check_curr.index = payload.index
+      state.dialog_check_curr.id = payload.id
     },
     ChangeApiResult: function (state: any, payload = {}) {
       state.dialog_content = payload
