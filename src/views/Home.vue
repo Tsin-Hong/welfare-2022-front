@@ -288,7 +288,7 @@ export default Vue.extend({
           {
             id: 4003,
             icon: '',
-            title: '請求攻擊',
+            title: '合攻',
             is_show: false,
             couldBeUseRoleIds: [],
             couldBeUseByCity: true,
@@ -480,6 +480,7 @@ export default Vue.extend({
           &.v-list-item--disabled {
             color: rgba(0, 0, 0, 0.38) !important;
             background: #a1a1a1 !important;
+            display: none;
             .v-icon {
               color: rgba(0, 0, 0, 0.38) !important;
             }
