@@ -28,9 +28,9 @@
                 v-model="passwordCheck"
                 label="密碼確認"
                 required
-                :append-icon="passwordShow ? 'mdi-eye' : 'mdi-eye-off'"
-                :type="passwordShow ? 'text' : 'password'"
-                @click:append="passwordShow = !passwordShow"
+                :append-icon="passwordCheckShow ? 'mdi-eye' : 'mdi-eye-off'"
+                :type="passwordCheckShow ? 'text' : 'password'"
+                @click:append="passwordCheckShow = !passwordCheckShow"
               ></v-text-field>
               <v-switch v-model="firstLogin" label="首次登入"></v-switch>
               <v-btn rounded block class="mx-auto" @click="login">進入遊戲</v-btn>
@@ -54,6 +54,7 @@ export default {
     account: '',
     firstLogin: false,
     passwordShow: false,
+    passwordCheckShow: false,
     password: '',
     passwordCheck: ''
   }),
@@ -74,7 +75,8 @@ export default {
       var data = { code: this.account.toUpperCase(), pwd: this.password }
       if (this.firstLogin) {
         data.pwdre = this.passwordCheck
-        var registerUrl = `${setting.getSocketLocation()}login`
+        var registerUrl = `${setting.getSocketLocation()}/login`
+        // console.log(registerUrl)
         // var registerUrl = 'http://172.16.20.73:20221/login'
         axios.post(registerUrl, data).then((e) => {
           console.log(e)

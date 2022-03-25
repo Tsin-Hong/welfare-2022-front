@@ -3,6 +3,8 @@ import mapAlgorithm from '@/unit/mapAlgorithm'
 const client = {
   state: {
     tempName: 'None',
+    dialog_battle_list: false,
+    dialog_battle: false,
     dialog_info: false,
     dialog: false,
     dialog_content: {
@@ -13,7 +15,8 @@ const client = {
     dialog_check: false,
     dialog_check_curr: {
       key: '',
-      index: ''
+      index: '',
+      id: 0
     },
     dialog_check_content: {
       title: '',
@@ -54,6 +57,11 @@ const client = {
   },
   getters: {},
   actions: {
+    ApiBattle: function ({}, payload) {
+      if (!payload.mapId) {
+
+      }
+    },
     ApiMove: function ({ commit, rootState }, payload) {
       const user = rootState.user
       const res = mapAlgorithm.getAllowedPosition(user.mapNowId, user.actPoint, user.countryId)

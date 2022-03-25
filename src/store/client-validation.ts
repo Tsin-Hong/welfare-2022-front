@@ -31,7 +31,7 @@ function isExistMap(mapId, global) {
 
 function isEnemyMap(user, mapId, global) {
   const _map = hash.getMap(mapId, global.maps)
-  return user.countryId > 0 && _map.ownCountryId > 0 && user.countryId != _map.ownCountryId ? '' : '指定地圖非敵陣營'
+  return user.countryId > 0 && user.countryId != _map.ownCountryId ? '' : '指定地圖非敵陣營'
 }
 
 function isInCity(user, global) {

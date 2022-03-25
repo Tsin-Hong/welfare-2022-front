@@ -80,7 +80,7 @@ export default Vue.extend({
       {
         id: 1,
         title: '內政',
-        icon: 'home-flood',
+        icon: 'castle',
         is_show: true,
         is_click: false,
         couldBeUseRoleIds: [1, 2],
@@ -117,7 +117,7 @@ export default Vue.extend({
           {
             id: 1004,
             icon: '',
-            title: '擁立',
+            title: '遷都',
             is_show: false,
             couldBeUseRoleIds: [],
             couldBeUseByCity: true,
@@ -170,16 +170,16 @@ export default Vue.extend({
             couldBeUseRoleIds: [],
             couldBeUseByCity: true,
             couldBeUseByOther: false
-          },
-          {
-            id: 2005,
-            icon: '',
-            title: '進貢',
-            is_show: false,
-            couldBeUseRoleIds: [],
-            couldBeUseByCity: true,
-            couldBeUseByOther: false
           }
+          // {
+          //   id: 2005,
+          //   icon: '',
+          //   title: '進貢',
+          //   is_show: false,
+          //   couldBeUseRoleIds: [],
+          //   couldBeUseByCity: true,
+          //   couldBeUseByOther: false
+          // }
         ]
       },
       {
@@ -222,7 +222,7 @@ export default Vue.extend({
           {
             id: 3004,
             icon: '',
-            title: '釋放',
+            title: '逃脫',
             is_show: false,
             couldBeUseRoleIds: [],
             couldBeUseByCity: true,
@@ -240,7 +240,7 @@ export default Vue.extend({
           {
             id: 3006,
             icon: '',
-            title: '裁判',
+            title: '俘虜',
             is_show: false,
             couldBeUseRoleIds: [],
             couldBeUseByCity: true,
@@ -257,45 +257,45 @@ export default Vue.extend({
           }
         ]
       },
-      {
-        id: 4,
-        title: '外交',
-        icon: 'hexagon-multiple',
-        is_show: false,
-        is_click: false,
-        couldBeUseByCity: true,
-        couldBeUseByOther: false,
-        couldBeUseRoleIds: [1, 2, 3],
-        items: [
-          {
-            id: 4001,
-            icon: '',
-            title: '親善',
-            is_show: false,
-            couldBeUseRoleIds: [],
-            couldBeUseByCity: true,
-            couldBeUseByOther: false
-          },
-          {
-            id: 4002,
-            icon: '',
-            title: '同盟',
-            is_show: false,
-            couldBeUseRoleIds: [],
-            couldBeUseByCity: true,
-            couldBeUseByOther: false
-          },
-          {
-            id: 4003,
-            icon: '',
-            title: '合攻',
-            is_show: false,
-            couldBeUseRoleIds: [],
-            couldBeUseByCity: true,
-            couldBeUseByOther: false
-          }
-        ]
-      },
+      // {
+      //   id: 4,
+      //   title: '外交',
+      //   icon: 'hexagon-multiple',
+      //   is_show: false,
+      //   is_click: false,
+      //   couldBeUseByCity: true,
+      //   couldBeUseByOther: false,
+      //   couldBeUseRoleIds: [1, 2, 3],
+      //   items: [
+      //     {
+      //       id: 4001,
+      //       icon: '',
+      //       title: '親善',
+      //       is_show: false,
+      //       couldBeUseRoleIds: [],
+      //       couldBeUseByCity: true,
+      //       couldBeUseByOther: false
+      //     },
+      //     {
+      //       id: 4002,
+      //       icon: '',
+      //       title: '同盟',
+      //       is_show: false,
+      //       couldBeUseRoleIds: [],
+      //       couldBeUseByCity: true,
+      //       couldBeUseByOther: false
+      //     },
+      //     {
+      //       id: 4003,
+      //       icon: '',
+      //       title: '合攻',
+      //       is_show: false,
+      //       couldBeUseRoleIds: [],
+      //       couldBeUseByCity: true,
+      //       couldBeUseByOther: false
+      //     }
+      //   ]
+      // },
       {
         id: 5,
         title: '軍議',
@@ -320,9 +320,9 @@ export default Vue.extend({
             icon: '',
             title: '出征',
             is_show: false,
-            couldBeUseRoleIds: [],
+            couldBeUseRoleIds: [1, 2],
             couldBeUseByCity: true,
-            couldBeUseByOther: false
+            couldBeUseByOther: true
           },
           {
             id: 5003,
@@ -367,10 +367,13 @@ export default Vue.extend({
 
   methods: {
     ...mapMutations(['ChangeState', 'ChangeApiCheck', 'ChangeDialogCheck']),
-    ...mapActions(['ApiMove']),
+    ...mapActions(['ApiMove', 'ApiBattle']),
     menuShow: function (item, child) {
       let show = false
-      if (item.is_show && this.client.status_type != 'move') {
+      if (
+        item.is_show &&
+        !['move', 'battal'].includes(this.client.status_type)
+      ) {
         if (child) {
           if (
             child.is_show &&
@@ -410,9 +413,12 @@ export default Vue.extend({
     chickBtn: function (go: any, key = '', index = '', id = 0) {
       if (go) {
         this.ChangeApiCheck({ key: key, index: index, id: id })
-        switch (key) {
-          case '移動':
+        switch (id) {
+          case 5001:
             this.ApiMove()
+            break
+          case 5002:
+            this.ChangeState(['status_type', 'battal'])
             break
           default:
             this.ChangeDialogCheck({ content: key })
@@ -445,6 +451,10 @@ export default Vue.extend({
       width: 120px;
       position: relative;
       background: transparent;
+      .v-list-item--link {
+        cursor: pointer;
+        // cursor: url('../assets/images/mouse.png'), pointer;
+      }
       .btn-group {
         position: relative;
         font-family: '華康行楷體W5';
@@ -478,11 +488,10 @@ export default Vue.extend({
         .main-btn,
         .sub-btn {
           &.v-list-item--disabled {
-            color: rgba(0, 0, 0, 0.38) !important;
+            color: rgba(0, 0, 0, 0.7) !important;
             background: #a1a1a1 !important;
-            display: none;
             .v-icon {
-              color: rgba(0, 0, 0, 0.38) !important;
+              color: rgba(0, 0, 0, 0.7) !important;
             }
           }
         }

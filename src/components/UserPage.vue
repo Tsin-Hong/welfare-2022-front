@@ -117,6 +117,10 @@
       </div>
       <div class="right-top-area">
         <div class="btn-group">
+          <span class="battle" disabled @click="showInfoArea(2)">
+            <img src="../assets/images/戰役.png" alt="" />
+            <div class="text">戰役</div>
+          </span>
           <span class="notice" @click="showInfoArea(0)">
             <img src="../assets/images/公告.png" alt="" />
             <div class="text">活動公告</div>
@@ -131,9 +135,13 @@
         <div class="d-flex">
           <div class="flex-block flex-1"></div>
           <div class="flex-block flex-2">
-            <div v-if="client.status_type == 'move'" class="btn-area">
-              <div class="btn-title">請選擇移動目的地</div>
-              <div class="btn-info">只能在勢力所在據點間移動</div>
+            <div v-if="client.status_type != ''" class="btn-area">
+              <div class="btn-title">
+                請選擇{{ client.dialog_check_curr.key }}目的地
+              </div>
+              <div v-if="client.status_type == 'move'" class="btn-info">
+                只能在勢力所在據點間移動
+              </div>
               <v-btn block dark @click="cencel()">取消</v-btn>
             </div>
           </div>
@@ -149,33 +157,7 @@
       >
         <template v-for="(stronghold, stronghold_i) in strongholds">
           <div
-            :class="[
-              'stronghold',
-              {
-                castle: stronghold.type == 1,
-                jungle: stronghold.type == 2,
-                here: stronghold.is_here,
-                main: stronghold.is_main,
-                show:
-                  client.status_type == '' ||
-                  (client.status_type == 'move' &&
-                    client.could_be_move_to.indexOf(stronghold.id) !== -1) ||
-                  user.mapNowId === stronghold.id,
-                moveTo:
-                  client.status_type == 'move' &&
-                  client.could_be_move_to.indexOf(stronghold.id) !== -1,
-                power0:
-                  0 < stronghold.military_strength &&
-                  stronghold.military_strength < 1000,
-                power1:
-                  1000 <= stronghold.military_strength &&
-                  stronghold.military_strength < 5600,
-                power2:
-                  5600 <= stronghold.military_strength &&
-                  stronghold.military_strength < 11200,
-                power3: 11200 <= stronghold.military_strength
-              }
-            ]"
+            :class="strongholdClass(stronghold)"
             :style="{ left: stronghold.x + 'px', top: stronghold.y + 'px' }"
             :id="'stronghold_' + stronghold_i"
             :key="stronghold_i"
@@ -312,10 +294,11 @@
           確定要執行 {{ client.dialog_check_content.content }} ?
         </v-card-title>
         <v-card-actions>
+          <v-btn class="ml-50-px" color="green darken-1" text @click="cencel()">
+            否
+          </v-btn>
           <v-spacer></v-spacer>
-
-          <v-btn color="green darken-1" text @click="cencel()"> 放棄 </v-btn>
-          <v-btn color="green darken-1" text @click="goDoApi()"> 執行 </v-btn>
+          <v-btn color="green darken-1" text @click="goDoApi()"> 是 </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -333,9 +316,58 @@
         <v-card-text>{{ client.dialog_content.text }}</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="white" text @click="ChangeState(['dialog', false])">
-            知悉
-          </v-btn>
+          <v-btn color="white" text @click="cencel()"> 知悉 </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog v-model="client.dialog_battle" persistent width="500">
+      <v-card dark class="dialog-battal-card">
+        <v-card-title v-if="goToCityObj.conutry"
+          >{{ goToCityObj.name }} 守方勢力 {{ goToCityObj.conutry.name }}
+        </v-card-title>
+        <v-card-text>
+          <div>
+            戰爭發生時間
+            <v-radio-group v-model="goToBattleTime" column>
+              <v-radio
+                v-for="(time, index) in global.battleAreaPanel.timeOptions"
+                :key="index"
+                :label="moment(time).format('YYYY-MM-DD HH:mm')"
+                :value="time"
+              ></v-radio>
+            </v-radio-group>
+          </div>
+          <div>
+            派出兵力數
+            <v-row>
+              <v-col class="pr-4">
+                <v-slider
+                  v-model="goToBattleSoldier"
+                  class="align-center"
+                  :max="battalSoldierMax"
+                  :min="battalSoldierMin"
+                  hide-details
+                >
+                  <template v-slot:append>
+                    <v-text-field
+                      v-model="goToBattleSoldier"
+                      class="mt-0 pt-0"
+                      hide-details
+                      single-line
+                      type="number"
+                      style="width: 60px"
+                    ></v-text-field>
+                  </template>
+                </v-slider>
+              </v-col>
+            </v-row>
+          </div>
+          <div class="red--text pt-6" v-text="errorText"></div>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn color="white" text @click="donotBattle()"> 返回 </v-btn>
+          <v-spacer></v-spacer>
+          <v-btn color="white" text @click="createBattle()"> 出征 </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -359,7 +391,7 @@
                 >
                   <v-list-item-content>
                     <v-list-item-subtitle
-                      v-text="item.no"
+                      v-text="numCN[i]"
                     ></v-list-item-subtitle>
                     <v-list-item-title
                       class="fz-20-px"
@@ -408,12 +440,181 @@
         </v-card-text>
       </v-card>
     </v-dialog>
+    <v-dialog
+      class="dialog-battle-area"
+      dark
+      fullscreen
+      hide-overlay
+      scrollable
+      v-model="client.dialog_battle_list"
+    >
+      <v-card class="dialog-battle">
+        <v-toolbar flat dark>
+          <v-toolbar-title>戰役</v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn icon dark @click="ChangeState(['dialog_battle_list', false])">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-toolbar>
+        <v-card-title></v-card-title>
+
+        <v-divider></v-divider>
+        <v-card-text>
+          <div
+            class="battle-box"
+            v-for="(battlefield, index) in battlefields"
+            :key="index"
+          >
+            <div class="battle-info-group">
+              <div class="battle-date">
+                競賽日
+                {{ moment(battlefield.timestamp).format('YYYY-MM-DD HH:mm') }}
+              </div>
+              <div class="battle-place flag-vertical">
+                {{ battlefield.map.name }}之戰
+              </div>
+            </div>
+            <div class="battle-top">
+              <img src="../assets/images/border04.png" alt="" />
+              <div class="battle-info-text">
+                <span>{{ battlefield.defenceSoldierTotal }}</span>
+                <span
+                  :style="{
+                    color: battlefield.defenceCountry.color[1],
+                    background: battlefield.defenceCountry.color[0]
+                  }"
+                  >{{ battlefield.defenceCountry.name }}</span
+                >
+                VS
+                <span
+                  :style="{
+                    color: battlefield.attackCountry.color[1],
+                    background: battlefield.attackCountry.color[0]
+                  }"
+                  >{{ battlefield.attackCountry.name }}</span
+                >
+                <span>{{ battlefield.attackSoldierTotal }}</span>
+              </div>
+            </div>
+            <div class="d-flex field-block">
+              <div class="battle-team-area d-flex">
+                <template v-for="(type, type_i) in battleType">
+                  <div
+                    v-if="battlefield[type + 'Country']"
+                    class="field-group"
+                    :class="[type + '-group']"
+                    :key="type_i"
+                  >
+                    <div class="user-group">
+                      <template>
+                        <div
+                          class="user-block"
+                          v-for="(user, u_i) in battlefield[type + 'Users']"
+                          :key="u_i"
+                        >
+                          <div class="user">
+                            <div
+                              class="bd-bg"
+                              :style="{
+                                background:
+                                  battlefield[type + 'Country'].color[0]
+                              }"
+                            ></div>
+                            <img
+                              v-if="user"
+                              :src="
+                                require('../assets/images/user/' +
+                                  user.code +
+                                  '.png')
+                              "
+                              alt=""
+                            />
+                          </div>
+                          <div class="bd">
+                            <img
+                              :src="require('../assets/images/border03.png')"
+                              alt=""
+                            />
+                            <div
+                              class="country-name"
+                              :style="{
+                                color: battlefield[type + 'Country'].color[0]
+                              }"
+                            >
+                              {{ battlefield[type + 'Country'].name }}
+                            </div>
+                            <div class="user-name">
+                              <div class="type">
+                                {{ type == 'defence' ? '守' : '攻' }}
+                              </div>
+                              <div v-if="user" class="name-text flag-vertical">
+                                {{ user.nickname }}
+                              </div>
+                            </div>
+                            <div v-if="battlefield" class="soldier-group">
+                              {{ battlefield[type + 'Soldier'][u_i] }}
+                            </div>
+                          </div>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+                </template>
+                <img class="vs-img" src="../assets/images/vs.png" />
+              </div>
+              <div class="field-group other-group">
+                <div class="user-group">
+                  <div
+                    class="user-block"
+                    v-for="(key, u_i) in battleOtherUser"
+                    :key="u_i"
+                  >
+                    <div v-if="battlefield[key]" class="user">
+                      <div class="bd-bg"></div>
+                      <img
+                        :src="
+                          require('../assets/images/user/' +
+                            battlefield[key].code +
+                            '.png')
+                        "
+                        alt=""
+                      />
+                    </div>
+                    <div class="bd">
+                      <img
+                        :src="require('../assets/images/border03.png')"
+                        alt=""
+                      />
+                      <div v-if="battlefield[key]" class="country-name">
+                        {{ battlefield[key].country.name }}
+                      </div>
+                      <div class="user-name">
+                        <div class="type">
+                          {{ key == 'judge' ? '判' : '巡' }}
+                        </div>
+                        <div
+                          v-if="battlefield[key]"
+                          class="name-text flag-vertical"
+                        >
+                          {{ battlefield[key].nickname }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
 <script lang="ts">
 // import router from '@/router'
 // import client from '@/store/client'
+import client from '@/store/client'
 import Vue from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -424,12 +625,18 @@ export default Vue.extend({
     _mouse_dataset: {},
     viewX: 0,
     viewY: 0,
+    errorText: '',
     goToCityId: 0,
+    goToCityObj: {},
+    goToBattleTime: -1,
+    goToBattleSoldier: 0,
     showCityDetails: localStorage.getItem('show_city_details') === 'true',
     showCountyDetails: localStorage.getItem('show_country_details') === 'true',
     showRoninDetails: localStorage.getItem('show_ronin_details') === 'true',
     infoTypeNow: 0,
-    selectedItem: 2,
+    selectedItem: 1,
+    curStronghold: {},
+    numCN: ['壹', '貳', '叁', '肆', '伍', '陸', '柒', '捌', '玖', '拾', '壹拾壹', '壹拾貳', '壹拾叁', '壹拾肆', ],
     leftList: [
       {
         no: '壹',
@@ -442,30 +649,21 @@ export default Vue.extend({
       },
       {
         no: '貳',
-        title: '初出茅廬',
-        date: '三月一日',
-        img: '',
-        link: 'https://rv.rv88.tw/office/oo/r/nsBvDLb0fBI2Ja4eYwsh2X4QUjhP1TQs',
-        disabled: false,
-        hasImg: false
-      },
-      {
-        no: '叁',
         title: '萬箭齊發',
-        date: '三月三十日',
+        date: '四月一日',
         img: '',
         link: 'https://rv.rv88.tw/office/oo/r/nra5tiN6BmPCC9aYX3APBe3Be6Dgd9Tg',
-        link_res: '',
         disabled: false,
         hasImg: true
       },
       {
-        no: '肆',
+        no: '叁',
         title: '知己知彼',
         date: '四月三十日',
         img: '',
         link: 'https://rv.rv88.tw/office/oo/r/nsBxWlzg4HdV9UVYeYSCS6GWGu6tMpte',
-        disabled: true,
+        link_res: '',
+        disabled: false,
         hasImg: true
       },
       {
@@ -558,12 +756,83 @@ export default Vue.extend({
         disabled: true,
         hasImg: true
       }
-    ]
+    ],
+    battleType: ['defence', 'attack'],
+    battleOtherUser: ['judge', 'toolman'],
+    defaultColor: ['#A1A1A1', '#000']
   }),
 
   computed: {
     ...mapState(['user', 'global', 'client', 'info']),
     ...mapGetters(['getUser']),
+    countries: function () {
+      const countries = JSON.parse(JSON.stringify(this.global.countries))
+      for (const i in countries) {
+        const curr = countries[i]
+        curr.color = curr.color.split(',')
+      }
+      return countries
+    },
+    users: function () {
+      const countries = JSON.parse(JSON.stringify(this.countries))
+      const users = JSON.parse(JSON.stringify(this.global.users))
+      for (const i in users) {
+        const user = users[i]
+        const currCountry = countries.find((item) => item.id == user.countryId)
+        user.country = currCountry
+          ? currCountry
+          : { color: this.defaultColer, name: '無' }
+      }
+
+      return users
+    },
+    battlefields: function () {
+      const battles = JSON.parse(JSON.stringify(this.global.battlefieldMap))
+      const countries = JSON.parse(JSON.stringify(this.countries))
+      const users = JSON.parse(JSON.stringify(this.users))
+      const strongholds = JSON.parse(JSON.stringify(this.strongholds))
+      for (const i in battles) {
+        const curr = battles[i]
+        curr.attackCountry = countries.find((item) => {
+          return item.id == curr.attackCountryIds[0]
+        })
+        curr.attackUsers = []
+        for (const u in curr.atkUserIds) {
+          const currUserId = curr.atkUserIds[u]
+          curr.attackUsers.push(users.find((item) => item.id == currUserId))
+        }
+        curr.attackSoldier = curr.detail.atkSoldiers
+        curr.attackSoldierTotal = curr.attackSoldier.reduce((a, b) => a + b)
+
+        curr.defenceCountry = countries.find((item) => {
+          return item.id == curr.defenceCountryId
+        })
+        curr.defenceUsers = []
+        for (const u in curr.defUserIds) {
+          const currUserId = curr.defUserIds[u]
+          curr.defenceUsers.push(users.find((item) => item.id == currUserId))
+        }
+        curr.defenceSoldier = curr.detail.defSoldiers
+        curr.defenceSoldierTotal = curr.defenceSoldier.reduce((a, b) => a + b)
+
+        curr.judge = users.find((item) => item.id == curr.judgeId)
+        curr.toolman = users.find((item) => item.id == curr.toolmanId)
+        curr.map = strongholds.find((item) => item.id == curr.mapId)
+      }
+      console.log(battles)
+      return battles
+    },
+    battalSoldierMax: function () {
+      let max = this.currUser.soldier
+      return max
+    },
+    battalSoldierMin: function () {
+      let min = 0
+      if (this.client.dialog_check_curr.id == 5002) {
+        min = 1000
+      }
+      return min
+    },
     infoTitle: function () {
       let text = '活動公告'
       if (this.infoTypeNow == 1) {
@@ -584,15 +853,14 @@ export default Vue.extend({
       const result = state.global.maps
         ? state.global.maps.map((m: any) => {
             const cid = m.ownCountryId
-            const country = state.global.countries.find(
-              (e: any) => e.id === cid
-            )
+            const country = state.global.countries.find((e) => e.id === cid)
             const cname = country ? country.name : '空'
             const colors = country
               ? country.color.split(',')
-              : ['#A1A1A1', '#000']
+              : this.defaultColor
             const usersInThisMap = hashMapIdUser[m.id] || []
             // console.log('usersInThisMap: ', usersInThisMap)
+            m.id === state.user.mapNowId && (this.curStronghold = m)
             return {
               ...m,
               type: m.cityId > 0 ? 1 : 2,
@@ -653,12 +921,20 @@ export default Vue.extend({
     },
     'client.dialog_check_curr': {
       handler: function (val) {
-        if (val.id === 5001) {
+        if ([5001, 5002].includes(val.id)) {
           this.goToXY(this.currUser.mapNowIndex)
         }
       },
       deep: true,
       immediate: true
+    },
+    'global.battleAreaPanel.mapId': function (val) {
+      if (val !== 0) {
+        this.goToBattleSoldier = 1000
+        this.ChangeState(['dialog_battle', true])
+      } else {
+        this.ChangeState(['dialog_battle', false])
+      }
     }
   },
 
@@ -668,7 +944,13 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapMutations(['ChangeState', 'ChangeApiCheck', 'ChangeDialogCheck']),
+    ...mapMutations([
+      'ChangeState',
+      'ChangeApiCheck',
+      'ChangeDialogCheck',
+      'ChangeRootState',
+      'ChangeApiResult'
+    ]),
     ...mapActions([
       'ApiAddTroops',
       'ApiJoinCountry',
@@ -677,16 +959,95 @@ export default Vue.extend({
       'actSearchWild',
       'actLeaveCountry',
       'actEnterCountry',
-      'ApiRes'
+      'ApiRes',
+      'actBattle'
     ]),
-    showInfoArea: function (type) {
-      if (type == 1) {
-        window.open(
-          'https://rv.rv88.tw/office/oo/r/nrm1TkHLbICx14kHvgvv7DETQQijFfjC',
-          '_blank'
-        )
+    moment: function (date) {
+      return this.$moment(date)
+    },
+    createBattle: function () {
+      if (this.goToBattleTime == -1) {
+        this.errorText = '請選擇戰爭發生時間。'
+        return
+      }
+
+      const data = {
+        mapId: this.goToCityId,
+        time: this.goToBattleTime,
+        soldier: this.goToBattleSoldier
+      }
+      this.actBattle(data)
+    },
+    strongholdClass: function (stronghold) {
+      let classNames = 'stronghold'
+      if (
+        this.client.status_type == '' ||
+        (this.client.status_type == 'move' &&
+          this.client.could_be_move_to.indexOf(stronghold.id) !== -1) ||
+        (this.client.status_type == 'battal' &&
+          this.curStronghold.route.includes(stronghold.id) &&
+          stronghold.ownCountryId != this.user.countryId) ||
+        this.user.mapNowId === stronghold.id
+      ) {
+        classNames += ' show'
+      }
+
+      if (stronghold.type == 2) {
+        classNames += ' jungle'
       } else {
-        this.ChangeState(['dialog_info', true])
+        classNames += ' castle'
+      }
+
+      if (stronghold.is_here) {
+        classNames += ' here'
+      }
+
+      if (stronghold.is_main) {
+        classNames += ' main'
+      }
+
+      if (
+        this.client.status_type == 'move' &&
+        this.client.could_be_move_to.indexOf(stronghold.id) !== -1
+      ) {
+        classNames += ' moveTo'
+      }
+
+      if (
+        0 < stronghold.military_strength &&
+        stronghold.military_strength < 1000
+      ) {
+        classNames += ' power0'
+      } else if (
+        1000 <= stronghold.military_strength &&
+        stronghold.military_strength < 5600
+      ) {
+        classNames += ' power1'
+      } else if (
+        5600 <= stronghold.military_strength &&
+        stronghold.military_strength < 11200
+      ) {
+        classNames += ' power2'
+      } else if (11200 <= stronghold.military_strength) {
+        classNames += ' power3'
+      }
+
+      return classNames
+    },
+    showInfoArea: function (type) {
+      switch (type) {
+        case 0:
+          this.ChangeState(['dialog_info', true])
+          break
+        case 1:
+          window.open(
+            'http://172.16.20.73:20221/upload/game_instructions.pdf',
+            '_blank'
+          )
+          break
+        case 2:
+          // this.ChangeState(['dialog_battle_list', true])
+          break
       }
     },
     setLeft: function (is_main, is_city, key) {
@@ -724,10 +1085,14 @@ export default Vue.extend({
       this.ChangeState(['status_type', ''])
       this.ChangeState(['could_be_move_to', []])
       this.ChangeState(['dialog_check', false])
+      this.ChangeState(['dialog', false])
     },
     goDoApi: function () {
       let content: ''
-      console.log('goDoApi this.client.dialog_check_curr: ', this.client.dialog_check_curr)
+      // console.log(
+      //   'goDoApi this.client.dialog_check_curr: ',
+      //   this.client.dialog_check_curr
+      // )
       switch (this.client.dialog_check_curr.id) {
         case 1002:
           this.actIncreaseSoldier()
@@ -751,6 +1116,9 @@ export default Vue.extend({
           break
         case 6:
           this.onClickLogout()
+          break
+        case 5002:
+          this.actBattle({ mapId: this.goToCityId })
           break
         case 5001:
           this.actMove(this.goToCityId)
@@ -778,14 +1146,22 @@ export default Vue.extend({
       })
     },
     clickThisStronghold: function (index = 0) {
-      const city = this.strongholds[index]
+      const stronghold = this.strongholds[index]
       if (
         this.client.status_type === 'move' &&
-        city.id !== this.user.mapNowId
+        stronghold.id !== this.user.mapNowId
       ) {
-        this.goToCityId = this.strongholds[index].id
-        this.ChangeDialogCheck({ content: '移動到 ' + city.name })
-      } else if (this.client.status_type === '') {
+        this.goToCityId = stronghold.id
+        this.ChangeDialogCheck({ content: '移動到 ' + stronghold.name })
+      } else if (
+        this.client.status_type === 'battal' &&
+        stronghold.id !== this.user.mapNowId
+      ) {
+        this.goToCityId = stronghold.id
+        this.goToCityObj = stronghold
+        this.ChangeDialogCheck({ content: '出征 ' + stronghold.name })
+      }
+      if (this.client.status_type === '') {
         this.goToXY(index)
       }
     },
@@ -829,6 +1205,14 @@ export default Vue.extend({
       const nextx = Math.max(-(3014 - window.innerWidth), xy[0])
       const nexty = Math.max(-(2089 - window.innerHeight), xy[1])
       return [Math.min(0, nextx), Math.min(0, nexty)]
+    },
+    donotBattle: function () {
+      this.ChangeRootState([
+        'global',
+        'battleAreaPanel',
+        { timeOptions: [], mapId: 0 }
+      ])
+      this.errorText = ''
     }
   }
 })
@@ -922,6 +1306,7 @@ html {
           z-index: 10;
           visibility: hidden;
           cursor: pointer;
+          // cursor: url('../assets/images/mouse.png'), pointer;
           .stronghold-area {
             position: relative;
             .here-bg {
@@ -1245,7 +1630,12 @@ html {
         display: flex;
       }
       span {
-        cursor: pointer;
+        opacity: 0.7;
+        &:not([disabled]) {
+          opacity: 1;
+          cursor: pointer;
+          // cursor: url('../assets/images/mouse.png'), pointer;
+        }
         text-align: center;
         display: inline-block;
         width: 100px;
@@ -1265,18 +1655,20 @@ html {
             display: block;
           }
         }
+        &.battle {
+          position: relative;
+          top: -14px;
+          img {
+            height: 70px;
+          }
+        }
       }
       img {
         width: 70px;
+        height: 54px;
         margin: 0 auto;
+        filter: drop-shadow(0px 0px 4px #cabca6);
       }
-      // .notice {
-      // }
-      // .game-book {
-      //   text-align: center;
-      //   display: inline-block;
-      //   width: 100px;
-      // }
     }
     .user-area {
       position: fixed;
@@ -1583,6 +1975,236 @@ html {
     }
     .v-card__actions {
     }
+  }
+}
+
+.dialog-battle {
+  font-family: '華康行楷體W5';
+  .battle-box {
+    width: 100%;
+    min-width: 1280px;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ccc;
+    background: url('../assets/images/公告紙.png') no-repeat center -100px;
+    background-size: 111% auto;
+    position: relative;
+    .battle-team-area {
+      position: relative;
+    }
+    .battle-info-group {
+      position: absolute;
+      left: 50px;
+      top: 70px;
+      width: 300px;
+      .battle-date {
+        width: 100%;
+        height: 80px;
+        line-height: 78px;
+        background: url('../assets/images/btn01.png') no-repeat center center;
+        background-size: 100% auto;
+        color: #fff;
+        padding-left: 35px;
+        font-size: 18px;
+        font-weight: 500;
+      }
+      .battle-place {
+        color: rgba(0, 0, 0, 0.85);
+        font-family: '華康行楷體W5';
+        font-size: 66px;
+        line-height: 100%;
+        letter-spacing: 3px;
+        padding-left: 60px;
+        margin-top: 30px;
+      }
+    }
+  }
+  .battle-top {
+    position: relative;
+    height: 120px;
+    padding-top: 50px;
+    margin-left: -40px;
+    .battle-info-text {
+      position: relative;
+      z-index: 1;
+      font-size: 32px;
+      line-height: 105%;
+      text-align: center;
+      color: rgb(255, 255, 255) !important;
+      span {
+        padding: 8px 15px;
+        font-family: '華康行楷體W5';
+        opacity: 0.8;
+        margin: 0 20px;
+        border-radius: 6px;
+      }
+    }
+    img {
+      position: absolute;
+      top: 0;
+      left: calc(50% - (980px / 2));
+      width: 980px;
+      z-index: 0;
+    }
+  }
+  .soldier-group {
+    width: 100%;
+    height: 50px;
+    line-height: 40px;
+    font-size: 20px;
+    background: url('../assets/images/soldier.png') no-repeat 60px -6px rgba(0, 0, 0, 0.6);
+    background-size: auto 40px;
+    text-align: left;
+    padding-left: 100px;
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    z-index: 2;
+    color: #fff;
+  }
+  .field-block {
+    position: relative;
+    .vs-img {
+      position: absolute;
+      left: calc(50% + 20px);
+      top: calc(50% - (256px / 2) - 20px);
+      z-index: 4;
+      opacity: 0.8;
+    }
+  }
+  .type {
+    width: 60px;
+    position: absolute;
+    left: calc(50% - (60px / 2));
+    top: 30px;
+    z-index: 1;
+  }
+  .field-group {
+    position: relative;
+    width: calc(265px * 2);
+    &.other-group {
+      margin: 0 auto;
+      width: 265px;
+      margin-right: 80px;
+    }
+    .user-group {
+      text-align: center;
+      .user-block {
+        display: inline-block;
+        width: 265px;
+        position: relative;
+        text-align: center;
+        margin: 10px 0;
+        .user {
+          background: #9b9b9b;
+          position: absolute;
+          top: 0;
+          left: calc(50% - (245px / 2));
+          width: 245px;
+          height: 291px;
+          overflow: hidden;
+          text-align: center;
+          img {
+            z-index: 2;
+            width: 291px;
+            position: relative;
+            left: calc(50% - (291px / 2));
+          }
+        }
+        .bd {
+          width: 245px;
+          position: relative;
+          left: calc(50% - (245px / 2));
+          img {
+            position: relative;
+            z-index: 3;
+          }
+          .country-name,
+          .user-name {
+            position: absolute;
+            font-family: '華康行楷體W5';
+            z-index: 4;
+          }
+          .country-name {
+            font-size: 50px;
+            top: 20px;
+            left: 8px;
+            line-height: 100%;
+            letter-spacing: -5px;
+            text-shadow: 0 0 5px #000;
+          }
+          .user-name {
+            top: 0;
+            right: 10px;
+            height: 100%;
+            width: 65px;
+            background: url('../assets/images/bg02.png') no-repeat center 25px;
+            background-size: 108%;
+            .type {
+              font-size: 60px;
+              line-height: 60px;
+              color: rgb(245, 245, 245);
+              text-shadow: 0px 0px 5px rgb(255, 255, 255);
+            }
+            .name-text {
+              font-size: 28px;
+              line-height: 60px;
+              margin-top: 90px;
+              margin-bottom: 50px;
+              letter-spacing: 2px;
+              height: calc(100% - 140px);
+            }
+            .user-name-bg {
+              top: 0;
+              right: 0px;
+              height: 100%;
+              width: auto;
+            }
+          }
+        }
+        .bd-bg {
+          mask: url('../assets/images/border02.png') no-repeat center center;
+          width: 100%;
+          height: 291px;
+          position: absolute;
+          top: 0;
+        }
+
+        img {
+          display: inline-block;
+          width: 100%;
+        }
+      }
+    }
+    &.attack-group {
+      margin-right: 40px;
+      .user-group {
+        .user-name {
+          .type {
+            color: rgb(192, 48, 48) !important;
+            margin-top: 3px;
+            font-size: 55px !important;
+          }
+        }
+      }
+    }
+    &.defence-group {
+      margin-right: 40px;
+      margin-left: 350px;
+      .user-group {
+        .user-name {
+          .type {
+            color: #2225b1 !important;
+            margin-top: 3px;
+            font-size: 55px !important;
+          }
+        }
+      }
+    }
+  }
+  .field-bg {
+    height: 100%;
+    width: 100%;
   }
 }
 </style>

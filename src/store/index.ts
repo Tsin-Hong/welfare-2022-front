@@ -14,5 +14,11 @@ export default new Vuex.Store({
     user,
     global,
     info
+  },
+  mutations: {
+    ChangeRootState: function (rootState, payload) {
+      const key = payload[0]
+      rootState[key][payload[1]] = payload[2]
+    },
   }
 })

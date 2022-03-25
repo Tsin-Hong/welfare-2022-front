@@ -137,7 +137,7 @@ const global = {
       /** 
        * 出征
        * @param {number} mapId
-       * @param {number} timestamp  - 可選
+       * @param {number} time  - 可選
        * @param {number} soldier    - 可選
        * 
        * 只帶 mapId 時會反推送 {number} options[] 會有可進行競賽的五個時間點
@@ -146,7 +146,7 @@ const global = {
       content.dispatch('emitMessage', {act: enums.ACT_BATTLE, payload: args});
     },
     actBattleJoin: (content: any, args: any) => {
-      /**
+      /**w
        * 加入戰役
        * @param {number} mapId
        * @param {number} battleId
