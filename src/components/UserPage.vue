@@ -923,6 +923,7 @@ export default Vue.extend({
     selectedMapInfo: function() {
       const _maps = this.global.maps;
       const _map = _maps[this.openMapInfoIdx]
+      if (!_map) return null
       const _city = this.global.cities.find(c => c.id == _map.cityId)
       const _occupationMap  = this.global.occupationMap;
       const userdata = this.global.users.filter(u => u.mapNowId == _map.id).map(u => {
@@ -939,7 +940,7 @@ export default Vue.extend({
         }
         return {...u, occupation}
       })
-      const basicInfos = _city ? [
+      const basicInfos = _map.ownCountryId > 0 && _city ? [
         {cons: 'barrack', name: '徵兵量', value: `${100} - ${300 + (_maps.filter(m => m.cityId > 0 && m.ownCountryId == _map.ownCountryId).length * 15)}` },
         {cons: 'market', name: '商業收益', value: `${50 + _city.addResource} - ${150 + _city.addResource}` },
         {cons: 'stable', name: '移動消耗減免', value: 0 },
