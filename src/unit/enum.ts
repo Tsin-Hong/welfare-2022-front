@@ -25,7 +25,9 @@ const enums = {
   ACT_BUSINESS: 25,
   ACT_APPOINTMENT: 26,
   ACT_DISMISS: 27,
-  UserGlobalAttributes: ['id', 'code', 'nickname', 'countryId', 'loyalty', 'loyalUserId', 'contribution', 'occupationId', 'role', 'mapNowId', 'soldier', 'captiveDate'],
+  ACT_LEVELUP_CITY: 28,
+  ACT_SHARE: 29,
+  UserGlobalAttributes: ['id', 'code', 'nickname', 'countryId', 'loyalty', 'loyalUserId', 'contribution', 'occupationId', 'role', 'mapNowId', 'soldier', 'captiveDate', 'actPointMax'],
   MapsGlobalAttributes: ['id', 'name', 'x', 'y', 'route', 'cityId', 'ownCountryId'],
   CityGlobalAttributes: ['id', 'money', 'addResource', 'timeBeAttacked', 'jsonConstruction'],
   CountryGlobalAttributes: ['id', 'name', 'money', 'emperorId', 'peopleMax', 'color', 'originCityId'],
@@ -40,11 +42,17 @@ const enums = {
   EVENT_GROUP_UP: '_GROUP_UP_',
   EVENT_COUNTRY_RELATIONSHIP: '_COUNTRY_RELATIONSHIP_',
   EVENT_OCCUPATION: '_OCCUPATION_',
+  EVENT_SYSTEM_RECOVER: "_SYSTEM_RECOVER_",
   NUM_BATTLE_SOLDIER_MIN: 1000,
   NUM_BATTLE_MONEY_MIN: 100,
   NUM_BATTLE_ACTION_MIN: 1,
   NUM_BATTLE_CONTRUBUTION: 6,
-  NUM_BATTLE_TOOLMANS_CONTRUBUTION: 12
+  NUM_BATTLE_TOOLMANS_CONTRUBUTION: 12,
+  NUM_LEVELUP_TRAPEZOID_SPENDING: 300,
+  NUM_ADDITIONAL_BARRACK_SOLDIER: 10,
+  NUM_ADDITIONAL_MARKET_MONEY: 6,
+  NUM_ADDITIONAL_WALL_DISCOUNT_DAMAGE_RATIO: 9,
+  NUM_ADDITIONAL_WALL_TRAPEZOID: 900,
 }
 
 export default enums
