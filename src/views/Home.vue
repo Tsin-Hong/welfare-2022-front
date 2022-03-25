@@ -206,7 +206,7 @@ export default Vue.extend({
             icon: '',
             title: '下野',
             is_show: true,
-            couldBeUseRoleIds: [1, 2],
+            couldBeUseRoleIds: [2],
             couldBeUseByCity: true,
             couldBeUseByOther: false
           },
