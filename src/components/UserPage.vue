@@ -608,36 +608,70 @@
         </v-card-text>
       </v-card>
     </v-dialog>
-    <v-dialog
-      class="dialog-map-info"
-      dark
-      v-model="openMapInfo"
-      width="600">
-      <v-card>
-        <div v-if="selectedMapInfo">
-          <p class="title">{{selectedMapInfo.name}}</p>
-          <table style="width: 100%;">
-            <tr>
-              <th width="50%">總兵力</th>
-              <th width="50%">{{selectedMapInfo.userdata.filter(u => u.countryId == selectedMapInfo.ownCountryId).reduce((a,b) => a + b.soldier, 0)}}</th>
-            </tr>
-            <tr>
-              <th>基本抵禦力</th>
-              <th>1000</th>
-            </tr>
-            <tr v-for="(info, idx) in selectedMapInfo.basicInfos" :key="`${selectedMapInfo.id}_${idx}`">
-              <th>{{info.name}}</th>
-              <th>{{info.value}}</th>
-            </tr>
-            <tr>
-              <th colspan="2">所在地將領</th>
-            </tr>
-            <tr v-for="(uu) in selectedMapInfo.userdata" :key="uu.id" :class="{captived: !!uu.captiveDate}" class="list-people">
-              <td>{{uu.occupation}}</td>
-              <td>{{uu.nickname}} ( {{uu.soldier}} )</td>
-            </tr>
-          </table>
-        </div>
+    <v-dialog dark v-model="openMapInfo" width="600">
+      <v-card class="dialog-map-info">
+        <template v-if="selectedMapInfo">
+          <v-toolbar
+            flat
+            dark
+            :style="{
+              background: selectedMapInfo.ownCountry.color[0],
+              color: selectedMapInfo.ownCountry.color[1]
+            }"
+          >
+            <v-toolbar-title v-if="selectedMapInfo.name" class="d-block">
+              {{ selectedMapInfo.name }}
+            </v-toolbar-title>
+            <v-spacer></v-spacer>
+            <v-btn icon dark @click="openMapInfo = false">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </v-toolbar>
+
+          <v-card-text class="py-15-px">
+            <v-card-subtitle class="grey--text">據點資訊</v-card-subtitle>
+            <v-divider class="mb-10-px"></v-divider>
+            <table class="map-info-table">
+              <tr>
+                <th width="50%">總兵力</th>
+                <th width="50%">
+                  {{
+                    selectedMapInfo.userdata
+                      .filter(
+                        (u) => u.countryId == selectedMapInfo.ownCountryId
+                      )
+                      .reduce((a, b) => a + b.soldier, 0)
+                  }}
+                </th>
+              </tr>
+              <tr>
+                <th>基本抵禦力</th>
+                <th>1000</th>
+              </tr>
+              <tr
+                v-for="(info, idx) in selectedMapInfo.basicInfos"
+                :key="`${selectedMapInfo.id}_${idx}`"
+              >
+                <th>{{ info.name }}</th>
+                <th>{{ info.value }}</th>
+              </tr>
+            </table>
+            <v-card-subtitle class="grey--text mt-15-px"
+              >在據點中的人員名冊</v-card-subtitle
+            >
+            <v-divider class="mb-10-px"></v-divider>
+            <span
+              class="user-blcok"
+              v-for="uu in selectedMapInfo.userdata"
+              :key="uu.id"
+              :class="{ captived: !!uu.captiveDate }"
+            >
+              <span class="title-name">{{ uu.occupation }}</span>
+              <span class="user-name">{{ uu.nickname }}</span>
+              <span class="user-other-info">( {{ uu.soldier }} )</span>
+            </span>
+          </v-card-text>
+        </template>
       </v-card>
     </v-dialog>
   </v-container>
@@ -668,7 +702,22 @@ export default Vue.extend({
     infoTypeNow: 0,
     selectedItem: 1,
     curStronghold: {},
-    numCN: ['壹', '貳', '叁', '肆', '伍', '陸', '柒', '捌', '玖', '拾', '壹拾壹', '壹拾貳', '壹拾叁', '壹拾肆', ],
+    numCN: [
+      '壹',
+      '貳',
+      '叁',
+      '肆',
+      '伍',
+      '陸',
+      '柒',
+      '捌',
+      '玖',
+      '拾',
+      '壹拾壹',
+      '壹拾貳',
+      '壹拾叁',
+      '壹拾肆'
+    ],
     leftList: [
       {
         no: '壹',
@@ -793,7 +842,7 @@ export default Vue.extend({
     battleOtherUser: ['judge', 'toolman'],
     defaultColor: ['#A1A1A1', '#000'],
     openMapInfo: false,
-    openMapInfoIdx: 0,
+    openMapInfoIdx: 0
   }),
 
   computed: {
@@ -815,7 +864,7 @@ export default Vue.extend({
         const currCountry = countries.find((item) => item.id == user.countryId)
         user.country = currCountry
           ? currCountry
-          : { color: this.defaultColer, name: '無' }
+          : { color: this.defaultColor, name: '無' }
       }
 
       return users
@@ -853,7 +902,6 @@ export default Vue.extend({
         curr.toolman = users.find((item) => item.id == curr.toolmanId)
         curr.map = strongholds.find((item) => item.id == curr.mapId)
       }
-      console.log(battles)
       return battles
     },
     battalSoldierMax: function () {
@@ -890,7 +938,9 @@ export default Vue.extend({
             const country = state.global.countries.find((e) => e.id === cid)
             const cname = country ? country.name : '空'
             const colors = country
-              ? country.color.split(',')
+              ? Array.isArray(country.color)
+                ? country.color
+                : country.color.split(',')
               : this.defaultColor
             const usersInThisMap = hashMapIdUser[m.id] || []
             // console.log('usersInThisMap: ', usersInThisMap)
@@ -920,34 +970,68 @@ export default Vue.extend({
         : []
       return result
     },
-    selectedMapInfo: function() {
-      const _maps = this.global.maps;
+    selectedMapInfo: function () {
+      const _maps = this.global.maps
       const _map = _maps[this.openMapInfoIdx]
       if (!_map) return null
-      const _city = this.global.cities.find(c => c.id == _map.cityId)
-      const _occupationMap  = this.global.occupationMap;
-      const userdata = this.global.users.filter(u => u.mapNowId == _map.id).map(u => {
-        const occ = _occupationMap[u.occupationId]
-        let occupation = '浪人'
-        switch (u.role) {
-          case 1: occupation = '主公'; break
-          case 2: occupation =  occ ? occ.name : '武將'; break
-          case 3: occupation = '浪人'; break
-          default:
-        }
-        if (u.captiveDate) {
-          occupation += '(俘虜)'
-        }
-        return {...u, occupation}
-      })
-      const basicInfos = _map.ownCountryId > 0 && _city ? [
-        {cons: 'barrack', name: '徵兵量', value: `${100} - ${300 + (_maps.filter(m => m.cityId > 0 && m.ownCountryId == _map.ownCountryId).length * 15)}` },
-        {cons: 'market', name: '商業收益', value: `${50 + _city.addResource} - ${150 + _city.addResource}` },
-        {cons: 'stable', name: '移動消耗減免', value: 0 },
-        {cons: 'wall', name: '防禦損兵減少量', value: `${0}%` },
-      ] : []
-      userdata.sort((a,b) => a.role == b.role ? b.soldier - a.soldier : a.role - b.role)
-      return {..._map, userdata, basicInfos};
+      const _city = this.global.cities.find((c) => c.id == _map.cityId)
+      const _country = JSON.parse(JSON.stringify(this.global.countries)).find(
+        (c) => c.id == _map.ownCountryId
+      )
+      const _occupationMap = this.global.occupationMap
+      const userdata = this.global.users
+        .filter((u) => u.mapNowId == _map.id)
+        .map((u) => {
+          const occ = _occupationMap[u.occupationId]
+          let occupation = '浪人'
+          switch (u.role) {
+            case 1:
+              occupation = '主公'
+              break
+            case 2:
+              occupation = occ ? occ.name : '武將'
+              break
+            case 3:
+              occupation = '浪人'
+              break
+            default:
+          }
+          if (u.captiveDate) {
+            occupation += '(俘虜)'
+          }
+          return { ...u, occupation }
+        })
+      const basicInfos =
+        _map.ownCountryId > 0 && _city
+          ? [
+              {
+                cons: 'barrack',
+                name: '徵兵量',
+                value: `${100} - ${
+                  300 +
+                  _maps.filter(
+                    (m) => m.cityId > 0 && m.ownCountryId == _map.ownCountryId
+                  ).length *
+                    15
+                }`
+              },
+              {
+                cons: 'market',
+                name: '商業收益',
+                value: `${50 + _city.addResource} - ${150 + _city.addResource}`
+              },
+              { cons: 'stable', name: '移動消耗減免', value: 0 },
+              { cons: 'wall', name: '防禦損兵減少量', value: `${0}%` }
+            ]
+          : []
+      const ownCountry =
+        _map.ownCountryId > 0 ? _country : { color: this.defaultColor }
+      userdata.sort((a, b) =>
+        a.role == b.role ? b.soldier - a.soldier : a.role - b.role
+      )
+      !Array.isArray(ownCountry.color) &&
+        (ownCountry.color = ownCountry.color.split(','))
+      return { ..._map, userdata, basicInfos, ownCountry }
     },
     currUser: function () {
       return this.getUser()
@@ -2270,6 +2354,31 @@ html {
   .field-bg {
     height: 100%;
     width: 100%;
+  }
+}
+.dialog-map-info {
+  .user-blcok {
+    display: inline-block;
+    border: 1px solid rgb(139, 139, 139);
+    margin: 1%;
+    padding: 6px 10px;
+    width: 48%;
+    .title-name {
+      margin-right: 6px;
+    }
+    .user-name {
+      margin-right: 5px;
+    }
+    span {
+      display: inline-block;
+    }
+  }
+}
+.map-info-table {
+  width: 100%;
+  th,
+  td {
+    padding: 10px 15px;
   }
 }
 </style>
