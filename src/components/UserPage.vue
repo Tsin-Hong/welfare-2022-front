@@ -625,7 +625,7 @@
               <th>基本抵禦力</th>
               <th>1000</th>
             </tr>
-            <tr v-for="(info, idx) in selectedMapInfo.basicInfos" :key="idx">
+            <tr v-for="(info, idx) in selectedMapInfo.basicInfos" :key="`${selectedMapInfo.id}_${idx}`">
               <th>{{info.name}}</th>
               <th>{{info.value}}</th>
             </tr>
