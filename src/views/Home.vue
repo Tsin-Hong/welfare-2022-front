@@ -91,8 +91,8 @@ export default Vue.extend({
             id: 1001,
             icon: '',
             title: '商業',
-            is_show: false,
-            couldBeUseRoleIds: [],
+            is_show: true,
+            couldBeUseRoleIds: [1, 2],
             couldBeUseByCity: true,
             couldBeUseByOther: false
           },
@@ -377,6 +377,7 @@ export default Vue.extend({
         if (child) {
           if (
             child.is_show &&
+            this.currUser.actPoint > 0 &&
             child.couldBeUseRoleIds.indexOf(this.currUser.role) !== -1
           ) {
             if (

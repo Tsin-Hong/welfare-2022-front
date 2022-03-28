@@ -117,7 +117,7 @@
       </div>
       <div class="right-top-area">
         <div class="btn-group">
-          <span class="battle" disabled @click="showInfoArea(2)">
+          <span class="battle" :disabled="true" @click="showInfoArea(2)">
             <img src="../assets/images/戰役.png" alt="" />
             <div class="text">戰役</div>
           </span>
@@ -131,22 +131,26 @@
           </span>
         </div>
       </div>
-      <div class="bottom-area">
-        <div class="d-flex">
-          <div class="flex-block flex-1"></div>
-          <div class="flex-block flex-2">
-            <div v-if="client.status_type != ''" class="btn-area">
-              <div class="btn-title">
-                請選擇{{ client.dialog_check_curr.key }}目的地
-              </div>
-              <div v-if="client.status_type == 'move'" class="btn-info">
-                只能在勢力所在據點間移動
-              </div>
-              <v-btn block dark @click="cencel()">取消</v-btn>
-            </div>
+      <div class="notification-area">
+        <div class="list-group">
+          <div
+            class="list d-flex"
+            v-for="(notice, index) in notifications"
+            :key="index"
+          >
+            <span>{{ notice[0] }}</span>
+            <span>{{ notice[1] }}</span>
           </div>
-          <div class="flex-block flex-3"></div>
         </div>
+      </div>
+      <div class="bottom-btn-area" v-if="client.status_type != ''">
+        <div class="btn-title">
+          請選擇{{ client.dialog_check_curr.key }}目的地
+        </div>
+        <div v-if="client.status_type == 'move'" class="btn-info">
+          只能在勢力所在據點間移動
+        </div>
+        <v-btn block dark @click="cencel()">取消</v-btn>
       </div>
       <div
         class="stronghold-list"
@@ -551,6 +555,12 @@
                                 {{ user.nickname }}
                               </div>
                             </div>
+                            <div v-if="!user" class="join-btn">
+                              <v-btn>加入</v-btn>
+                              <div class="limit-time">
+                                截止時間<br />{{ battlefield.timestampLimit }}
+                              </div>
+                            </div>
                             <div v-if="battlefield" class="soldier-group">
                               {{ battlefield[type + 'Soldier'][u_i] }}
                             </div>
@@ -569,8 +579,13 @@
                     v-for="(key, u_i) in battleOtherUser"
                     :key="u_i"
                   >
-                    <div v-if="battlefield[key]" class="user">
-                      <div class="bd-bg"></div>
+                    <div v-if="battlefield[key].id" class="user">
+                      <div
+                        class="bd-bg"
+                        :style="{
+                          background: battlefield[key].country.color[0]
+                        }"
+                      ></div>
                       <img
                         :src="
                           require('../assets/images/user/' +
@@ -585,7 +600,13 @@
                         :src="require('../assets/images/border03.png')"
                         alt=""
                       />
-                      <div v-if="battlefield[key]" class="country-name">
+                      <div
+                        v-if="battlefield[key]"
+                        class="country-name"
+                        :style="{
+                          color: battlefield[key].country.color[0]
+                        }"
+                      >
                         {{ battlefield[key].country.name }}
                       </div>
                       <div class="user-name">
@@ -597,6 +618,12 @@
                           class="name-text flag-vertical"
                         >
                           {{ battlefield[key].nickname }}
+                        </div>
+                      </div>
+                      <div v-if="!battlefield[key]" class="join-btn">
+                        <v-btn>擔任</v-btn>
+                        <div class="limit-time">
+                          截止時間<br />{{ battlefield.timestampLimit }}
                         </div>
                       </div>
                     </div>
@@ -627,7 +654,6 @@
               <v-icon>mdi-close</v-icon>
             </v-btn>
           </v-toolbar>
-
           <v-card-text class="py-15-px">
             <v-card-subtitle class="grey--text">據點資訊</v-card-subtitle>
             <v-divider class="mb-10-px"></v-divider>
@@ -848,6 +874,16 @@ export default Vue.extend({
   computed: {
     ...mapState(['user', 'global', 'client', 'info']),
     ...mapGetters(['getUser']),
+    notifications: function () {
+      const notifications = JSON.parse(
+        JSON.stringify(this.global.notifications)
+      )
+      for (const i in notifications) {
+        const curr = notifications[i]
+        curr[0] = this.$moment(curr[0]).format('YYYY-MM-DD HH:mm')
+      }
+      return notifications
+    },
     countries: function () {
       const countries = JSON.parse(JSON.stringify(this.global.countries))
       for (const i in countries) {
@@ -876,6 +912,9 @@ export default Vue.extend({
       const strongholds = JSON.parse(JSON.stringify(this.strongholds))
       for (const i in battles) {
         const curr = battles[i]
+        curr.timestampLimit = this.$moment(curr.timestamp)
+          .subtract(3, 'days')
+          .format('YYYY-MM-DD HH:mm')
         curr.attackCountry = countries.find((item) => {
           return item.id == curr.attackCountryIds[0]
         })
@@ -901,6 +940,21 @@ export default Vue.extend({
         curr.judge = users.find((item) => item.id == curr.judgeId)
         curr.toolman = users.find((item) => item.id == curr.toolmanId)
         curr.map = strongholds.find((item) => item.id == curr.mapId)
+
+        if (!curr.judge) {
+          curr.judge = {
+            country: {
+              color: this.defaultColor
+            }
+          }
+        }
+        if (!curr.toolman) {
+          curr.toolman = {
+            country: {
+              color: this.defaultColor
+            }
+          }
+        }
       }
       return battles
     },
@@ -1106,6 +1160,7 @@ export default Vue.extend({
       'actSearchWild',
       'actLeaveCountry',
       'actEnterCountry',
+      'actBusiness',
       'ApiRes',
       'actBattle'
     ]),
@@ -1255,6 +1310,11 @@ export default Vue.extend({
           this.actLeaveCountry()
           content = ''
           // this.ApiRes({ content: content })
+          break
+        case 1001:
+          console.log('11')
+          this.actBusiness()
+          content = ''
           break
         case 5003:
           this.actSearchWild()
@@ -1997,33 +2057,49 @@ html {
     }
   }
 }
-.bottom-area {
+.bottom-btn-area {
+  position: fixed;
+  left: calc(50% - 100px);
+  bottom: 0;
+  z-index: 20;
+  width: 200px;
+  margin: 80px auto 60px;
+  text-align: center;
+  .btn-title {
+    font-weight: bolder;
+    font-size: 18px;
+    color: #fff;
+    text-shadow: 0 0 10px #272727;
+  }
+  .btn-info {
+    color: #fff;
+    text-shadow: 0 0 10px #272727;
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+}
+.notification-area {
+  width: 500px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 20px;
+  border-top-left-radius: 10px;
   position: fixed;
   right: 0;
   bottom: 0;
-  z-index: 20;
-  width: 100vw;
-  .d-flex {
-    flex-direction: row-reverse;
+  z-index: 3;
+  .list-group {
+    height: 250px;
+    overflow-y: scroll;
   }
-  .flex-block {
-    width: calc(100% / 3);
-  }
-  .btn-area {
-    width: 200px;
-    margin: 0 auto 60px;
-    text-align: center;
-    .btn-title {
-      font-weight: bolder;
-      font-size: 18px;
-      color: #fff;
-      text-shadow: 0 0 10px #272727;
-    }
-    .btn-info {
-      color: #fff;
-      text-shadow: 0 0 10px #272727;
-      font-size: 14px;
-      margin-bottom: 8px;
+  .list {
+    color: #fff;
+    span {
+      &:first-child {
+        flex: 0 160px;
+      }
+      &:not(:first-child) {
+        flex: 1;
+      }
     }
   }
 }
@@ -2210,6 +2286,19 @@ html {
     left: 0px;
     z-index: 2;
     color: #fff;
+  }
+  .join-btn {
+    width: 100%;
+    position: absolute;
+    left: 0;
+    top: 40%;
+    z-index: 5;
+    text-align: center;
+    color: #272727;
+    text-shadow: 0 0 3px #ccc;
+    .limit-time {
+      margin-top: 8px;
+    }
   }
   .field-block {
     position: relative;

@@ -41,7 +41,7 @@ function isInCity(user, global) {
 }
 
 function isInCountryHere(user, global) {
-  const _map = global.mapIdMap[user.mapNowId];
+  const _map = global.maps.find((item) => item.id == user.mapNowId);
   return _map && user.countryId == _map.ownCountryId ? '' : '不是此國家的人';
 }
 

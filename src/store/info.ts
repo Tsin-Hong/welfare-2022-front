@@ -33,18 +33,22 @@ const info = {
               const cid = received.payload.countryId || 0;
               const conntry = content.rootState.global.countries.find(c => c.id == cid)
               if (cid > 0) {
-                msg = `入仕成功! 成功加入國家 [ ${conntry ? conntry.name : ''} ] `
+                msg = `入仕成功! 成功加入國家【 ${conntry ? conntry.name : ''} 】`
               } else {
                 msg = '入仕失敗, 請恢復行動力後再嘗次'
               }
             }  break
             case enums.ACT_SEARCH_WILD: {
               const adds = received.payload.money - content.rootState.user.money
-              msg = `探索成功! 找到了 [黃金] [ ${adds} ]`
+              msg = `探索成功! 找到了【黃金】X ${adds}`
             } break
             case enums.ACT_INCREASE_SOLDIER: {
               const adds = received.payload.soldier - content.rootState.user.soldier
-              msg = `徵兵成功! 有 [ ${adds} ] 位士兵願意追隨您`
+              msg = `徵兵成功! 有 【 ${adds} 】 位士兵願意追隨您`
+            } break
+            case enums.ACT_BUSINESS: {
+              const adds = received.payload.money - content.rootState.user.money
+              msg = `商業執行成功! 獲得【黃金】X ${adds}`
             } break
             default:
           }
