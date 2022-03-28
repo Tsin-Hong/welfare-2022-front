@@ -10,12 +10,13 @@ const global = {
     cities: [],
     countries: [],
     notifications: [],
-    battlefieldMap: {0: {id: 0, attackCountryIds: [], defenceCountryId: 0, detail: {}, judgeId: 0, mapId: 0, round: 0, timestamp: 0, winnerCountryId: 0}},
+    domesticMessages: [],
+    battlefieldMap: {/*0: {id: 0, attackCountryIds: [], defenceCountryId: 0, detail: {}, judgeId: 0, mapId: 0, round: 0, timestamp: 0, winnerCountryId: 0}*/},
     battleAreaPanel: {
       timeOptions: [],
       mapId: 0
     },
-    occupationMap: {0: {id: 0, name: '', contributionCondi: 999, addActPoint: 5, isAllowedRecurit: false, isAllowedShare: false}},
+    occupationMap: {/*0: {id: 0, name: '', contributionCondi: 999, addActPoint: 5, isAllowedRecurit: false, isAllowedShare: false}*/},
     io: null
   },
   mutations: {
@@ -33,6 +34,10 @@ const global = {
           if (payload.notifications) {
             state.notifications = payload.notifications.map((e: any) => [new Date(e[0]), e[1]])
             state.notifications.sort((a: any, b: any) => b[0] - a[0])
+          }
+          if (payload.domesticMessages) {
+            state.domesticMessages = payload.domesticMessages.map(e => [new Date(e[0]), e[1]]);
+            state.domesticMessages.sort((a,b) => b[0] - a[0]);
           }
           if (payload.battlefieldMap) {
             state.battlefieldMap = payload.battlefieldMap;
@@ -89,9 +94,10 @@ const global = {
           delete nextBattlefield[mapId];
           state.battlefieldMap = nextBattlefield;
         } break
-        // case enums.ALERT:
-        //   window.alert(payload.msg)
-        //   break
+        case enums.ACT_NOTIFICATION_DOMESTIC: {
+          const newmsg = [new Date(payload[0]), payload[1]]
+          state.domesticMessages = [newmsg].concat(state.domesticMessages)
+        } break
         default:
       }
     },
@@ -178,6 +184,55 @@ const global = {
        * 可以獲得 [隨機 50 ~ 150 + 城池 addResource 值] 的黃金量
        */
       content.dispatch('emitMessage', {act: enums.ACT_BUSINESS});
+    },
+    actAppointOccupation: (content: any, args: any) => {
+      /**
+       * 任命官吏
+       * @param {number} userId
+       * @param {number} occupationId
+       * 
+       * occupationId 參考 occupationMap 裡的資料中id
+       */
+      content.dispatch('wsEmitMessage', {act: enums.ACT_APPOINTMENT, payload: args});
+    },
+    actDismissOccupation: (content: any, args: any) => {
+      /**
+       * 解除官吏
+       * @param {number} userId
+       * 
+       */
+      content.dispatch('wsEmitMessage', {act: enums.ACT_DISMISS, payload: args});
+    },
+    actLevelUpCity: (content: any, args: any) => {
+      /**
+       * 升級建築
+       * @param {number} cityId
+       * @param {string} constructionName  [ "barrack" , "market" , "stable" , "wall" ]
+       * 
+       * cityId 指的是 cities 全域資料裡的id  並非 maps 裡的id
+       * constructionName 請參考 enum 裡的 CHINESE_CONSTRUCTION_NAMES KEY
+       */
+      content.dispatch('wsEmitMessage', {act: enums.ACT_LEVELUP_CITY, payload: args});
+    },
+    actShare: (content: any, args: any) => {
+      /**
+       * 配給
+       * @param {number} userId
+       * @param {number} money
+       * @param {number} soldier
+       * 
+       * 暫時先開放配給 黃金跟士兵 直接指定要給的數量 如果money或soldier其一沒有則給 0
+       */
+      content.dispatch('wsEmitMessage', {act: enums.ACT_SHARE, payload: args});
+    },
+    actEscape: (content: any, args: any) => {
+      /**
+       * 逃脫
+       * @param {number} money
+       * 
+       * 被俘虜時有10%機率逃往主城 解除俘虜狀態 每多100黃金增加機率1%  如不花費黃金則給 0
+       */
+      content.dispatch('wsEmitMessage', {act: enums.ACT_ESCAPE, payload: args});
     },
   },
   getters: {
