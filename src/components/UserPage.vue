@@ -659,8 +659,12 @@
             <v-divider class="mb-10-px"></v-divider>
             <table class="map-info-table">
               <tr>
-                <th width="50%">總兵力</th>
-                <th width="50%">
+                <th>基本抵禦力</th>
+                <th>
+                  {{ selectedMapInfo.basicDefense }}
+                </th>
+                <th>總兵力</th>
+                <th>
                   {{
                     selectedMapInfo.userdata
                       .filter(
@@ -670,17 +674,19 @@
                   }}
                 </th>
               </tr>
-              <tr>
-                <th>基本抵禦力</th>
-                <th>1000</th>
-              </tr>
-              <tr
-                v-for="(info, idx) in selectedMapInfo.basicInfos"
-                :key="`${selectedMapInfo.id}_${idx}`"
-              >
-                <th>{{ info.name }}</th>
-                <th>{{ info.value }}</th>
-              </tr>
+              <template v-if="selectedMapInfo.basicInfos">
+                <tr
+                  v-for="(info, idx) in selectedMapInfo.basicInfos"
+                  :key="`${selectedMapInfo.id}_${idx}`"
+                >
+                  <th>{{ info.name }}</th>
+                  <th v-text="info.value"></th>
+                  <th>{{ constructionName[info.cons] }}</th>
+                  <th>
+                    LV {{ info._lv }}
+                  </th>
+                </tr>
+              </template>
             </table>
             <v-card-subtitle class="grey--text mt-15-px"
               >在據點中的人員名冊</v-card-subtitle
@@ -739,7 +745,7 @@
                     :src="require('../assets/images/' + key + '.png')"
                   ></v-img>
                 </v-avatar>
-                <div>
+                <div v-if="currUser.mapNowCity">
                   <v-card-title
                     class="ff-wkw5 fz-32-px"
                     v-text="item"
@@ -972,10 +978,20 @@ export default Vue.extend({
     },
     countries: function () {
       const countries = JSON.parse(JSON.stringify(this.global.countries))
+      const maps = JSON.parse(JSON.stringify(this.global.maps))
+
       for (const i in countries) {
         const curr = countries[i]
         curr.color = curr.color.split(',')
+        curr.cityNum = 0
+        for (const j in maps) {
+          const currMap = maps[j]
+          if (currMap.cityId > 0 && currMap.ownCountryId == curr.id) {
+            curr.cityNum += 1
+          }
+        }
       }
+
       return countries
     },
     users: function () {
@@ -1115,7 +1131,7 @@ export default Vue.extend({
       const _map = _maps[this.openMapInfoIdx]
       if (!_map) return null
       const _city = this.global.cities.find((c) => c.id == _map.cityId)
-      const _country = JSON.parse(JSON.stringify(this.global.countries)).find(
+      const _country = JSON.parse(JSON.stringify(this.countries)).find(
         (c) => c.id == _map.ownCountryId
       )
       const _occupationMap = this.global.occupationMap
@@ -1147,21 +1163,46 @@ export default Vue.extend({
               {
                 cons: 'barrack',
                 name: '徵兵量',
-                value: `${100} - ${
+                _lv: _city.jsonConstruction.barrack.lv,
+                value: `${
+                  100 + Number(_city.jsonConstruction.barrack.lv) * 10
+                } - ${
                   300 +
                   _maps.filter(
                     (m) => m.cityId > 0 && m.ownCountryId == _map.ownCountryId
                   ).length *
-                    15
+                    15 +
+                  Number(_city.jsonConstruction.barrack.lv) * 10
                 }`
               },
               {
                 cons: 'market',
                 name: '商業收益',
-                value: `${50 + _city.addResource} - ${150 + _city.addResource}`
+                _lv: _city.jsonConstruction.market.lv,
+                value: `${
+                  50 +
+                  _city.addResource +
+                  Number(_city.jsonConstruction.market.lv) * 6
+                } - ${
+                  150 +
+                  _city.addResource +
+                  Number(_city.jsonConstruction.market.lv) * 6
+                }`
               },
-              { cons: 'stable', name: '移動消耗減免', value: 0 },
-              { cons: 'wall', name: '防禦損兵減少量', value: `${0}%` }
+              {
+                cons: 'stable',
+                name: '移動消耗減免',
+                _lv: _city.jsonConstruction.stable.lv,
+                value: +Number(_city.jsonConstruction.stable.lv)
+              },
+              {
+                cons: 'wall',
+                name: '防禦損兵減少量',
+                _lv: _city.jsonConstruction.wall.lv,
+                value: `${
+                  0 + Number(_city.jsonConstruction.wall.lv) * 0.09 * 100
+                }%`
+              }
             ]
           : []
       const ownCountry =
@@ -1169,9 +1210,16 @@ export default Vue.extend({
       userdata.sort((a, b) =>
         a.role == b.role ? b.soldier - a.soldier : a.role - b.role
       )
+
+      const basicDefense =
+        _map.ownCountryId > 0 && _city
+          ? 1000 + 900 * _city.jsonConstruction.wall.lv
+          : 1000
+
+      const city = _city
       !Array.isArray(ownCountry.color) &&
         (ownCountry.color = ownCountry.color.split(','))
-      return { ..._map, userdata, basicInfos, ownCountry }
+      return { ..._map, userdata, basicInfos, ownCountry, city, basicDefense }
     },
     currUser: function () {
       return this.getUser()
@@ -1251,6 +1299,38 @@ export default Vue.extend({
       'actBattle',
       'actLevelUpCity'
     ]),
+    basicInfosValue: function (info, lv, cityNum) {
+      let value = info.value
+      const str = ' - '
+
+      switch (info.cons) {
+        case 'barrack': {
+          const data = value.split(str)
+          value =
+            Number(data[0]) +
+            10 * lv +
+            str +
+            (Number(data[1]) + 10 * lv + cityNum * 15)
+          break
+        }
+        case 'market': {
+          const data = value.split(str)
+          value = Number(data[0]) + 6 * lv + str + (Number(data[1]) + 6 * lv)
+          break
+        }
+        case 'stable': {
+          value = lv
+          break
+        }
+        case 'wall': {
+          const data = value.split('%')
+          value = Number(data[0]) + lv * 0.09 + data[1]
+          break
+        }
+      }
+
+      return value
+    },
     moment: function (date) {
       return this.$moment(date)
     },
@@ -1335,7 +1415,7 @@ export default Vue.extend({
           )
           break
         case 2:
-          this.ChangeState(['dialog_battle_list', true])
+          // this.ChangeState(['dialog_battle_list', true])
           break
       }
     },
@@ -2538,6 +2618,7 @@ html {
   width: 100%;
   th,
   td {
+    width: 25%;
     padding: 10px 15px;
   }
 }
