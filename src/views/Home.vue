@@ -88,6 +88,15 @@ export default Vue.extend({
         couldBeUseByOther: false,
         items: [
           {
+            id: 1005,
+            icon: '',
+            title: '建築',
+            is_show: true,
+            couldBeUseRoleIds: [1, 2],
+            couldBeUseByCity: true,
+            couldBeUseByOther: false
+          },
+          {
             id: 1001,
             icon: '',
             title: '商業',

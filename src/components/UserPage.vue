@@ -620,7 +620,7 @@
                           {{ battlefield[key].nickname }}
                         </div>
                       </div>
-                      <div v-if="!battlefield[key]" class="join-btn">
+                      <div v-if="battlefield[key + 'Id'] == 0" class="join-btn">
                         <v-btn>擔任</v-btn>
                         <div class="limit-time">
                           截止時間<br />{{ battlefield.timestampLimit }}
@@ -1248,7 +1248,7 @@ export default Vue.extend({
           )
           break
         case 2:
-          // this.ChangeState(['dialog_battle_list', true])
+          this.ChangeState(['dialog_battle_list', true])
           break
       }
     },
@@ -1290,36 +1290,21 @@ export default Vue.extend({
       this.ChangeState(['dialog', false])
     },
     goDoApi: function () {
-      let content: ''
-      // console.log(
-      //   'goDoApi this.client.dialog_check_curr: ',
-      //   this.client.dialog_check_curr
-      // )
       switch (this.client.dialog_check_curr.id) {
         case 1002:
           this.actIncreaseSoldier()
-          content = ''
-          // this.ApiRes({ content: content })
           break
         case 3001:
           this.actEnterCountry()
-          content = ''
-          // this.ApiRes({ content: content })
           break
         case 3002:
           this.actLeaveCountry()
-          content = ''
-          // this.ApiRes({ content: content })
           break
         case 1001:
-          console.log('11')
           this.actBusiness()
-          content = ''
           break
         case 5003:
           this.actSearchWild()
-          content = ''
-          // this.ApiRes({ content: content })
           break
         case 6:
           this.onClickLogout()
@@ -1332,7 +1317,6 @@ export default Vue.extend({
           this.goToCityId = 0
           this.ChangeState(['status_type', ''])
           this.ChangeState(['could_be_move_to', []])
-          content = ''
           break
       }
       this.ChangeState(['dialog_check', false])
