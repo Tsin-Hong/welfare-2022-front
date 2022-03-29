@@ -25,6 +25,32 @@ function isRoleNotFree(user) {
   return user.role !== enums.ROLE_FREEMAN ? '' : '你是浪人.';
 }
 
+function isRoleFree(user) {
+  return user.role == enums.ROLE_FREEMAN ? '' : '不是浪人.';
+}
+
+function isRoleWarrier(user) {
+  return user.role == enums.ROLE_GENERMAN ? '' : '不是武將.';
+}
+
+function isNotLoyal(user) {
+  return user.loyalUserId == 0 ? '' : '你是元老.';
+}
+
+function isAllowedShareUser(user, global) {
+  if (user.role == enums.ROLE_EMPEROR) return '';
+  const _myOccupation = global.occupationMap[user.occupationId];
+  return _myOccupation && _myOccupation.isAllowedShare ? '' : '沒有配給權力';
+}
+
+function isNotBeCaptived(user) {
+  return !user.captiveDate ? '' : `被俘虜中. [${user.captiveDate.toLocaleDateString()}]`
+}
+
+function isBeCaptived(user) {
+  return user.captiveDate ? '' : `不是俘虜.`
+}
+
 function isExistMap(mapId, global) {
   return hash.getMap(mapId, global.maps) ? '' : '地圖選取錯誤'
 }
@@ -37,7 +63,20 @@ function isEnemyMap(user, mapId, global) {
 function isInCity(user, global) {
   const _map = hash.getMap(user.mapNowId, global.maps);
   const _city = hash.getCity(_map.cityId, global.cities);
-  return _map && _city ? '' : '所在不是城市';
+  return _map && _city ? '' : '所在不是城池';
+}
+
+function isExistCity(cityId, global) {
+  return hash.getCity(cityId, global.cities) ? '' : '城池不存在';
+}
+
+function isExistConstuction(conName) {
+  return enums.CHINESE_CONSTRUCTION_NAMES[conName] ? '' : '不存在的建築';
+}
+
+function isInWild(user, global) {
+  const _map = hash.getMap(user.mapNowId, global.maps);
+  return _map && _map.cityId == 0 ? '' : '所在不是野區';
 }
 
 function isInCountryHere(user, global) {
@@ -93,6 +132,10 @@ function havePoint(user, point = 1) {
   return user.actPoint >= point ? '' : '行動點數不足'
 }
 
+function haveMoney(user, money = 0) {
+  return 0 <= money && money <= user.money ? '' : '黃金不足.';
+}
+
 function haveBasicBattleResource(user) {
   return user.money >= enums.NUM_BATTLE_MONEY_MIN && user.soldier >= enums.NUM_BATTLE_SOLDIER_MIN ? '' : '資源不足以出征'
 }
@@ -103,6 +146,15 @@ function isOccupationEnoughContribution(userId, occupationId, global) {
   return _occu && _user && _user.contribution >= _occu.contributionCondi ? '' : '貢獻值不足.';
 }
 
+function isSameCountryPartner(user, partnerId, global) {
+  const _partent = hash.getUser(partnerId, global.users)
+  return _partent && user.countryId == _partent.countryId ? '' : '不同的國家.';
+}
+
+function isExistOriginCity(user, global) {
+  const country = hash.getCountry(user.countryId, global.countries);
+  return country && isExistCity(country.originCityId, global) == '' ? '' : '不存在主城.';
+}
 
 
 export default {
@@ -117,21 +169,30 @@ export default {
     const payload = args.payload || {}
     switch (act) {
       case enums.ACT_INCREASE_SOLDIER: {
-        return havePoint(user, 1) || isInCity(user, global)
+        return havePoint(user, 1) || isInCity(user, global) || isNotBeCaptived(user)
       }
       case enums.ACT_MOVE: {
-        return isNoTarget(user)
+        return isNoTarget(user) || havePoint(user, 1) || isNotBeCaptived(user)
+      }
+      case enums.ACT_SEARCH_WILD: {
+        return isNoTarget(user) || havePoint(user, 1) || isInWild(user, global) || isNotBeCaptived(user)
+      }
+      case enums.ACT_LEAVE_COUNTRY: {
+        return havePoint(user, 1) || isRoleWarrier(user) || isNotLoyal(user)
+      }
+      case enums.ACT_ENTER_COUNTRY: {
+        return havePoint(user, 1) || isRoleFree(user) || isExistMap(user.mapNowId, global) || isInCity(user, global)
       }
       case enums.ACT_BATTLE: {
         const mapId = payload.mapId;
         return isNoTarget(user) || isExistMap(mapId, global) || isEnemyMap(user, mapId, global) || hasNoBattlefield(mapId, global) || haveNoWorking(user, global)
-            || havePoint(user) || haveBasicBattleResource(user)
+            || havePoint(user) || haveBasicBattleResource(user) || isNotBeCaptived(user)
       }
       case enums.ACT_BATTLE_JOIN: {
         const mapId = payload.mapId;
         const battleId = payload.battleId;
         const position = payload.position;
-        return isNoTarget(user) || haveNoWorking(user, global) || hasBattle(mapId, battleId, global) || isEmptyBattlePosition(user, position, mapId, global) || isNotInvolvedBattle(user, position, mapId, global);
+        return isNoTarget(user) || haveNoWorking(user, global) || hasBattle(mapId, battleId, global) || isEmptyBattlePosition(user, position, mapId, global) || isNotInvolvedBattle(user, position, mapId, global) || isNotBeCaptived(user)
       }
       case enums.ACT_BATTLE_JUDGE: {
         const mapId = payload.mapId;
@@ -144,10 +205,26 @@ export default {
       case enums.ACT_APPOINTMENT: {
         const userId = payload.userId;
         const occupationId = payload.occupationId;
-        return isRoleEmperor(user) || havePoint(user, 3) || isOccupationEnoughContribution(userId, occupationId, global);
+        return isNotBeCaptived(user) || isRoleEmperor(user) || havePoint(user, 3) || isOccupationEnoughContribution(userId, occupationId, global);
       }
       case enums.ACT_DISMISS: {
-        return isRoleEmperor(user) || havePoint(user, 1);
+        return isNotBeCaptived(user) || isRoleEmperor(user) || havePoint(user, 1);
+      }
+      case enums.ACT_LEVELUP_CITY: {
+        const cityId = payload.cityId;
+        const constructionName = payload.constructionName;
+        return isNotBeCaptived(user) || havePoint(user, 1) || isInCity(user, global) || isInCountryHere(user, global) || isExistCity(cityId, global) || isExistConstuction(constructionName)
+      }
+      case enums.ACT_SHARE: {
+        const userId = payload.userId;
+        // const soldier = payload.soldier;
+        // const money = payload.money;
+        // const packetId = payload.packetId;
+        return isNotBeCaptived(user) || havePoint(user, 1) || isAllowedShareUser(user, global) || isSameCountryPartner(user, userId, global)
+      }
+      case enums.ACT_ESCAPE: {
+        const money = payload.money;
+        return havePoint(user, 1) || isBeCaptived(user) || haveMoney(user, money) || isExistOriginCity(user, global)
       }
     }
     return ''
