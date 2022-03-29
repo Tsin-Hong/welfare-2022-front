@@ -430,6 +430,9 @@ export default Vue.extend({
           case 5002:
             this.ChangeState(['status_type', 'battal'])
             break
+          case 1005:
+            this.ChangeState(['dialog_level_up_city', true])
+            break
           default:
             this.ChangeDialogCheck({ content: key })
         }

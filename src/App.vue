@@ -65,6 +65,10 @@ export default Vue.extend({
   display: none;
 }
 
+.ff-wkw5 {
+  font-family: '華康行楷體W5' !important;
+}
+
 body,
 html,
 .dialog {
@@ -184,6 +188,10 @@ html,
   }
   .ml-rev-#{$i}-px {
     margin-left: -#{$i}px !important;
+  }
+
+  .ma-#{$i}-pct {
+    margin: #{$i} + '%' !important;
   }
 
   .my-#{$i}-pct {

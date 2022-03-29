@@ -82,6 +82,16 @@ const user = {
           user.mapNowName = curr.name
           user.mapNowIsCity = curr.cityId > 0
           user.mapNowIndex = parseInt(i)
+          user.mapNowCityId = curr.cityId
+        }
+      }
+
+      if (user.mapNowIsCity) {
+        for (const i in global.state.cities) {
+          const curr = global.state.cities[i]
+          if (curr.id == user.mapNowCityId) {
+            user.mapNowCity = curr
+          }
         }
       }
 

@@ -7,6 +7,7 @@ const client = {
     dialog_battle: false,
     dialog_info: false,
     dialog: false,
+    dialog_level_up_city: false,
     dialog_content: {
       title: '',
       text: '',

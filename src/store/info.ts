@@ -63,6 +63,14 @@ const info = {
           const payload = decoded.payload
           let errorMsg = '未知錯誤'
           switch (payload.act) {
+            case enums.ACT_LEVELUP_CITY:
+              errorMsg = '建築失敗'
+              if (payload.msg == 'Money Not Enough.') {
+                errorMsg += '，黃金不足。'
+              } else if (payload.msg == 'Lv Out Of Max.') {
+                errorMsg += '，該建築已達最高等級。'
+              }
+              break
             case enums.ACT_MOVE:
               errorMsg = '行軍失敗'
               break

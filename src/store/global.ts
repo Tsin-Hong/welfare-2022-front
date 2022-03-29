@@ -193,7 +193,7 @@ const global = {
        * 
        * occupationId 參考 occupationMap 裡的資料中id
        */
-      content.dispatch('wsEmitMessage', {act: enums.ACT_APPOINTMENT, payload: args});
+      content.dispatch('emitMessage', {act: enums.ACT_APPOINTMENT, payload: args});
     },
     actDismissOccupation: (content: any, args: any) => {
       /**
@@ -201,7 +201,7 @@ const global = {
        * @param {number} userId
        * 
        */
-      content.dispatch('wsEmitMessage', {act: enums.ACT_DISMISS, payload: args});
+      content.dispatch('emitMessage', {act: enums.ACT_DISMISS, payload: args});
     },
     actLevelUpCity: (content: any, args: any) => {
       /**
@@ -212,7 +212,7 @@ const global = {
        * cityId 指的是 cities 全域資料裡的id  並非 maps 裡的id
        * constructionName 請參考 enum 裡的 CHINESE_CONSTRUCTION_NAMES KEY
        */
-      content.dispatch('wsEmitMessage', {act: enums.ACT_LEVELUP_CITY, payload: args});
+      content.dispatch('emitMessage', {act: enums.ACT_LEVELUP_CITY, payload: args});
     },
     actShare: (content: any, args: any) => {
       /**
@@ -223,7 +223,7 @@ const global = {
        * 
        * 暫時先開放配給 黃金跟士兵 直接指定要給的數量 如果money或soldier其一沒有則給 0
        */
-      content.dispatch('wsEmitMessage', {act: enums.ACT_SHARE, payload: args});
+      content.dispatch('emitMessage', {act: enums.ACT_SHARE, payload: args});
     },
     actEscape: (content: any, args: any) => {
       /**
@@ -232,7 +232,7 @@ const global = {
        * 
        * 被俘虜時有10%機率逃往主城 解除俘虜狀態 每多100黃金增加機率1%  如不花費黃金則給 0
        */
-      content.dispatch('wsEmitMessage', {act: enums.ACT_ESCAPE, payload: args});
+      content.dispatch('emitMessage', {act: enums.ACT_ESCAPE, payload: args});
     },
   },
   getters: {

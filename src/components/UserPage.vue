@@ -700,13 +700,98 @@
         </template>
       </v-card>
     </v-dialog>
+    <v-dialog dark v-model="client.dialog_level_up_city" width="600">
+      <v-card class="dialog-level-up-city ff-wkw5">
+        <template>
+          <v-toolbar
+            flat
+            dark
+            :style="{
+              background: currUser.countryColors,
+              color: currUser.countryColorsT
+            }"
+          >
+            <v-toolbar-title v-if="currUser.mapNowName" class="d-block">
+              {{ currUser.mapNowName }}
+            </v-toolbar-title>
+            <v-spacer></v-spacer>
+            <v-btn
+              icon
+              dark
+              @click="ChangeState(['dialog_level_up_city', false])"
+            >
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </v-toolbar>
+          <v-card-text class="py-15-px">
+            <v-card
+              :color="item.color"
+              dark
+              v-for="(item, key) in constructionName"
+              :key="key"
+              class="d-inline-block ff-wkw5 ma-1-pct"
+              elevation="0"
+              width="48%"
+            >
+              <div class="d-flex flex-no-wrap justify-space-between">
+                <v-avatar class="ma-3" size="125" tile>
+                  <v-img
+                    :src="require('../assets/images/' + key + '.png')"
+                  ></v-img>
+                </v-avatar>
+                <div>
+                  <v-card-title
+                    class="ff-wkw5 fz-32-px"
+                    v-text="item"
+                  ></v-card-title>
+                  <v-card-subtitle
+                    >LV
+                    {{
+                      currUser.mapNowCity.jsonConstruction[key].lv
+                    }}</v-card-subtitle
+                  >
+
+                  <v-card-actions>
+                    <v-btn
+                      v-if="currUser.mapNowCity.jsonConstruction[key].lv < 10"
+                      class="ml-2 mt-5 ff-wkw5 fz-16-px"
+                      outlined
+                      small
+                      @click="
+                        actLevelUpCity({
+                          cityId: currUser.mapNowCityId,
+                          constructionName: key
+                        })
+                      "
+                    >
+                      升級
+                    </v-btn>
+                  </v-card-actions>
+                  <v-card-subtitle
+                    v-if="currUser.mapNowCity.jsonConstruction[key].lv < 10"
+                    class="grey--text"
+                    >下一級需要
+                    <br />
+                    {{
+                      (currUser.mapNowCity.jsonConstruction[key].lv + 1) * 300
+                    }}
+                    黃金</v-card-subtitle
+                  >
+                </div>
+              </div>
+            </v-card>
+          </v-card-text>
+        </template>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
 <script lang="ts">
 // import router from '@/router'
 // import client from '@/store/client'
-import client from '@/store/client'
+// import client from '@/store/client'
+import enums from '@/unit/enum'
 import Vue from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -728,6 +813,7 @@ export default Vue.extend({
     infoTypeNow: 0,
     selectedItem: 1,
     curStronghold: {},
+    constructionName: enums.CHINESE_CONSTRUCTION_NAMES,
     numCN: [
       '壹',
       '貳',
@@ -1162,7 +1248,8 @@ export default Vue.extend({
       'actEnterCountry',
       'actBusiness',
       'ApiRes',
-      'actBattle'
+      'actBattle',
+      'actLevelUpCity'
     ]),
     moment: function (date) {
       return this.$moment(date)
