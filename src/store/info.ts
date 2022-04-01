@@ -18,8 +18,8 @@ const info = {
     wsOnReceiveAUTHORIZE: (content: any, message: any) => {
       if (message.byteLength < 0x0400) {
         const received = parser.arrayBufferToJSON(message)
-        console.log('[INFO] wsOnReceiveAUTHORIZE recived: ', received)
-        console.log('content.rootState: ', content.rootState)
+        // console.log('[INFO] wsOnReceiveAUTHORIZE recived: ', received)
+        // console.log('content.rootState: ', content.rootState)
         if (typeof received.act === 'number') {
           let msg = '成功!'
           switch (received.act) {

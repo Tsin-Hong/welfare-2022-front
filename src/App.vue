@@ -75,18 +75,9 @@ html,
   min-width: 1280px;
 }
 
-// body,
-// .v-input--selection-controls .v-input__slot,
-// .v-input--selection-controls .v-radio,
-// .v-input--selection-controls__ripple,
-// .v-input--selection-controls__input + .v-label,
-// button,
-// [type='button'],
-// [type='reset'],
-// [type='submit'],
-// [role='button'] {
-//   cursor: url('./assets/images/mouse.png'), pointer !important;
-// }
+.posi-re {
+  position: relative;
+}
 
 @for $i from 0 through 5000 {
   .fz-#{$i}-px {

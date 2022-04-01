@@ -94,7 +94,7 @@ const user = {
           }
         }
       }
-
+      
       if (stateUser.countryId === 0) {
       } else {
         for (const i in global.state.countries) {

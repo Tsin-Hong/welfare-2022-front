@@ -328,7 +328,7 @@ export default Vue.extend({
             id: 5002,
             icon: '',
             title: '出征',
-            is_show: false,
+            is_show: true,
             couldBeUseRoleIds: [1, 2],
             couldBeUseByCity: true,
             couldBeUseByOther: true

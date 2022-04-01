@@ -13,6 +13,7 @@ const client = {
       text: '',
       img: ''
     },
+    dialog_check_input_name: '',
     dialog_check: false,
     dialog_check_curr: {
       key: '',
@@ -25,6 +26,10 @@ const client = {
     },
     status_type: '',
     could_be_move_to: [],
+    battle_worker_type: {
+      judge: ['判', '裁判', 4],
+      toolman: ['攝', '攝影師', 5],
+    },
     rolesObj: {
       1: {
         name: '君主'
@@ -43,7 +48,8 @@ const client = {
       state[key] = payload[1]
     },
     ChangeDialogCheck: function (state, payload) {
-      state.dialog_check_content.content = payload.content
+      state.dialog_check_content.content = '確定要執行' + payload.content + '?'
+      state.dialog_check_input_name = payload.input_name ? payload.input_name : ''
       state.dialog_check = true
     },
     ChangeApiCheck: function (state: any, payload = { key: '', index: '', id: 0 }) {
@@ -58,11 +64,6 @@ const client = {
   },
   getters: {},
   actions: {
-    ApiBattle: function ({}, payload) {
-      if (!payload.mapId) {
-
-      }
-    },
     ApiMove: function ({ commit, rootState }, payload) {
       const user = rootState.user
       const res = mapAlgorithm.getAllowedPosition(user.mapNowId, user.actPoint, user.countryId)

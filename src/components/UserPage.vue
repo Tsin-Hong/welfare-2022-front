@@ -117,7 +117,7 @@
       </div>
       <div class="right-top-area">
         <div class="btn-group">
-          <span class="battle" :disabled="true" @click="showInfoArea(2)">
+          <span class="battle" :disabled="false" @click="showInfoArea(2)">
             <img src="../assets/images/戰役.png" alt="" />
             <div class="text">戰役</div>
           </span>
@@ -132,10 +132,14 @@
         </div>
       </div>
       <div class="notification-area">
-        <div class="list-group">
+        <v-tabs class="tab" v-model="tab">
+          <v-tab key="notifications">公開事件</v-tab>
+          <v-tab key="domesticMessages">國內事件</v-tab>
+        </v-tabs>
+        <div class="list-group px-3-px">
           <div
             class="list d-flex"
-            v-for="(notice, index) in notifications"
+            v-for="(notice, index) in notices"
             :key="index"
           >
             <span>{{ notice[0] }}</span>
@@ -294,9 +298,38 @@
     </div>
     <v-dialog v-model="client.dialog_check" persistent max-width="500">
       <v-card dark class="dialog-card">
-        <v-card-title>
-          確定要執行 {{ client.dialog_check_content.content }} ?
-        </v-card-title>
+        <v-card-title
+          :class="{ 'h-80-px': !client.dialog_check_input_name }"
+        ></v-card-title>
+        <v-card-text>
+          <div v-html="client.dialog_check_content.content"></div>
+          <div class="px-30-px mt-2" v-if="client.dialog_check_input_name">
+            {{ client.dialog_check_input_name }}
+            <v-row>
+              <v-col class="pr-4">
+                <v-slider
+                  v-model="goToBattleSoldier"
+                  class="align-center"
+                  :max="battalSoldierMax"
+                  :min="battalSoldierMin"
+                  hide-details
+                >
+                  <template v-slot:append>
+                    <v-text-field
+                      v-model="goToBattleSoldier"
+                      class="mt-0 pt-0"
+                      hide-details
+                      single-line
+                      type="number"
+                      style="width: 60px"
+                    ></v-text-field>
+                  </template>
+                </v-slider>
+              </v-col>
+            </v-row>
+          </div>
+          <div class="red--text pt-6" v-text="errorText"></div>
+        </v-card-text>
         <v-card-actions>
           <v-btn class="ml-50-px" color="green darken-1" text @click="cencel()">
             否
@@ -307,7 +340,7 @@
       </v-card>
     </v-dialog>
     <v-dialog v-model="client.dialog" persistent width="500">
-      <v-card dark class="dialog-card">
+      <v-card dark class="dialog-card req-dialog">
         <!-- <v-img
           v-if="client.dialog_content.img"
           :src="require('../assets/images/dialog/' + client.dialog_content.img)"
@@ -326,11 +359,16 @@
     </v-dialog>
     <v-dialog v-model="client.dialog_battle" persistent width="500">
       <v-card dark class="dialog-battal-card">
-        <v-card-title v-if="goToCityObj.conutry"
+        <v-card-title
+          v-if="goToCityObj.conutry"
+          :style="{
+            background: goToCityObj.conutry.color,
+            color: goToCityObj.conutry['t_color']
+          }"
           >{{ goToCityObj.name }} 守方勢力 {{ goToCityObj.conutry.name }}
         </v-card-title>
         <v-card-text>
-          <div>
+          <div class="pt-20-px">
             戰爭發生時間
             <v-radio-group v-model="goToBattleTime" column>
               <v-radio
@@ -478,18 +516,11 @@
                 {{ battlefield.map.name }}之戰
               </div>
             </div>
-            <div class="battle-top">
+            <div class="battle-top text-center">
               <img src="../assets/images/border04.png" alt="" />
               <div class="battle-info-text">
-                <span>{{ battlefield.defenceSoldierTotal }}</span>
-                <span
-                  :style="{
-                    color: battlefield.defenceCountry.color[1],
-                    background: battlefield.defenceCountry.color[0]
-                  }"
-                  >{{ battlefield.defenceCountry.name }}</span
-                >
-                VS
+                
+                <span>{{ battlefield.attackSoldierTotal }}</span>
                 <span
                   :style="{
                     color: battlefield.attackCountry.color[1],
@@ -497,8 +528,30 @@
                   }"
                   >{{ battlefield.attackCountry.name }}</span
                 >
-                <span>{{ battlefield.attackSoldierTotal }}</span>
+                VS
+                <span
+                  :style="{
+                    color: battlefield.defenceCountry.color[1],
+                    background: battlefield.defenceCountry.color[0]
+                  }"
+                  >{{ battlefield.defenceCountry.name }}</span
+                >
+                <span>{{ battlefield.defenceSoldierTotal }}</span>
               </div>
+              <span
+                class="
+                  d-inline-block
+                  px-10-px
+                  py-6-px
+                  posi-re
+                  mt-15-px
+                  grey
+                  darken-4
+                  fz-18-px
+                "
+                :z-index="3"
+                >※ 【攻方】總兵力於截止時間結算小於【守方】直接戰敗 ※</span
+              >
             </div>
             <div class="d-flex field-block">
               <div class="battle-team-area d-flex">
@@ -555,8 +608,21 @@
                                 {{ user.nickname }}
                               </div>
                             </div>
-                            <div v-if="!user" class="join-btn">
-                              <v-btn>加入</v-btn>
+                            <div v-if="!user && battlefield" class="join-btn">
+                              <v-btn
+                                :disabled="
+                                  battlefield[type + 'Country'].id !=
+                                    currUser.countryId ||
+                                  currUser.alreadyJoined ||
+                                  battlefield.timestampLimit < dateFormat ||
+                                  !battlefield.map.route.includes(
+                                    currUser.mapNowId
+                                  )
+                                "
+                                class="fz-16-px"
+                                @click="joinBattleBtn(battlefield, u_i)"
+                                >加入</v-btn
+                              >
                               <div class="limit-time">
                                 截止時間<br />{{ battlefield.timestampLimit }}
                               </div>
@@ -576,8 +642,8 @@
                 <div class="user-group">
                   <div
                     class="user-block"
-                    v-for="(key, u_i) in battleOtherUser"
-                    :key="u_i"
+                    v-for="(type, key) in client.battle_worker_type"
+                    :key="key"
                   >
                     <div v-if="battlefield[key].id" class="user">
                       <div
@@ -611,7 +677,7 @@
                       </div>
                       <div class="user-name">
                         <div class="type">
-                          {{ key == 'judge' ? '判' : '巡' }}
+                          {{ type[0] }}
                         </div>
                         <div
                           v-if="battlefield[key]"
@@ -621,7 +687,19 @@
                         </div>
                       </div>
                       <div v-if="battlefield[key + 'Id'] == 0" class="join-btn">
-                        <v-btn>擔任</v-btn>
+                        <v-btn
+                          :disabled="
+                            battlefield.defenceCountry.id ==
+                              currUser.countryId ||
+                            battlefield.attackCountry.id ==
+                              currUser.countryId ||
+                            currUser.alreadyJoined ||
+                            currUser.actPoint == 0
+                          "
+                          class="fz-16-px"
+                          @click="joinBattleWorkerBtn(battlefield, type)"
+                          >擔任</v-btn
+                        >
                         <div class="limit-time">
                           截止時間<br />{{ battlefield.timestampLimit }}
                         </div>
@@ -682,9 +760,7 @@
                   <th>{{ info.name }}</th>
                   <th v-text="info.value"></th>
                   <th>{{ constructionName[info.cons] }}</th>
-                  <th>
-                    LV {{ info._lv }}
-                  </th>
+                  <th>LV {{ info._lv }}</th>
                 </tr>
               </template>
             </table>
@@ -804,6 +880,8 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 export default Vue.extend({
   name: 'UserPage',
   data: () => ({
+    date: new Date(),
+    tab: 0,
     inCurrStrongholdIndex: '',
     _mouse_dataset: {},
     viewX: 0,
@@ -956,25 +1034,30 @@ export default Vue.extend({
         hasImg: true
       }
     ],
-    battleType: ['defence', 'attack'],
+    battleType: ['attack', 'defence'],
     battleOtherUser: ['judge', 'toolman'],
     defaultColor: ['#A1A1A1', '#000'],
     openMapInfo: false,
-    openMapInfoIdx: 0
+    openMapInfoIdx: 0,
+    storage: {},
+    formateStr: 'YYYY-MM-DD HH-mm'
   }),
 
   computed: {
     ...mapState(['user', 'global', 'client', 'info']),
     ...mapGetters(['getUser']),
-    notifications: function () {
-      const notifications = JSON.parse(
-        JSON.stringify(this.global.notifications)
-      )
-      for (const i in notifications) {
-        const curr = notifications[i]
+    dateFormat: function () {
+      return this.$moment(this.date).format(this.formateStr)
+    },
+    notices: function () {
+      const tabs = ['notifications', 'domesticMessages']
+      const notices = JSON.parse(JSON.stringify(this.global[tabs[this.tab]]))
+
+      for (const i in notices) {
+        const curr = notices[i]
         curr[0] = this.$moment(curr[0]).format('YYYY-MM-DD HH:mm')
       }
-      return notifications
+      return notices
     },
     countries: function () {
       const countries = JSON.parse(JSON.stringify(this.global.countries))
@@ -1014,9 +1097,12 @@ export default Vue.extend({
       const strongholds = JSON.parse(JSON.stringify(this.strongholds))
       for (const i in battles) {
         const curr = battles[i]
-        curr.timestampLimit = this.$moment(curr.timestamp)
+        const currDate = this.$moment(curr.timestamp)
+        curr.timestamp = currDate.format('YYYY-MM-DD HH:mm')
+        curr.timestampLimit = currDate
           .subtract(3, 'days')
           .format('YYYY-MM-DD HH:mm')
+
         curr.attackCountry = countries.find((item) => {
           return item.id == curr.attackCountryIds[0]
         })
@@ -1066,8 +1152,15 @@ export default Vue.extend({
     },
     battalSoldierMin: function () {
       let min = 0
-      if (this.client.dialog_check_curr.id == 5002) {
-        min = 1000
+      if (this.currUser.soldier != 0) {
+        switch (this.client.dialog_check_curr.id) {
+          case 5002:
+            min = 1000
+            break
+          case 9002:
+            min = 1
+            break
+        }
       }
       return min
     },
@@ -1193,7 +1286,7 @@ export default Vue.extend({
                 cons: 'stable',
                 name: '移動消耗減免',
                 _lv: _city.jsonConstruction.stable.lv,
-                value: +Number(_city.jsonConstruction.stable.lv)
+                value: Number(_city.jsonConstruction.stable.lv)
               },
               {
                 cons: 'wall',
@@ -1222,7 +1315,21 @@ export default Vue.extend({
       return { ..._map, userdata, basicInfos, ownCountry, city, basicDefense }
     },
     currUser: function () {
-      return this.getUser()
+      const user = this.getUser()
+      const battlefields = this.battlefields
+      user.alreadyJoined = false
+
+      for (const i in battlefields) {
+        const curr = battlefields[i]
+        const userIds = [].concat(curr.atkUserIds, curr.defUserIds, [
+          curr.judgeId,
+          curr.toolmanI
+        ])
+        if (userIds.includes(user.id)) {
+          user.alreadyJoined = true
+        }
+      }
+      return user
     },
     today: function () {
       const curr = this.$moment()
@@ -1278,6 +1385,12 @@ export default Vue.extend({
     // localStorage.setItem('show_country_details', 'true')
   },
 
+  beforeDestroy: function () {
+    if (this.timer) {
+      clearInterval(this.timer)
+    }
+  },
+
   methods: {
     ...mapMutations([
       'ChangeState',
@@ -1297,42 +1410,17 @@ export default Vue.extend({
       'actBusiness',
       'ApiRes',
       'actBattle',
-      'actLevelUpCity'
+      'actLevelUpCity',
+      'actBattleJoin'
     ]),
-    basicInfosValue: function (info, lv, cityNum) {
-      let value = info.value
-      const str = ' - '
-
-      switch (info.cons) {
-        case 'barrack': {
-          const data = value.split(str)
-          value =
-            Number(data[0]) +
-            10 * lv +
-            str +
-            (Number(data[1]) + 10 * lv + cityNum * 15)
-          break
-        }
-        case 'market': {
-          const data = value.split(str)
-          value = Number(data[0]) + 6 * lv + str + (Number(data[1]) + 6 * lv)
-          break
-        }
-        case 'stable': {
-          value = lv
-          break
-        }
-        case 'wall': {
-          const data = value.split('%')
-          value = Number(data[0]) + lv * 0.09 + data[1]
-          break
-        }
-      }
-
-      return value
-    },
     moment: function (date) {
       return this.$moment(date)
+    },
+    setNow: function () {
+      this.timer = setInterval(function (this) {
+        console.log(this)
+        this.date = new Date()
+      }, 1000)
     },
     createBattle: function () {
       if (this.goToBattleTime == -1) {
@@ -1346,6 +1434,40 @@ export default Vue.extend({
         soldier: this.goToBattleSoldier
       }
       this.actBattle(data)
+    },
+    joinBattleBtn: function (battlefield, u_i) {
+      this.storage = { battlefield, u_i }
+      this.ChangeDialogCheck({
+        input_name: '派出兵力數',
+        content:
+          '加入<br>' +
+          battlefield.timestampLimit +
+          '<br>在【' +
+          battlefield.map.name +
+          '】<br> 【' +
+          battlefield.defenceCountry.name +
+          '】與【' +
+          battlefield.attackCountry.name +
+          '】戰役'
+      })
+      this.ChangeApiCheck({ id: 9002, key: '', index: -1 })
+    },
+    joinBattleWorkerBtn: function (battlefield, type) {
+      this.storage = { battlefield, type }
+      this.ChangeDialogCheck({
+        content:
+          '擔任<br>【' +
+          battlefield.defenceCountry.name +
+          '】與【' +
+          battlefield.attackCountry.name +
+          '】於<br>' +
+          battlefield.timestampLimit +
+          '<br>在【' +
+          battlefield.map.name +
+          '】戰役的' +
+          type[1]
+      })
+      this.ChangeApiCheck({ id: 9001, key: '', index: -1 })
     },
     strongholdClass: function (stronghold) {
       let classNames = 'stronghold'
@@ -1415,7 +1537,7 @@ export default Vue.extend({
           )
           break
         case 2:
-          // this.ChangeState(['dialog_battle_list', true])
+          this.ChangeState(['dialog_battle_list', true])
           break
       }
     },
@@ -1455,8 +1577,10 @@ export default Vue.extend({
       this.ChangeState(['could_be_move_to', []])
       this.ChangeState(['dialog_check', false])
       this.ChangeState(['dialog', false])
+      this.goToBattleSoldier = 0
     },
     goDoApi: function () {
+      console.log(this.storage, this.client.dialog_check_curr.id)
       switch (this.client.dialog_check_curr.id) {
         case 1002:
           this.actIncreaseSoldier()
@@ -1485,8 +1609,31 @@ export default Vue.extend({
           this.ChangeState(['status_type', ''])
           this.ChangeState(['could_be_move_to', []])
           break
+        case 9001: {
+          const battlefield = this.storage.battlefield
+          const type = this.storage.type
+          const position = type[2]
+          const mapId = battlefield.mapId
+          const battleId = battlefield.id
+          // const soldier = 0
+          this.actBattleJoin({ position, mapId, battleId })
+          break
+        }
+        case 9002: {
+          const battlefield = this.storage.battlefield
+          const position = this.storage.u_i
+          const mapId = battlefield.mapId
+          const battleId = battlefield.id
+          const soldier = this.goToBattleSoldier
+          this.actBattleJoin({ position, mapId, battleId, soldier })
+          break
+        }
       }
+      this.ChangeDialogCheck({
+        content: ''
+      })
       this.ChangeState(['dialog_check', false])
+      this.goToBattleSoldier = 0
     },
     onClickLogout: function () {
       localStorage.removeItem('_token_')
@@ -2238,6 +2385,35 @@ html {
   right: 0;
   bottom: 0;
   z-index: 3;
+  .tab {
+    margin-bottom: 3px;
+    .v-item-group {
+      background: transparent !important;
+      .v-tabs-slider-wrapper {
+        display: none;
+      }
+      .v-tab {
+        background: url('../assets/images/邊框.png') no-repeat center center
+          rgb(129, 129, 129);
+        background-size: auto 100%;
+        color: rgb(134, 134, 134);
+        width: 131px;
+        font-family: '華康行楷體W5';
+        font-size: 20px;
+        opacity: 0.6;
+        &:hover {
+          opacity: 0.8;
+        }
+        &.v-tab--active {
+          background: url('../assets/images/邊框.png') no-repeat center center
+            rgb(189, 156, 65);
+          background-size: auto 100%;
+          color: rgb(14, 14, 14);
+          opacity: 1 !important;
+        }
+      }
+    }
+  }
   .list-group {
     height: 250px;
     overflow-y: scroll;
@@ -2261,8 +2437,14 @@ html {
   font-family: '華康行楷體W5';
   font-size: 26px;
   &.v-card {
+    &.req-dialog {
+      .v-card__title {
+        padding: 50px 70px !important;
+      }
+    }
     .v-card__title {
-      padding: 50px 70px !important;
+      min-height: 30px;
+      // padding: 50px 70px !important;
     }
     .v-card__text {
       font-size: 22px;
@@ -2567,6 +2749,7 @@ html {
     }
     &.attack-group {
       margin-right: 40px;
+      margin-left: 350px;
       .user-group {
         .user-name {
           .type {
@@ -2579,7 +2762,6 @@ html {
     }
     &.defence-group {
       margin-right: 40px;
-      margin-left: 350px;
       .user-group {
         .user-name {
           .type {

@@ -22,7 +22,7 @@ const global = {
   mutations: {
     wsOnMESSAGE: (state: any, message: any) => {
       const parsedMsg = parser.arrayBufferToJSON(message)
-      console.log('Socket On Message Parsed: ', parsedMsg)
+      // console.log('Socket On Message Parsed: ', parsedMsg)
       const payload = parsedMsg.payload
       switch (parsedMsg.act) {
         case enums.ACT_GET_GLOBAL_DATA:
