@@ -26,7 +26,7 @@
             <img
               v-if="currUser.code"
               class="user-img"
-              :src="require('../assets/images/user/' + currUser.code + '.png')"
+              :src="require('../assets/images/user/' + currUser.code + picTypeName[currUser.role] + '.png')"
               alt=""
             />
             <img
@@ -1040,7 +1040,12 @@ export default Vue.extend({
     openMapInfo: false,
     openMapInfoIdx: 0,
     storage: {},
-    formateStr: 'YYYY-MM-DD HH-mm'
+    formateStr: 'YYYY-MM-DD HH-mm',
+    picTypeName: {
+      1: '_1',
+      2: '',
+      3: '_0'
+    }
   }),
 
   computed: {
