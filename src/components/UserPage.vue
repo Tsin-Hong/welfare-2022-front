@@ -26,7 +26,12 @@
             <img
               v-if="currUser.code"
               class="user-img"
-              :src="require('../assets/images/user/' + currUser.code + picTypeName[currUser.role] + '.png')"
+              :src="
+                require('../assets/images/user/' +
+                  currUser.code +
+                  picTypeName[currUser.role] +
+                  '.png')
+              "
               alt=""
             />
             <img
@@ -112,6 +117,12 @@
               color="orange darken-3"
               hide-details
             ></v-checkbox>
+            <v-checkbox
+              v-model="showBattles"
+              label="顯示戰役"
+              color="orange darken-3"
+              hide-details
+            ></v-checkbox>
           </div>
         </div>
       </div>
@@ -175,6 +186,12 @@
             @click="clickThisStronghold(stronghold_i)"
           >
             <div class="stronghold-area">
+              <img
+                v-if="showBattles && stronghold.is_fire"
+                class="battle-icon"
+                src="../assets/images/battle.png"
+                alt=""
+              />
               <div class="here-bg">
                 <img src="../assets/images/黃框.png" alt="" />
               </div>
@@ -502,206 +519,209 @@
 
         <v-divider></v-divider>
         <v-card-text>
-          <div
-            class="battle-box"
-            v-for="(battlefield, index) in battlefields"
-            :key="index"
-          >
-            <div class="battle-info-group">
-              <div class="battle-date">
-                競賽日
-                {{ moment(battlefield.timestamp).format('YYYY-MM-DD HH:mm') }}
+          <template v-for="(battlefield, index) in battlefields">
+            <div v-if="!selectedMapInfo || (selectedMapInfo && battlefield.mapId == selectedMapInfo.id )" class="battle-box" :key="index">
+              <div class="battle-info-group">
+                <div class="battle-date">
+                  競賽日
+                  {{ moment(battlefield.timestamp).format('YYYY-MM-DD HH:mm') }}
+                </div>
+                <div class="battle-place flag-vertical">
+                  {{ battlefield.map.name }}之戰
+                </div>
               </div>
-              <div class="battle-place flag-vertical">
-                {{ battlefield.map.name }}之戰
-              </div>
-            </div>
-            <div class="battle-top text-center">
-              <img src="../assets/images/border04.png" alt="" />
-              <div class="battle-info-text">
-                
-                <span>{{ battlefield.attackSoldierTotal }}</span>
-                <span
-                  :style="{
-                    color: battlefield.attackCountry.color[1],
-                    background: battlefield.attackCountry.color[0]
-                  }"
-                  >{{ battlefield.attackCountry.name }}</span
-                >
-                VS
-                <span
-                  :style="{
-                    color: battlefield.defenceCountry.color[1],
-                    background: battlefield.defenceCountry.color[0]
-                  }"
-                  >{{ battlefield.defenceCountry.name }}</span
-                >
-                <span>{{ battlefield.defenceSoldierTotal }}</span>
-              </div>
-              <span
-                class="
-                  d-inline-block
-                  px-10-px
-                  py-6-px
-                  posi-re
-                  mt-15-px
-                  grey
-                  darken-4
-                  fz-18-px
-                "
-                :z-index="3"
-                >※ 【攻方】總兵力於截止時間結算小於【守方】直接戰敗 ※</span
-              >
-            </div>
-            <div class="d-flex field-block">
-              <div class="battle-team-area d-flex">
-                <template v-for="(type, type_i) in battleType">
-                  <div
-                    v-if="battlefield[type + 'Country']"
-                    class="field-group"
-                    :class="[type + '-group']"
-                    :key="type_i"
+              <div class="battle-top text-center">
+                <img src="../assets/images/border04.png" alt="" />
+                <div class="battle-info-text">
+                  <span>{{ battlefield.attackSoldierTotal }}</span>
+                  <span
+                    :style="{
+                      color: battlefield.attackCountry.color[1],
+                      background: battlefield.attackCountry.color[0]
+                    }"
+                    >{{ battlefield.attackCountry.name }}</span
                   >
-                    <div class="user-group">
-                      <template>
-                        <div
-                          class="user-block"
-                          v-for="(user, u_i) in battlefield[type + 'Users']"
-                          :key="u_i"
-                        >
-                          <div class="user">
-                            <div
-                              class="bd-bg"
-                              :style="{
-                                background:
-                                  battlefield[type + 'Country'].color[0]
-                              }"
-                            ></div>
-                            <img
-                              v-if="user"
-                              :src="
-                                require('../assets/images/user/' +
-                                  user.code +
-                                  '.png')
-                              "
-                              alt=""
-                            />
-                          </div>
-                          <div class="bd">
-                            <img
-                              :src="require('../assets/images/border03.png')"
-                              alt=""
-                            />
-                            <div
-                              class="country-name"
-                              :style="{
-                                color: battlefield[type + 'Country'].color[0]
-                              }"
-                            >
-                              {{ battlefield[type + 'Country'].name }}
-                            </div>
-                            <div class="user-name">
-                              <div class="type">
-                                {{ type == 'defence' ? '守' : '攻' }}
-                              </div>
-                              <div v-if="user" class="name-text flag-vertical">
-                                {{ user.nickname }}
-                              </div>
-                            </div>
-                            <div v-if="!user && battlefield" class="join-btn">
-                              <v-btn
-                                :disabled="
-                                  battlefield[type + 'Country'].id !=
-                                    currUser.countryId ||
-                                  currUser.alreadyJoined ||
-                                  battlefield.timestampLimit < dateFormat ||
-                                  !battlefield.map.route.includes(
-                                    currUser.mapNowId
-                                  )
+                  VS
+                  <span
+                    :style="{
+                      color: battlefield.defenceCountry.color[1],
+                      background: battlefield.defenceCountry.color[0]
+                    }"
+                    >{{ battlefield.defenceCountry.name }}</span
+                  >
+                  <span>{{ battlefield.defenceSoldierTotal }}</span>
+                </div>
+                <span
+                  class="
+                    d-inline-block
+                    px-10-px
+                    py-6-px
+                    posi-re
+                    mt-15-px
+                    grey
+                    darken-4
+                    fz-18-px
+                  "
+                  :z-index="3"
+                  >※ 【攻方】總兵力於截止時間結算小於【守方】直接戰敗 ※</span
+                >
+              </div>
+              <div class="d-flex field-block">
+                <div class="battle-team-area d-flex">
+                  <template v-for="(type, type_i) in battleType">
+                    <div
+                      v-if="battlefield[type + 'Country']"
+                      class="field-group"
+                      :class="[type + '-group']"
+                      :key="type_i"
+                    >
+                      <div class="user-group">
+                        <template>
+                          <div
+                            class="user-block"
+                            v-for="(user, u_i) in battlefield[type + 'Users']"
+                            :key="u_i"
+                          >
+                            <div class="user">
+                              <div
+                                class="bd-bg"
+                                :style="{
+                                  background:
+                                    battlefield[type + 'Country'].color[0]
+                                }"
+                              ></div>
+                              <img
+                                v-if="user"
+                                :src="
+                                  require('../assets/images/user/' +
+                                    user.code +
+                                    '.png')
                                 "
-                                class="fz-16-px"
-                                @click="joinBattleBtn(battlefield, u_i)"
-                                >加入</v-btn
+                                alt=""
+                              />
+                            </div>
+                            <div class="bd">
+                              <img
+                                :src="require('../assets/images/border03.png')"
+                                alt=""
+                              />
+                              <div
+                                class="country-name"
+                                :style="{
+                                  color: battlefield[type + 'Country'].color[0]
+                                }"
                               >
-                              <div class="limit-time">
-                                截止時間<br />{{ battlefield.timestampLimit }}
+                                {{ battlefield[type + 'Country'].name }}
+                              </div>
+                              <div class="user-name">
+                                <div class="type">
+                                  {{ type == 'defence' ? '守' : '攻' }}
+                                </div>
+                                <div
+                                  v-if="user"
+                                  class="name-text flag-vertical"
+                                >
+                                  {{ user.nickname }}
+                                </div>
+                              </div>
+                              <div v-if="!user && battlefield" class="join-btn">
+                                <v-btn
+                                  :disabled="
+                                    battlefield[type + 'Country'].id !=
+                                      currUser.countryId ||
+                                    currUser.alreadyJoined ||
+                                    battlefield.timestampLimit < dateFormat ||
+                                    !battlefield.map.route.includes(
+                                      currUser.mapNowId
+                                    )
+                                  "
+                                  class="fz-16-px"
+                                  @click="joinBattleBtn(battlefield, u_i)"
+                                  >加入</v-btn
+                                >
+                                <div class="limit-time">
+                                  截止時間<br />{{ battlefield.timestampLimit }}
+                                </div>
+                              </div>
+                              <div v-if="battlefield" class="soldier-group">
+                                {{ battlefield[type + 'Soldier'][u_i] }}
                               </div>
                             </div>
-                            <div v-if="battlefield" class="soldier-group">
-                              {{ battlefield[type + 'Soldier'][u_i] }}
-                            </div>
                           </div>
-                        </div>
-                      </template>
-                    </div>
-                  </div>
-                </template>
-                <img class="vs-img" src="../assets/images/vs.png" />
-              </div>
-              <div class="field-group other-group">
-                <div class="user-group">
-                  <div
-                    class="user-block"
-                    v-for="(type, key) in client.battle_worker_type"
-                    :key="key"
-                  >
-                    <div v-if="battlefield[key].id" class="user">
-                      <div
-                        class="bd-bg"
-                        :style="{
-                          background: battlefield[key].country.color[0]
-                        }"
-                      ></div>
-                      <img
-                        :src="
-                          require('../assets/images/user/' +
-                            battlefield[key].code +
-                            '.png')
-                        "
-                        alt=""
-                      />
-                    </div>
-                    <div class="bd">
-                      <img
-                        :src="require('../assets/images/border03.png')"
-                        alt=""
-                      />
-                      <div
-                        v-if="battlefield[key]"
-                        class="country-name"
-                        :style="{
-                          color: battlefield[key].country.color[0]
-                        }"
-                      >
-                        {{ battlefield[key].country.name }}
+                        </template>
                       </div>
-                      <div class="user-name">
-                        <div class="type">
-                          {{ type[0] }}
-                        </div>
+                    </div>
+                  </template>
+                  <img class="vs-img" src="../assets/images/vs.png" />
+                </div>
+                <div class="field-group other-group">
+                  <div class="user-group">
+                    <div
+                      class="user-block"
+                      v-for="(type, key) in client.battle_worker_type"
+                      :key="key"
+                    >
+                      <div v-if="battlefield[key].id" class="user">
+                        <div
+                          class="bd-bg"
+                          :style="{
+                            background: battlefield[key].country.color[0]
+                          }"
+                        ></div>
+                        <img
+                          :src="
+                            require('../assets/images/user/' +
+                              battlefield[key].code +
+                              '.png')
+                          "
+                          alt=""
+                        />
+                      </div>
+                      <div class="bd">
+                        <img
+                          :src="require('../assets/images/border03.png')"
+                          alt=""
+                        />
                         <div
                           v-if="battlefield[key]"
-                          class="name-text flag-vertical"
+                          class="country-name"
+                          :style="{
+                            color: battlefield[key].country.color[0]
+                          }"
                         >
-                          {{ battlefield[key].nickname }}
+                          {{ battlefield[key].country.name }}
                         </div>
-                      </div>
-                      <div v-if="battlefield[key + 'Id'] == 0" class="join-btn">
-                        <v-btn
-                          :disabled="
-                            battlefield.defenceCountry.id ==
-                              currUser.countryId ||
-                            battlefield.attackCountry.id ==
-                              currUser.countryId ||
-                            currUser.alreadyJoined ||
-                            currUser.actPoint == 0
-                          "
-                          class="fz-16-px"
-                          @click="joinBattleWorkerBtn(battlefield, type)"
-                          >擔任</v-btn
+                        <div class="user-name">
+                          <div class="type">
+                            {{ type[0] }}
+                          </div>
+                          <div
+                            v-if="battlefield[key]"
+                            class="name-text flag-vertical"
+                          >
+                            {{ battlefield[key].nickname }}
+                          </div>
+                        </div>
+                        <div
+                          v-if="battlefield[key + 'Id'] == 0"
+                          class="join-btn"
                         >
-                        <div class="limit-time">
-                          截止時間<br />{{ battlefield.timestampLimit }}
+                          <v-btn
+                            :disabled="
+                              battlefield.defenceCountry.id ==
+                                currUser.countryId ||
+                              battlefield.attackCountry.id ==
+                                currUser.countryId ||
+                              currUser.alreadyJoined ||
+                              currUser.actPoint == 0
+                            "
+                            class="fz-16-px"
+                            @click="joinBattleWorkerBtn(battlefield, type)"
+                            >擔任</v-btn
+                          >
+                          <div class="limit-time">
+                            截止時間<br />{{ battlefield.timestampLimit }}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -709,7 +729,7 @@
                 </div>
               </div>
             </div>
-          </div>
+          </template>
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -725,7 +745,7 @@
             }"
           >
             <v-toolbar-title v-if="selectedMapInfo.name" class="d-block">
-              {{ selectedMapInfo.name }}
+              <span>{{ selectedMapInfo.name }}</span>
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn icon dark @click="openMapInfo = false">
@@ -764,6 +784,23 @@
                 </tr>
               </template>
             </table>
+            <template v-if="selectedMapInfo.battle">
+              <v-card-subtitle class="grey--text mt-15-px"
+                >戰役資訊</v-card-subtitle
+              >
+              <v-divider class="mb-10-px"></v-divider>
+              <div class="battle-info">
+                <span class="battle-btn"
+                  ><img src="../assets/images/battle.png" alt=""
+                /></span>
+                <span
+                  >{{ selectedMapInfo.battle.timestamp }} 勢力【{{
+                    selectedMapInfo.battle.attackCountry.name
+                  }}】 將對此據點發動戰爭。</span
+                >
+                <v-btn small @click="showInfoArea(2)">查看</v-btn>
+              </div>
+            </template>
             <v-card-subtitle class="grey--text mt-15-px"
               >在據點中的人員名冊</v-card-subtitle
             >
@@ -891,6 +928,7 @@ export default Vue.extend({
     goToCityObj: {},
     goToBattleTime: -1,
     goToBattleSoldier: 0,
+    showBattles: localStorage.getItem('show_battles') === 'true',
     showCityDetails: localStorage.getItem('show_city_details') === 'true',
     showCountyDetails: localStorage.getItem('show_country_details') === 'true',
     showRoninDetails: localStorage.getItem('show_ronin_details') === 'true',
@@ -1038,7 +1076,7 @@ export default Vue.extend({
     battleOtherUser: ['judge', 'toolman'],
     defaultColor: ['#A1A1A1', '#000'],
     openMapInfo: false,
-    openMapInfoIdx: 0,
+    openMapInfoIdx: -1,
     storage: {},
     formateStr: 'YYYY-MM-DD HH-mm',
     picTypeName: {
@@ -1186,6 +1224,9 @@ export default Vue.extend({
           hashMapIdUser[user.mapNowId] = [user]
         }
       })
+      const battles = Object.values(
+        JSON.parse(JSON.stringify(this.global.battlefieldMap))
+      )
       const result = state.global.maps
         ? state.global.maps.map((m: any) => {
             const cid = m.ownCountryId
@@ -1211,6 +1252,7 @@ export default Vue.extend({
                 },
                 0
               ),
+              is_fire: battles.find((e:any) => e.mapId == m.id) ? true : false,
               is_main: country ? country.originCityId === m.cityId : false,
               is_here: m.id === state.user.mapNowId,
               conutry: {
@@ -1226,7 +1268,12 @@ export default Vue.extend({
     },
     selectedMapInfo: function () {
       const _maps = this.global.maps
+      if (this.openMapInfoIdx == -1) {
+        return false
+      }
       const _map = _maps[this.openMapInfoIdx]
+      const _battles = Object.values(this.battlefields)
+      const battle = _battles.find((e:any) => e.mapId == _map.id)
       if (!_map) return null
       const _city = this.global.cities.find((c) => c.id == _map.cityId)
       const _country = JSON.parse(JSON.stringify(this.countries)).find(
@@ -1317,7 +1364,15 @@ export default Vue.extend({
       const city = _city
       !Array.isArray(ownCountry.color) &&
         (ownCountry.color = ownCountry.color.split(','))
-      return { ..._map, userdata, basicInfos, ownCountry, city, basicDefense }
+      return {
+        ..._map,
+        userdata,
+        basicInfos,
+        ownCountry,
+        city,
+        basicDefense,
+        battle
+      }
     },
     currUser: function () {
       const user = this.getUser()
@@ -1357,6 +1412,9 @@ export default Vue.extend({
       deep: true,
       immediate: true
     },
+    showBattles: function (val) {
+      localStorage.setItem('show_battles', val)
+    },
     showCityDetails: function (val) {
       localStorage.setItem('show_city_details', val)
     },
@@ -1365,6 +1423,11 @@ export default Vue.extend({
     },
     showRoninDetails: function (val) {
       localStorage.setItem('show_ronin_details', val)
+    },
+    openMapInfo: function (val) {
+      if (!val) {
+        this.openMapInfoIdx = -1
+      }
     },
     'client.dialog_check_curr': {
       handler: function (val) {
@@ -1733,26 +1796,49 @@ export default Vue.extend({
 <style lang="scss" scope>
 @keyframes herebg {
   from {
-    transform: scale(2);
+    transform: scale(1);
+    opacity: 1;
+  }
+  75% {
+    opacity: 0.6;
   }
   to {
-    transform: scale(4);
+    transform: scale(3);
+    opacity: 0;
   }
 }
 @keyframes herebgcastle {
   from {
-    transform: scale(3);
+    transform: scale(2);
+    opacity: 1;
+  }
+  75% {
+    opacity: 0.7;
   }
   to {
     transform: scale(6);
+    opacity: 0;
   }
 }
-@keyframes herebgcastlemain {
+
+@keyframes battleIcon {
   from {
-    transform: scale(0);
+    filter: drop-shadow(0px 0px 6px #9e2626);
+    width: 30px;
+    right: calc(50% - 15px);
+    bottom: calc(50% - 15px);
+  }
+  50% {
+    filter: drop-shadow(0px 0px 10px #9e2626);
+    width: 50px;
+    right: calc(50% - 25px);
+    bottom: calc(50% - 25px);
   }
   to {
-    transform: scale(2);
+    filter: drop-shadow(0px 0px 6px #9e2626);
+    width: 30px;
+    right: calc(50% - 15px);
+    bottom: calc(50% - 15px);
   }
 }
 
@@ -1821,6 +1907,14 @@ html {
           // cursor: url('../assets/images/mouse.png'), pointer;
           .stronghold-area {
             position: relative;
+            .battle-icon {
+              position: absolute;
+              z-index: 1;
+              animation-name: battleIcon;
+              animation-duration: 3s;
+              animation-iteration-count: infinite;
+              // filter: drop-shadow(0px 0px 4px #9e2626);
+            }
             .here-bg {
               position: absolute;
               z-index: -1;
@@ -1915,6 +2009,8 @@ html {
               align-items: center;
               .stronghold-name {
                 display: flex;
+                z-index: 1;
+
                 .name {
                   white-space: nowrap;
                   position: relative;
@@ -2059,7 +2155,7 @@ html {
             left: -10px;
             width: 70px !important;
             z-index: 1;
-            filter: drop-shadow(0px 0px 4px #830b0b);
+            filter: drop-shadow(0px 0px 4px #bebebe);
             // box-shadow: 1px 1px 5px #CCC;
             &.soldier {
               width: 50px !important;
@@ -2544,21 +2640,38 @@ html {
 .dialog-battle {
   font-family: '華康行楷體W5';
   .battle-box {
-    width: 100%;
-    min-width: 1280px;
+    width: 1800px;
+    margin: 20px auto;
     padding-bottom: 20px;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #ccc;
-    background: url('../assets/images/公告紙.png') no-repeat center -100px;
-    background-size: 111% auto;
     position: relative;
+    background: url('../assets/images/公告紙_中.png') repeat-x center center;
+    &::before {
+      position: absolute;
+      top: 0;
+      left: -32px;
+      display: block;
+      content: '';
+      width: 85px;
+      height: 100%;
+      background: url('../assets/images/公告紙_左.png') no-repeat center left;
+    }
+    &::after {
+      position: absolute;
+      top: 0;
+      right: -32px;
+      display: block;
+      content: '';
+      width: 85px;
+      height: 100%;
+      background: url('../assets/images/公告紙_右.png') no-repeat center right;
+    }
     .battle-team-area {
       position: relative;
     }
     .battle-info-group {
       position: absolute;
       left: 50px;
-      top: 70px;
+      top: 130px;
       width: 300px;
       .battle-date {
         width: 100%;
@@ -2643,7 +2756,7 @@ html {
     .vs-img {
       position: absolute;
       left: calc(50% + 20px);
-      top: calc(50% - (256px / 2) - 20px);
+      top: calc(50% - (256px / 2) - 50px);
       z-index: 4;
       opacity: 0.8;
     }
@@ -2658,6 +2771,7 @@ html {
   .field-group {
     position: relative;
     width: calc(265px * 2);
+    margin-bottom: 100px;
     &.other-group {
       margin: 0 auto;
       width: 265px;
@@ -2689,6 +2803,7 @@ html {
         }
         .bd {
           width: 245px;
+          height: 291px;
           position: relative;
           left: calc(50% - (245px / 2));
           img {
@@ -2784,6 +2899,19 @@ html {
   }
 }
 .dialog-map-info {
+  .battle-info {
+    & > span {
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 10px;
+    }
+  }
+  .battle-btn {
+    margin-left: 15px;
+    img {
+      height: 30px;
+    }
+  }
   .user-blcok {
     display: inline-block;
     border: 1px solid rgb(139, 139, 139);
