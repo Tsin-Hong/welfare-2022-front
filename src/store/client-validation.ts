@@ -230,7 +230,7 @@ export default {
         return isNoTarget(user) || havePoint(user, 1) || isNotBeCaptived(user)
       }
       case enums.ACT_SEARCH_WILD: {
-        return isNoTarget(user) || havePoint(user, 1) || isInWild(user, global) || isNotBeCaptived(user)
+        return havePoint(user, 1) || isInWild(user, global) || isNotBeCaptived(user)
       }
       case enums.ACT_LEAVE_COUNTRY: {
         return havePoint(user, 1) || isRoleWarrier(user) || isNotLoyal(user)
