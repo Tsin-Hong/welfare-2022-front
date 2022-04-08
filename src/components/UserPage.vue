@@ -528,9 +528,48 @@
                   競賽日
                   {{ moment(battlefield.timestamp).format('YYYY-MM-DD HH:mm') }}
                 </div>
-                <!-- <div>競賽項目</div> -->
+                <div
+                  v-if="
+                    battlefield.map.is_main &&
+                    battlefield.map.conutry.id == currUser.countryId &&
+                    (currUser.role == 1 || currUser.occupationId > 0)
+                  "
+                  class="grey darken-4 p-10-px"
+                >
+                  開放選擇競賽項目時段<br />
+                  {{ battlefield.timestampLimit }} ~
+                  {{
+                    moment(battlefield.timestamp)
+                      .subtract(1, 'days')
+                      .format('YYYY-MM-DD HH:mm')
+                  }}
+                  <v-overflow-btn
+                    class="my-2"
+                    :disabled="
+                      battlefield.timestampLimit > dateFormat ||
+                      dateFormat >
+                        moment(battlefield.timestamp)
+                          .subtract(1, 'days')
+                          .format('YYYY-MM-DD HH:mm')
+                    "
+                    :items="beAbleToSelectGameList(battlefield.map.gameType)"
+                    item-text="name"
+                    item-value="id"
+                    label="選擇競賽項目"
+                    dense
+                    dark
+                    hide-details
+                    @change="selectGame(battlefield, $event)"
+                  ></v-overflow-btn>
+                </div>
                 <div class="battle-place flag-vertical">
-                  {{ battlefield.map.name }}之戰
+                  <div>{{ battlefield.map.name }}之戰</div>
+                  <div
+                    v-if="battlefield.gameId > 0"
+                    class="fz-22-px mt-80-px grey--text text--darken-1"
+                  >
+                    {{ battlefield.game.name }}
+                  </div>
                 </div>
               </div>
               <div class="battle-top text-center">
@@ -577,9 +616,9 @@
                       <div
                         class="user-group"
                         :class="{
-                          overtime: battlefield.timestampLimit < dateFormat,
+                          overtime: battlefield.timestamp < dateFormat,
                           'curr-user-judge':
-                            battlefield.timestampLimit < dateFormat &&
+                            battlefield.timestamp < dateFormat &&
                             battlefield.judgeId == currUser.id
                         }"
                         @click="whoIsWiner(battlefield, type)"
@@ -736,7 +775,9 @@
             </div>
           </template>
           <template v-if="battlefieldList.length == 0">
-            <div class="fz-48-px text-center text--darken-1 grey--text ">空空如也</div>
+            <div class="fz-48-px text-center text--darken-1 grey--text">
+              空空如也
+            </div>
           </template>
         </v-card-text>
       </v-card>
@@ -1093,7 +1134,8 @@ export default Vue.extend({
       2: '',
       3: '_0'
     },
-    setWiner: {}
+    setWiner: {},
+    setGame: {}
   }),
 
   computed: {
@@ -1145,6 +1187,7 @@ export default Vue.extend({
     },
     battlefields: function () {
       const battles = JSON.parse(JSON.stringify(this.global.battlefieldMap))
+      const games = JSON.parse(JSON.stringify(this.global.gameMap))
       const countries = JSON.parse(JSON.stringify(this.countries))
       const users = JSON.parse(JSON.stringify(this.users))
       const strongholds = JSON.parse(JSON.stringify(this.strongholds))
@@ -1156,6 +1199,8 @@ export default Vue.extend({
         curr.timestampLimit = currDate
           .subtract(3, 'days')
           .format('YYYY-MM-DD HH:mm')
+
+        curr.game = games[curr.gameId] ? games[curr.gameId] : {}
 
         curr.attackCountry = countries.find((item) => {
           return item.id == curr.attackCountryIds[0]
@@ -1520,22 +1565,51 @@ export default Vue.extend({
       'actBattle',
       'actLevelUpCity',
       'actBattleJoin',
-      'actBattleJudge'
+      'actBattleJudge',
+      'actSelectGame'
     ]),
     moment: function (date) {
       return this.$moment(date)
     },
-    whoIsWiner: function (battlefield, type) {
+    beAbleToSelectGameList: function (gameType) {
+      const games = JSON.parse(
+        JSON.stringify(Object.values(this.global.gameMap))
+      )
+      const newGames = games.filter((e) => e.type == gameType)
+      return newGames
+    },
+    selectGame: function (battlefield, event) {
+      this.setGame = {
+        gameId: event,
+        battleId: battlefield.id,
+        mapId: battlefield.mapId
+      }
       this.ChangeDialogCheck({
         content:
-          '由【'+battlefield[type + 'Country'].name + '】獲得此戰役的勝利'
+          '將【' +
+          battlefield.map.name +
+          '】此競賽遊戲定為<br>" ' +
+          this.global.gameMap[event].name +
+          ' "'
       })
-      this.setWiner = {
-        mapId: battlefield.mapId,
-        battleId: battlefield.id,
-        winId: battlefield[type + 'CountryId']
-      }
       this.ChangeApiCheck({ id: 9003, key: '', index: -1 })
+    },
+    whoIsWiner: function (battlefield, type) {
+      if (
+        battlefield.timestampLimit < this.dateFormat &&
+        battlefield.judgeId == this.currUser.id
+      ) {
+        this.ChangeDialogCheck({
+          content:
+            '由【' + battlefield[type + 'Country'].name + '】獲得此戰役的勝利'
+        })
+        this.setWiner = {
+          mapId: battlefield.mapId,
+          battleId: battlefield.id,
+          winId: battlefield[type + 'CountryId']
+        }
+        this.ChangeApiCheck({ id: 9004, key: '', index: -1 })
+      }
     },
     setNow: function () {
       this.timer = setInterval(function (this) {
@@ -1750,6 +1824,11 @@ export default Vue.extend({
           break
         }
         case 9003: {
+          this.actSelectGame(this.setGame)
+          this.setGame = {}
+          break
+        }
+        case 9004: {
           this.actBattleJudge(this.setWiner)
           this.setWiner = {}
           break
@@ -1790,7 +1869,9 @@ export default Vue.extend({
         case 'join':
           if (
             battlefield[type + 'Country'].id != this.currUser.countryId ||
-            !battlefield.map.route.includes(this.currUser.mapNowId)
+            (!battlefield.map.route.includes(this.currUser.mapNowId) &&
+              this.currUser.mapNowId != battlefield.mapId) ||
+              this.currUser.soldier == 0
           ) {
             return true
           }
@@ -1806,6 +1887,8 @@ export default Vue.extend({
           }
           break
       }
+
+      return false
     },
     clickThisStronghold: function (index = 0) {
       const stronghold = this.strongholds[index]
@@ -2767,6 +2850,7 @@ html {
       left: 50px;
       top: 160px;
       width: 300px;
+      z-index: 2;
       .battle-date {
         width: 100%;
         height: 80px;
