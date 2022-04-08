@@ -11,12 +11,15 @@ const global = {
     countries: [],
     notifications: [],
     domesticMessages: [],
+    warRecords: [],
     battlefieldMap: {/*0: {id: 0, attackCountryIds: [], defenceCountryId: 0, detail: {}, judgeId: 0, mapId: 0, round: 0, timestamp: 0, winnerCountryId: 0}*/},
+    gameMap: {/*0: {id: 0, name: '', type: 0, b1v1: true, b2v2: false, b3v3: false, b4v4: false,..} */},
+    occupationMap: {/*0: {id: 0, name: '', contributionCondi: 999, addActPoint: 5, isAllowedRecurit: false, isAllowedShare: false}*/},
     battleAreaPanel: {
       timeOptions: [],
       mapId: 0
     },
-    occupationMap: {/*0: {id: 0, name: '', contributionCondi: 999, addActPoint: 5, isAllowedRecurit: false, isAllowedShare: false}*/},
+    battleRecordDetails: { id: 0, winnerCountryId: 0, defenceCountryId: 0, attackCountryIds: [0], atkUserIds: [0,0,0,0], defUserIds: [0,0,0,0], judgeId: 0, toolmanId: 0, gameId: 0, timestamp: '', detail: {}},
     io: null
   },
   mutations: {
@@ -30,6 +33,8 @@ const global = {
           state.maps = parser.parseArraiesToObjects(payload.maps, enums.MapsGlobalAttributes)
           state.cities = parser.parseArraiesToObjects(payload.cities, enums.CityGlobalAttributes)
           state.countries = parser.parseArraiesToObjects(payload.countries, enums.CountryGlobalAttributes)
+          state.warRecords = parser.parseArraiesToObjects(payload.warRecords, enums.WarRecordGlobalAttributes)
+          state.warRecords.sort((a,b) => b.id - a.id)
           algorithm.setData(state.maps)
           if (payload.notifications) {
             state.notifications = payload.notifications.map((e: any) => [new Date(e[0]), e[1]])
@@ -44,6 +49,9 @@ const global = {
           }
           if (payload.occupationMap) {
             state.occupationMap = payload.occupationMap;
+          }
+          if (payload.gameMap) {
+            state.gameMap = payload.gameMap;
           }
           valication.cacheGlobal(state)
           break
@@ -93,10 +101,22 @@ const global = {
           const nextBattlefield = { ...state.battlefieldMap };
           delete nextBattlefield[mapId];
           state.battlefieldMap = nextBattlefield;
+          state.warRecords = state.warRecords.concat([payload]);
+          state.warRecords.sort((a,b) => b.id - a.id);
         } break
         case enums.ACT_NOTIFICATION_DOMESTIC: {
           const newmsg = [new Date(payload[0]), payload[1]]
           state.domesticMessages = [newmsg].concat(state.domesticMessages)
+        } break
+        case enums.ACT_BATTLE_GAME_SELECTED: {
+          const mapId = payload.mapId;
+          const gameId = payload.gameId;
+          const nextBattlefield = { ...state.battlefieldMap };
+          nextBattlefield[mapId].gameId = gameId;
+          state.battlefieldMap = nextBattlefield;
+        } break
+        case enums.ACT_GET_BATTLE_DETAIL: {
+          state.battleRecordDetails = payload;
         } break
         default:
       }
@@ -234,6 +254,44 @@ const global = {
        */
       content.dispatch('emitMessage', {act: enums.ACT_ESCAPE, payload: args});
     },
+    actSelectGame: (content: any, args: any) => {
+      /**
+       * 主城選遊戲項
+       * @param {number} battleId
+       * @param {number} mapId
+       * @param {number} gameId
+       */
+      content.dispatch('emitMessage', {act: enums.ACT_BATTLE_SELECT_GAME, payload: args});
+    },
+    getWarRecord: (content: any, args: any) => {
+      /**
+       * 歷史戰鬥
+       * @param {number} battleId
+       */
+      content.dispatch('emitMessage', {act: enums.ACT_GET_BATTLE_DETAIL, payload: args});
+    },
+    actRecruit: (content: any, args: any) => {
+      /**
+       * 招募
+       * @param {number} userId
+       */
+      content.dispatch('emitMessage', {act: enums.ACT_RECRUIT, payload: args});
+    },
+    actRecruitCaptive: (content: any, args: any) => {
+      /**
+       * 招募俘虜
+       * @param {number} userId
+       */
+      content.dispatch('emitMessage', {act: enums.ACT_RECRUIT_CAPTIVE, payload: args});
+    },
+    actReleaseCaptive: (content: any, args: any) => {
+      /**
+       * 釋放俘虜
+       * @param {number} userId
+       */
+      content.dispatch('emitMessage', {act: enums.ACT_RELEASE_CAPTIVE, payload: args});
+    },
+
   },
   getters: {
   }
