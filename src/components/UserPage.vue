@@ -13,7 +13,7 @@
     <div id="mapArea" class="map-area" style="overflow: hidden">
       <img
         class="map"
-        src="../assets/images/map.jpg"
+        src="/images/map.jpg"
         alt=""
         :style="{
           transform: `translate(${viewX}px, ${viewY}px)`,
@@ -27,26 +27,18 @@
               v-if="currUser.code"
               class="user-img"
               :src="
-                require('../assets/images/user/' +
-                  currUser.code +
-                  picTypeName[currUser.role] +
-                  '.png')
+                '/images/user/' +
+                currUser.code +
+                picTypeName[currUser.role] +
+                '.png'
               "
               alt=""
             />
-            <img
-              class="img-border"
-              src="../assets/images/人物頭像框.png"
-              alt=""
-            />
+            <img class="img-border" src="/images/人物頭像框.png" alt="" />
           </div>
           <div class="info-area">
             <div class="info-content">
-              <img
-                class="flag flag-border"
-                src="../assets/images/旗幟_外.png"
-                alt=""
-              />
+              <img class="flag flag-border" src="/images/旗幟_外.png" alt="" />
               <div
                 class="flag flag-content"
                 :style="{ background: currUser.countryColors }"
@@ -57,7 +49,7 @@
                 >
                   {{ currUser.countryName }}
                 </div>
-                <img src="../assets/images/旗幟_內.png" alt="" />
+                <img src="/images/旗幟_內.png" alt="" />
               </div>
               <div class="info-block">
                 <div class="date">{{ today[0] }}{{ today[1] }}</div>
@@ -621,7 +613,12 @@
                             battlefield.timestamp < dateFormat &&
                             battlefield.judgeId == currUser.id
                         }"
-                        @click="whoIsWiner(battlefield, type)"
+                        @click="
+                          whoIsWinner(
+                            battlefield,
+                            battlefield[type + 'Country']
+                          )
+                        "
                       >
                         <template>
                           <div
@@ -897,7 +894,7 @@
               dark
               v-for="(item, key) in constructionName"
               :key="key"
-              class="d-inline-block ff-wkw5 ma-1-pct"
+              class="d-inline-block ff-wkw5 ma-1-pct construction"
               elevation="0"
               width="48%"
             >
@@ -1255,14 +1252,11 @@ export default Vue.extend({
             newBattles.push(curr)
           }
         } else {
-          if (
-            this.battleTypeTab == 0 &&
-            curr.timestampLimit >= this.dateFormat
-          ) {
+          if (this.battleTypeTab == 0 && curr.timestamp >= this.dateFormat) {
             newBattles.push(curr)
           } else if (
             this.battleTypeTab == 1 &&
-            curr.timestampLimit < this.dateFormat
+            curr.timestamp < this.dateFormat
           ) {
             newBattles.push(curr)
           }
@@ -1594,19 +1588,18 @@ export default Vue.extend({
       })
       this.ChangeApiCheck({ id: 9003, key: '', index: -1 })
     },
-    whoIsWiner: function (battlefield, type) {
+    whoIsWinner: function (battlefield, country) {
       if (
         battlefield.timestampLimit < this.dateFormat &&
         battlefield.judgeId == this.currUser.id
       ) {
         this.ChangeDialogCheck({
-          content:
-            '由【' + battlefield[type + 'Country'].name + '】獲得此戰役的勝利'
+          content: '由【' + country.name + '】獲得此戰役的勝利'
         })
         this.setWiner = {
           mapId: battlefield.mapId,
           battleId: battlefield.id,
-          winId: battlefield[type + 'CountryId']
+          winId: country.id
         }
         this.ChangeApiCheck({ id: 9004, key: '', index: -1 })
       }
@@ -1871,7 +1864,7 @@ export default Vue.extend({
             battlefield[type + 'Country'].id != this.currUser.countryId ||
             (!battlefield.map.route.includes(this.currUser.mapNowId) &&
               this.currUser.mapNowId != battlefield.mapId) ||
-              this.currUser.soldier == 0
+            this.currUser.soldier == 0
           ) {
             return true
           }
@@ -2650,7 +2643,7 @@ html {
   }
 }
 .notification-area {
-  width: 500px;
+  width: 560px;
   background: rgba(0, 0, 0, 0.5);
   padding: 20px;
   border-top-left-radius: 10px;
@@ -2695,7 +2688,7 @@ html {
     color: #fff;
     span {
       &:first-child {
-        flex: 0 160px;
+        flex: 0 0 130px;
       }
       &:not(:first-child) {
         flex: 1;
@@ -2988,22 +2981,22 @@ html {
     .user-group {
       text-align: center;
       &.overtime {
-        opacity: 0.8;
-        &::after {
-          position: absolute;
-          left: 0;
-          top: 0;
-          z-index: 4;
-          content: '';
-          display: block;
-          width: 100%;
-          height: 100%;
-          background: url('../assets/images/win.png') no-repeat center center;
-          filter: grayscale(1);
-          opacity: 0.6;
-        }
         &.curr-user-judge {
           cursor: pointer;
+          opacity: 0.8;
+          &::after {
+            position: absolute;
+            left: 0;
+            top: 0;
+            z-index: 4;
+            content: '';
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: url('../assets/images/win.png') no-repeat center center;
+            filter: grayscale(1);
+            opacity: 0.6;
+          }
           &:hover {
             opacity: 1;
             &::after {
@@ -3166,6 +3159,14 @@ html {
     }
   }
 }
+.dialog-level-up-city {
+  background: rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(5px);
+  .construction {
+    background: transparent !important;
+  }
+}
+
 .map-info-table {
   width: 100%;
   th,
