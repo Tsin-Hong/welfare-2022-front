@@ -121,15 +121,15 @@
       <div class="right-top-area">
         <div class="btn-group">
           <span class="battle" :disabled="false" @click="showInfoArea(2)">
-            <img src="../assets/images/戰役.png" alt="" />
+            <img src="/images/戰役.png" alt="" />
             <div class="text">戰役</div>
           </span>
           <span class="notice" @click="showInfoArea(0)">
-            <img src="../assets/images/公告.png" alt="" />
+            <img src="/images/公告.png" alt="" />
             <div class="text">活動公告</div>
           </span>
           <span class="game-book" @click="showInfoArea(1)">
-            <img src="../assets/images/說明書.png" alt="" />
+            <img src="/images/說明書.png" alt="" />
             <div class="text">遊戲說明</div>
           </span>
         </div>
@@ -181,11 +181,11 @@
               <img
                 v-if="showBattles && stronghold.is_fire"
                 class="battle-icon"
-                src="../assets/images/battle.png"
+                src="/images/battle.png"
                 alt=""
               />
               <div class="here-bg">
-                <img src="../assets/images/黃框.png" alt="" />
+                <img src="/images/黃框.png" alt="" />
               </div>
               <div
                 v-if="stronghold.conutry.id && showCountyDetails"
@@ -205,33 +205,33 @@
               <img
                 v-if="showCityDetails"
                 class="hose soldier"
-                src="../assets/images/兵力.png"
+                src="/images/兵力.png"
                 alt=""
               />
               <img
                 v-if="showCityDetails"
                 class="hose hose1"
-                src="../assets/images/武力.gif"
+                src="/images/武力.gif"
                 alt=""
               />
               <img
                 v-if="showCityDetails"
                 class="hose hose2"
-                src="../assets/images/武力.gif"
+                src="/images/武力.gif"
                 alt=""
               />
               <img
                 v-if="showCityDetails"
                 class="hose hose3"
-                src="../assets/images/武力.gif"
+                src="/images/武力.gif"
                 alt=""
               />
               <img
                 v-if="stronghold.type == 1"
                 :src="
-                  require('../assets/images/' +
-                    (stronghold.is_main ? 'castle_main' : 'castle') +
-                    '.png')
+                  '/images/' +
+                  (stronghold.is_main ? 'castle_main' : 'castle') +
+                  '.png'
                 "
                 alt=""
               />
@@ -272,9 +272,7 @@
                     class="ronin-icon-area"
                   >
                     <span>{{ stronghold.ronin_num }}x</span
-                    ><span
-                      ><img src="../assets/images/浪人icon.png" alt=""
-                    /></span>
+                    ><span><img src="/images/浪人icon.png" alt="" /></span>
                   </div>
                 </div>
               </div>
@@ -352,7 +350,7 @@
       <v-card dark class="dialog-card req-dialog">
         <!-- <v-img
           v-if="client.dialog_content.img"
-          :src="require('../assets/images/dialog/' + client.dialog_content.img)"
+          :src="require('/images/dialog/' + client.dialog_content.img)"
           height="200px"
           top
         /> -->
@@ -481,9 +479,9 @@
               <img
                 v-if="leftList[selectedItem].hasImg"
                 :src="
-                  require('../assets/images/active/' +
-                    this.leftList[this.selectedItem].title +
-                    '活動海報.jpg')
+                  '/images/active/' +
+                  this.leftList[this.selectedItem].title +
+                  '活動海報.jpg'
                 "
               />
             </div>
@@ -636,19 +634,12 @@
                               ></div>
                               <img
                                 v-if="user"
-                                :src="
-                                  require('../assets/images/user/' +
-                                    user.code +
-                                    '.png')
-                                "
+                                :src="'/images/user/' + user.code + '.png'"
                                 alt=""
                               />
                             </div>
                             <div class="bd">
-                              <img
-                                :src="require('../assets/images/border03.png')"
-                                alt=""
-                              />
+                              <img :src="'/images/border03.png'" alt="" />
                               <div
                                 class="country-name"
                                 :style="{
@@ -694,7 +685,7 @@
                       </div>
                     </div>
                   </template>
-                  <img class="vs-img" src="../assets/images/vs.png" />
+                  <img class="vs-img" src="/images/vs.png" />
                 </div>
                 <div class="field-group other-group">
                   <div class="user-group">
@@ -712,18 +703,13 @@
                         ></div>
                         <img
                           :src="
-                            require('../assets/images/user/' +
-                              battlefield[key].code +
-                              '.png')
+                            '/images/user/' + battlefield[key].code + '.png'
                           "
                           alt=""
                         />
                       </div>
                       <div class="bd">
-                        <img
-                          :src="require('../assets/images/border03.png')"
-                          alt=""
-                        />
+                        <img :src="'/images/border03.png'" alt="" />
                         <div
                           v-if="battlefield[key]"
                           class="country-name"
@@ -837,7 +823,7 @@
               <v-divider class="mb-10-px"></v-divider>
               <div class="battle-info">
                 <span class="battle-btn"
-                  ><img src="../assets/images/battle.png" alt=""
+                  ><img src="/images/battle.png" alt=""
                 /></span>
                 <span
                   >{{ battlefields[selectedMapInfo.id].timestamp }} 勢力【{{
@@ -901,7 +887,7 @@
               <div class="d-flex flex-no-wrap justify-space-between">
                 <v-avatar class="ma-3" size="125" tile>
                   <v-img
-                    :src="require('../assets/images/' + key + '.png')"
+                    :src="'/images/' + key + '.png'"
                   ></v-img>
                 </v-avatar>
                 <div v-if="currUser.mapNowCity">
@@ -2069,7 +2055,7 @@ html {
           z-index: 10;
           visibility: hidden;
           cursor: pointer;
-          // cursor: url('../assets/images/mouse.png'), pointer;
+          // cursor: url('/images/mouse.png'), pointer;
           .stronghold-area {
             position: relative;
             .battle-icon {
@@ -2107,7 +2093,7 @@ html {
                 background: #cabca6;
                 position: relative;
                 z-index: -1;
-                background: url('../assets/images/大旗.png') no-repeat;
+                background: url('/images/大旗.png') no-repeat;
                 background-size: contain;
                 height: 130px;
                 width: 80px;
@@ -2151,6 +2137,7 @@ html {
                 rgba(0, 0, 0, 0.5) 72%,
                 rgba(0, 0, 0, 0.1) 98%
               );
+              backdrop-filter: blur(5px);
               filter: drop-shadow(0px 0px 2px #201707);
               & > span {
                 display: inline-block;
@@ -2215,7 +2202,7 @@ html {
                   padding: 4px;
                   width: 79px;
                   height: 29px;
-                  background-image: url('../assets/images/邊框.png');
+                  background-image: url('/images/邊框.png');
                   background-size: contain;
                   background-repeat: no-repeat;
                   line-height: 22px;
@@ -2407,7 +2394,7 @@ html {
         &:not([disabled]) {
           opacity: 1;
           cursor: pointer;
-          // cursor: url('../assets/images/mouse.png'), pointer;
+          // cursor: url('/images/mouse.png'), pointer;
         }
         text-align: center;
         display: inline-block;
@@ -2415,7 +2402,7 @@ html {
         .text {
           width: 100px;
           height: 26px;
-          background: url('../assets/images/right-top-btn.png') no-repeat center
+          background: url('/images/right-top-btn.png') no-repeat center
             center;
           background-size: contain;
           color: #fff;
@@ -2456,6 +2443,7 @@ html {
         position: relative;
         border-radius: 999px;
         background: #0a293c;
+        backdrop-filter: blur(5px);
         overflow: hidden;
         float: left;
         z-index: 1;
@@ -2494,10 +2482,11 @@ html {
           border-radius: 6px;
           background: -webkit-linear-gradient(
             -90deg,
-            rgba(25, 25, 25, 0.9) 10%,
-            rgba(25, 25, 25, 0.8) 40%,
-            rgba(25, 25, 25, 0.7) 100%
+            rgba(25, 25, 25, 0.8) 10%,
+            rgba(25, 25, 25, 0.6) 40%,
+            rgba(25, 25, 25, 0.4) 100%
           );
+          backdrop-filter: blur(5px);
           height: 100px;
           .info-content {
             position: relative;
@@ -2518,7 +2507,7 @@ html {
                 width: 34px;
                 left: 33px;
                 top: 2px;
-                mask: url('../assets/images/旗幟_內.png') no-repeat;
+                mask: url('/images/旗幟_內.png') no-repeat;
                 mask-size: 100% auto;
                 box-shadow: rgb(98 98 98 / 40%) 3px 3px 15px 0px;
                 .name {
@@ -2645,6 +2634,7 @@ html {
 .notification-area {
   width: 560px;
   background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(3px);
   padding: 20px;
   border-top-left-radius: 10px;
   position: fixed;
@@ -2659,7 +2649,7 @@ html {
         display: none;
       }
       .v-tab {
-        background: url('../assets/images/邊框.png') no-repeat center center
+        background: url('/images/邊框.png') no-repeat center center
           rgb(129, 129, 129);
         background-size: auto 100%;
         color: rgb(134, 134, 134);
@@ -2671,7 +2661,7 @@ html {
           opacity: 0.8;
         }
         &.v-tab--active {
-          background: url('../assets/images/邊框.png') no-repeat center center
+          background: url('/images/邊框.png') no-repeat center center
             rgb(189, 156, 65);
           background-size: auto 100%;
           color: rgb(14, 14, 14);
@@ -2697,7 +2687,7 @@ html {
   }
 }
 .dialog-card {
-  background: url('../assets/images/dialog/bg.png') no-repeat center center;
+  background: url('/images/dialog/bg.png') no-repeat center center;
   background-size: contain;
   height: 380px;
   font-family: '華康行楷體W5';
@@ -2814,7 +2804,7 @@ html {
     padding: 160px 0 20px;
     margin: 0 auto;
     position: relative;
-    background: url('../assets/images/公告紙_中.png') repeat-x center 120px;
+    background: url('/images/公告紙_中.png') repeat-x center 120px;
     &::before {
       position: absolute;
       top: 0;
@@ -2823,7 +2813,7 @@ html {
       content: '';
       width: 85px;
       height: 100%;
-      background: url('../assets/images/公告紙_左.png') no-repeat left 120px;
+      background: url('/images/公告紙_左.png') no-repeat left 120px;
     }
     &::after {
       position: absolute;
@@ -2833,7 +2823,7 @@ html {
       content: '';
       width: 85px;
       height: 100%;
-      background: url('../assets/images/公告紙_右.png') no-repeat right 120px;
+      background: url('/images/公告紙_右.png') no-repeat right 120px;
     }
     .battle-team-area {
       position: relative;
@@ -2848,7 +2838,7 @@ html {
         width: 100%;
         height: 80px;
         line-height: 78px;
-        background: url('../assets/images/btn01.png') no-repeat center center;
+        background: url('/images/btn01.png') no-repeat center center;
         background-size: 100% auto;
         color: #fff;
         padding-left: 35px;
@@ -2873,18 +2863,18 @@ html {
     &::before {
       content: '';
       display: block;
-      background: url('../assets/images/border05_上.png') no-repeat top center;
+      background: url('/images/border05_上.png') no-repeat top center;
       height: 55px;
     }
     &::after {
       content: '';
       display: block;
-      background: url('../assets/images/border05_下.png') no-repeat bottom
+      background: url('/images/border05_下.png') no-repeat bottom
         center;
       height: 25px;
     }
     .battle-info-text {
-      background: url('../assets/images/border05_中.png') repeat-y center center;
+      background: url('/images/border05_中.png') repeat-y center center;
       position: relative;
       z-index: 1;
       font-size: 32px;
@@ -2929,7 +2919,7 @@ html {
     height: 50px;
     line-height: 40px;
     font-size: 20px;
-    background: url('../assets/images/soldier.png') no-repeat 60px -6px rgba(0, 0, 0, 0.6);
+    background: url('/images/soldier.png') no-repeat 60px -6px rgba(0, 0, 0, 0.6);
     background-size: auto 40px;
     text-align: left;
     padding-left: 100px;
@@ -2993,7 +2983,7 @@ html {
             display: block;
             width: 100%;
             height: 100%;
-            background: url('../assets/images/win.png') no-repeat center center;
+            background: url('/images/win.png') no-repeat center center;
             filter: grayscale(1);
             opacity: 0.6;
           }
@@ -3057,7 +3047,7 @@ html {
             right: 10px;
             height: 100%;
             width: 65px;
-            background: url('../assets/images/bg02.png') no-repeat center 25px;
+            background: url('/images/bg02.png') no-repeat center 25px;
             background-size: 108%;
             .type {
               font-size: 60px;
@@ -3082,7 +3072,7 @@ html {
           }
         }
         .bd-bg {
-          mask: url('../assets/images/border02.png') no-repeat center center;
+          mask: url('/images/border02.png') no-repeat center center;
           width: 100%;
           height: 291px;
           position: absolute;

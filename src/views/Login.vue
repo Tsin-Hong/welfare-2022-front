@@ -1,12 +1,12 @@
 <template>
   <div class="login-page">
     <div class="login-area">
-      <img class="img img-02" src="../assets/images/logo.png" alt="" />
-      <img class="img img-01" src="../assets/images/user.png" alt="" />
+      <img class="img img-02" src="/images/logo.png" alt="" />
+      <img class="img img-01" src="/images/user.png" alt="" />
       <v-card class="mx-auto login-block" dark>
         <v-list-item three-line>
           <v-list-item-content>
-            <img class="img img-03" src="../assets/images/text.png" alt="" />
+            <img class="img img-03" src="/images/text.png" alt="" />
             <v-divider class="my-3"></v-divider>
             <form @keyup.enter="login">
               <v-text-field
@@ -126,7 +126,7 @@ html {
     z-index: 0;
     overflow-y: scroll;
     height: 100%;
-    background-image: url('../assets/images/bg_220119.jpg');
+    background-image: url('/images/bg_220119.jpg');
     background-repeat: no-repeat;
     background-position: center center;
     background-size: 1024px;
@@ -140,7 +140,7 @@ html {
     width: 100%;
     height: 100vh;
     opacity: 0.4;
-    background-image: url('../assets/images/bg_220119.jpg');
+    background-image: url('/images/bg_220119.jpg');
     background-repeat: repeat-x;
     background-position: center bottom;
     background-size: 1024px;

@@ -466,7 +466,7 @@ export default Vue.extend({
       background: transparent;
       .v-list-item--link {
         cursor: pointer;
-        // cursor: url('../assets/images/mouse.png'), pointer;
+        // cursor: url('/images/mouse.png'), pointer;
       }
       .btn-group {
         position: relative;
@@ -481,6 +481,7 @@ export default Vue.extend({
             rgb(255 252 240) 40%,
             rgb(234 229 214) 100%
           );
+          backdrop-filter: blur(2px);
           border-radius: 3px;
           color: #2b323f;
           padding: 0 8px;
@@ -503,6 +504,7 @@ export default Vue.extend({
           &.v-list-item--disabled {
             color: rgba(0, 0, 0, 0.7) !important;
             background: #a1a1a1 !important;
+            backdrop-filter: blur(2px);
             .v-icon {
               color: rgba(0, 0, 0, 0.7) !important;
             }
@@ -524,11 +526,18 @@ export default Vue.extend({
               0deg,
               rgb(239 234 209 / 0%) 0%,
               rgb(239 234 209 / 60%) 35%,
-              rgb(239 234 209 / 80%) 40%,
+              rgb(239 234 209 / 70%) 40%,
               rgb(239 234 209 / 100%) 60%
             );
+            backdrop-filter: blur(2px);
             &.v-list-item--disabled {
-              background: #a1a1a1a2 !important;
+              background: -webkit-linear-gradient(
+                0deg,
+                rgb(161 161 161 / 0%) 0%,
+                rgb(161 161 161 / 60%) 35%,
+                rgb(161 161 161 / 70%) 40%,
+                rgb(161 161 161 / 80%) 60%
+              ) !important;
             }
             &:last-child {
               border: none;

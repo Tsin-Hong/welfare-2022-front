@@ -60,7 +60,7 @@ export default Vue.extend({
 </script>
 
 <style lang="scss">
-@import './assets/fonts/fonts.css';
+@import '/fonts/fonts.css';
 [v-cloak] {
   display: none;
 }
