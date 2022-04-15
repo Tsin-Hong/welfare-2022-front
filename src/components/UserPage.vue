@@ -301,14 +301,16 @@
                   hide-details
                 >
                   <template v-slot:append>
-                    <v-input
+                    <v-text-field
                       v-model="goToBattleSoldier"
                       class="mt-0 pt-0"
                       hide-details
                       single-line
+                      :max="currUser.soldier"
+                      :min="battalSoldierMin"
                       type="number"
                       style="width: 60px"
-                    ></v-input>
+                    ></v-text-field>
                   </template>
                 </v-slider>
               </v-col>
@@ -382,6 +384,8 @@
                       class="mt-0 pt-0"
                       hide-details
                       single-line
+                      :max="currUser.soldier"
+                      :min="battalSoldierMin"
                       type="number"
                       style="width: 60px"
                     ></v-text-field>
@@ -521,7 +525,7 @@
                           .subtract(1, 'days')
                           .format('YYYY-MM-DD HH:mm')
                     "
-                    :items="beAbleToSelectGameList(battlefield.map.gameType)"
+                    :items="beAbleToSelectGameList(battlefield)"
                     item-text="name"
                     item-value="id"
                     label="選擇競賽項目"
@@ -825,6 +829,7 @@
               <span class="title-name">{{ uu.occupation }}</span>
               <span class="user-name">{{ uu.nickname }}</span>
               <span class="user-other-info">( {{ uu.soldier }} )</span>
+              <span class="user-other-info">( {{ uu.code }} )</span>
             </span>
           </v-card-text>
         </template>
@@ -1532,12 +1537,25 @@ export default Vue.extend({
     moment: function (date) {
       return this.$moment(date)
     },
-    beAbleToSelectGameList: function (gameType) {
+    beAbleToSelectGameList: function (battlefield) {
+      const gameType = battlefield.map.gameType
       const games = JSON.parse(
         JSON.stringify(Object.values(this.global.gameMap))
       )
+      const attackUserIds = battlefield.atkUserIds.filter((e) => e != 0)
+      const defenceUserIds = battlefield.defUserIds.filter((e) => e != 0)
+      const vsNum = [attackUserIds.length, defenceUserIds.length]
+      vsNum.sort()
       const newGames = games.filter((e) => e.type == gameType)
-      return newGames
+      const vsNumKey = 'b' + vsNum[0] + 'v' + vsNum[1]
+      const beUseGames = []
+      for (const i in newGames) {
+        const curr = newGames[i]
+        if (curr[vsNumKey]) {
+          beUseGames.push(curr)
+        }
+      }
+      return beUseGames
     },
     selectGame: function (battlefield, event) {
       this.setGame = {
@@ -1781,8 +1799,15 @@ export default Vue.extend({
           const battleId = battlefield.id
           const soldier = this.goToBattleSoldier
 
-          if (soldier < this.battalSoldierMin || soldier > this.currUser.soldier) {
-
+          if (
+            soldier < this.battalSoldierMin ||
+            soldier > this.currUser.soldier
+          ) {
+            this.ChangeApiResult({
+              title: '',
+              text: '派遣兵力數錯誤。',
+              img: ''
+            })
           } else {
             this.actBattleJoin({ position, mapId, battleId, soldier })
           }
@@ -1927,17 +1952,24 @@ export default Vue.extend({
       ])
       this.errorText = ''
     },
-    onClickHeadImage: function() {
+    onClickHeadImage: function () {
       if (window.location.port.match(/20221/g)) {
         return console.log('PROD not allowed.')
       }
-      const myselfIddd = this.user.id - 5;
-      const selected = window.prompt(this.global.users.filter(user => user.id > myselfIddd).map(user => `${user.id}  > ${user.code} ${user.nickname}`).join('\r\n'))
-      const findUser = this.global.users.find(user => user.code == selected || user.id == selected)
+      const myselfIddd = this.user.id - 5
+      const selected = window.prompt(
+        this.global.users
+          .filter((user) => user.id > myselfIddd)
+          .map((user) => `${user.id}  > ${user.code} ${user.nickname}`)
+          .join('\r\n')
+      )
+      const findUser = this.global.users.find(
+        (user) => user.code == selected || user.id == selected
+      )
       if (findUser) {
-        this.global.io.emit('ADMINCTL', {userid: findUser.id})
+        this.global.io.emit('ADMINCTL', { userid: findUser.id })
       } else {
-        console.log('not found user: ', selected);
+        console.log('not found user: ', selected)
       }
     }
   }
