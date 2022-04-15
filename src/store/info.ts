@@ -86,6 +86,9 @@ const info = {
             case enums.ACT_INCREASE_SOLDIER:
               errorMsg = '徵兵未能成功'
               break
+            case enums.ACT_BATTLE:
+              errorMsg = `${payload.map} 正在修整剛佔領的據點 於 ${new Date(payload.deadline).toLocaleString()} 修整完畢`;
+              break
             default:
           }
           content.dispatch('showClientDialog', errorMsg)

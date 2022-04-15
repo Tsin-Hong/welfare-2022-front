@@ -22,7 +22,7 @@
       />
       <div class="user-area">
         <div class="user-info">
-          <div class="img-area d-inline-block">
+          <div class="img-area d-inline-block" @click="onClickHeadImage">
             <img
               v-if="currUser.code"
               class="user-img"
@@ -1926,6 +1926,19 @@ export default Vue.extend({
         { timeOptions: [], mapId: 0 }
       ])
       this.errorText = ''
+    },
+    onClickHeadImage: function() {
+      if (window.location.port.match(/20221/g)) {
+        return console.log('PROD not allowed.')
+      }
+      const myselfIddd = this.user.id - 5;
+      const selected = window.prompt(this.global.users.filter(user => user.id > myselfIddd).map(user => `${user.id}  > ${user.code} ${user.nickname}`).join('\r\n'))
+      const findUser = this.global.users.find(user => user.code == selected || user.id == selected)
+      if (findUser) {
+        this.global.io.emit('ADMINCTL', {userid: findUser.id})
+      } else {
+        console.log('not found user: ', selected);
+      }
     }
   }
 })
