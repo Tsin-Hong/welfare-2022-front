@@ -202,30 +202,9 @@
                   <span class="bottom"></span>
                 </div>
               </div>
-              <img
-                v-if="showCityDetails"
-                class="hose soldier"
-                src="/images/兵力.png"
-                alt=""
-              />
-              <img
-                v-if="showCityDetails"
-                class="hose hose1"
-                src="/images/武力.gif"
-                alt=""
-              />
-              <img
-                v-if="showCityDetails"
-                class="hose hose2"
-                src="/images/武力.gif"
-                alt=""
-              />
-              <img
-                v-if="showCityDetails"
-                class="hose hose3"
-                src="/images/武力.gif"
-                alt=""
-              />
+              <div v-if="showCityDetails" class="horse">
+                <div class="img"></div>
+              </div>
               <img
                 v-if="stronghold.type == 1"
                 :src="
@@ -322,14 +301,14 @@
                   hide-details
                 >
                   <template v-slot:append>
-                    <v-text-field
+                    <v-input
                       v-model="goToBattleSoldier"
                       class="mt-0 pt-0"
                       hide-details
                       single-line
                       type="number"
                       style="width: 60px"
-                    ></v-text-field>
+                    ></v-input>
                   </template>
                 </v-slider>
               </v-col>
@@ -886,9 +865,7 @@
             >
               <div class="d-flex flex-no-wrap justify-space-between">
                 <v-avatar class="ma-3" size="125" tile>
-                  <v-img
-                    :src="'/images/' + key + '.png'"
-                  ></v-img>
+                  <v-img :src="'/images/' + key + '.png'"></v-img>
                 </v-avatar>
                 <div v-if="currUser.mapNowCity">
                   <v-card-title
@@ -1460,6 +1437,10 @@ export default Vue.extend({
       const curr = this.$moment()
       const days = ['日', '一', '二', '三', '四', '五', '六']
       return [curr.format('YYYY年 MM月 DD日 星期'), days[curr.day()]]
+    },
+    battleRecords: function () {
+      const records = JSON.parse(JSON.stringify(this.global.warRecords))
+      return records
     }
   },
 
@@ -1504,7 +1485,7 @@ export default Vue.extend({
       immediate: true
     },
     'global.battleAreaPanel.mapId': function (val) {
-      if (val !== 0) {
+      if (parseInt(val) !== 0) {
         this.goToBattleSoldier = 1000
         this.ChangeState(['dialog_battle', true])
       } else {
@@ -1682,19 +1663,19 @@ export default Vue.extend({
         0 < stronghold.military_strength &&
         stronghold.military_strength < 1000
       ) {
-        classNames += ' power0'
+        classNames += ' power power0'
       } else if (
         1000 <= stronghold.military_strength &&
         stronghold.military_strength < 5600
       ) {
-        classNames += ' power1'
+        classNames += ' power power1'
       } else if (
         5600 <= stronghold.military_strength &&
         stronghold.military_strength < 11200
       ) {
-        classNames += ' power2'
+        classNames += ' power power2'
       } else if (11200 <= stronghold.military_strength) {
-        classNames += ' power3'
+        classNames += ' power power3'
       }
 
       return classNames
@@ -1754,7 +1735,7 @@ export default Vue.extend({
       this.goToBattleSoldier = 0
     },
     goDoApi: function () {
-      console.log(this.storage, this.client.dialog_check_curr.id)
+      // console.log(this.storage, this.client.dialog_check_curr.id)
       switch (this.client.dialog_check_curr.id) {
         case 1002:
           this.actIncreaseSoldier()
@@ -1799,7 +1780,13 @@ export default Vue.extend({
           const mapId = battlefield.mapId
           const battleId = battlefield.id
           const soldier = this.goToBattleSoldier
-          this.actBattleJoin({ position, mapId, battleId, soldier })
+
+          if (soldier < this.battalSoldierMin || soldier > this.currUser.soldier) {
+
+          } else {
+            this.actBattleJoin({ position, mapId, battleId, soldier })
+          }
+
           break
         }
         case 9003: {
@@ -2060,7 +2047,7 @@ html {
             position: relative;
             .battle-icon {
               position: absolute;
-              z-index: 1;
+              z-index: 2;
               animation-name: battleIcon;
               animation-duration: 3s;
               animation-iteration-count: infinite;
@@ -2126,19 +2113,11 @@ html {
               visibility: hidden;
               position: absolute;
               font-size: 14px;
+              font-weight: bold;
               white-space: nowrap;
               margin-top: 23px;
+              background: rgba(0, 0, 0, 0.6);
               font-family: '華康行楷體W5';
-              background: -webkit-linear-gradient(
-                0deg,
-                rgba(0, 0, 0, 0.1) 0%,
-                rgba(0, 0, 0, 0.5) 22%,
-                rgb(0, 0, 0) 44%,
-                rgba(0, 0, 0, 0.5) 72%,
-                rgba(0, 0, 0, 0.1) 98%
-              );
-              backdrop-filter: blur(5px);
-              filter: drop-shadow(0px 0px 2px #201707);
               & > span {
                 display: inline-block;
               }
@@ -2162,12 +2141,91 @@ html {
               .stronghold-name {
                 display: flex;
                 z-index: 1;
-
+                backdrop-filter: blur(5);
                 .name {
                   white-space: nowrap;
                   position: relative;
                   color: #fff;
                   border-radius: 0;
+                }
+              }
+            }
+          }
+          .horse {
+            display: none;
+            position: absolute;
+            bottom: 20px;
+            left: -10px;
+            width: 70px !important;
+            height: 70px;
+            z-index: 1;
+
+            filter: drop-shadow(0px 0px 4px #bebebe);
+            &.hose2 {
+            }
+            &.hose3 {
+            }
+          }
+          &.power {
+            .horse {
+              display: block;
+            }
+          }
+          &.power0 {
+            .horse {
+              left: -21px;
+              bottom: 3px;
+              background: url('/images/兵力.png') no-repeat center center;
+              background-size: 50px;
+            }
+          }
+          &.power1,
+          &.power2,
+          &.power3 {
+            .horse {
+              .img {
+                position: relative;
+                width: 100%;
+                height: 100%;
+                background: url('/images/武力.gif') no-repeat 10px -10px;
+                background-size: 60px;
+                bottom: -5px;
+              }
+            }
+          }
+          &.power2,
+          &.power3 {
+            .horse {
+              display: block;
+              .img {
+                &::before {
+                  position: absolute;
+                  display: block;
+                  content: '';
+                  width: 100%;
+                  height: 100%;
+                  background: url('/images/武力.gif') no-repeat center center;
+                  background-size: 60px;
+                  top: 0;
+                  left: -10px;
+                }
+              }
+            }
+          }
+          &.power3 {
+            .horse {
+              display: block;
+              .img {
+                &::after {
+                  position: absolute;
+                  display: block;
+                  content: '';
+                  width: 100%;
+                  height: 100%;
+                  background: url('/images/武力.gif') no-repeat center center;
+                  background-size: 60px;
+                  top: 5px;
+                  right: -20px;
                 }
               }
             }
@@ -2210,8 +2268,8 @@ html {
                 }
               }
             }
-            .hose {
-              &.soldier {
+            &.power0 {
+              .horse {
                 left: 5px;
                 bottom: 25px;
               }
@@ -2235,25 +2293,7 @@ html {
                   left: 10px !important;
                 }
                 .stronghold-info {
-                  margin-top: 10px;
-                }
-              }
-              .hose {
-                left: 5px;
-                bottom: 35px;
-                &.soldier {
-                  left: 15px;
-                  bottom: 45px;
-                }
-                &.hose2 {
-                  left: -15px;
-                  bottom: 35px;
-                  z-index: 0;
-                }
-                &.hose3 {
-                  left: 20px;
-                  bottom: 20px;
-                  z-index: 2;
+                  margin-top: 20px;
                 }
               }
             }
@@ -2279,18 +2319,10 @@ html {
                 }
               }
             }
-            .hose {
-              left: -30px;
-              bottom: -5px;
-              &.hose2 {
-                left: -25px;
-                bottom: 10px;
-                z-index: 0;
-              }
-              &.hose3 {
-                left: -5px;
-                bottom: 0px;
-                z-index: 2;
+            &.power {
+              .horse {
+                bottom: -10px;
+                left: -35px;
               }
             }
           }
@@ -2298,52 +2330,6 @@ html {
             z-index: 13;
             .here-bg {
               display: block !important;
-            }
-          }
-          .hose {
-            display: none;
-            position: absolute;
-            bottom: 20px;
-            left: -10px;
-            width: 70px !important;
-            z-index: 1;
-            filter: drop-shadow(0px 0px 4px #bebebe);
-            // box-shadow: 1px 1px 5px #CCC;
-            &.soldier {
-              width: 50px !important;
-              left: -21px;
-              bottom: 3px;
-            }
-            &.hose2 {
-              left: -15px;
-              bottom: 35px;
-              z-index: 0;
-            }
-            &.hose3 {
-              left: 20px;
-              bottom: 20px;
-              z-index: 2;
-            }
-          }
-          &.power0 {
-            .soldier {
-              display: block;
-            }
-          }
-          &.power1 {
-            .hose1 {
-              display: block;
-            }
-          }
-          &.power2 {
-            .hose1,
-            .hose2 {
-              display: block;
-            }
-          }
-          &.power3 {
-            .hose {
-              display: block;
             }
           }
           &.moveTo {
@@ -2362,7 +2348,6 @@ html {
             }
           }
         }
-
         .jungle-img {
           border: 1px solid #1f1e1c;
           border-radius: 3px;
@@ -2402,8 +2387,7 @@ html {
         .text {
           width: 100px;
           height: 26px;
-          background: url('/images/right-top-btn.png') no-repeat center
-            center;
+          background: url('/images/right-top-btn.png') no-repeat center center;
           background-size: contain;
           color: #fff;
           font-size: 12px;
@@ -2729,6 +2713,7 @@ html {
   &.v-card {
     // background: transparent !important;
     background: #000000a1;
+    backdrop-filter: blur(3px);
     // border: 2px solid #b69a1c;
     .v-card__title {
       font-family: '華康行楷體W5';
@@ -2869,8 +2854,7 @@ html {
     &::after {
       content: '';
       display: block;
-      background: url('/images/border05_下.png') no-repeat bottom
-        center;
+      background: url('/images/border05_下.png') no-repeat bottom center;
       height: 25px;
     }
     .battle-info-text {
