@@ -379,6 +379,7 @@ export default Vue.extend({
     ...mapActions(['ApiMove', 'ApiBattle']),
     menuShow: function (item, child) {
       let show = false
+      const mapTargetIdUnableTitle = ['移動', '出征']
       if (
         item.is_show &&
         !['move', 'battal'].includes(this.client.status_type)
@@ -394,8 +395,11 @@ export default Vue.extend({
               (child.title === '下野' && this.currUser.loyalUserId === 0)
             ) {
               if (
-                (this.currUser.mapNowIsCity && child.couldBeUseByCity) ||
-                (!this.currUser.mapNowIsCity && child.couldBeUseByOther)
+                ((this.currUser.mapNowIsCity && child.couldBeUseByCity) ||
+                  (!this.currUser.mapNowIsCity && child.couldBeUseByOther)) &&
+                (!mapTargetIdUnableTitle.includes(child.title) ||
+                  (mapTargetIdUnableTitle.includes(child.title) &&
+                    this.currUser.mapTargetId == 0))
               ) {
                 show = true
               }
