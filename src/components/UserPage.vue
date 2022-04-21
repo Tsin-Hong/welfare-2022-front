@@ -493,7 +493,7 @@
           </v-btn>
         </v-toolbar>
         <v-card-title></v-card-title>
-        <v-card-text>
+        <v-card-text v-if="battleTypeTab != 2">
           <template v-for="(battlefield, index) in battlefieldList">
             <div class="battle-box" :key="index">
               <div class="battle-info-group">
@@ -741,6 +741,225 @@
             </div>
           </template>
           <template v-if="battlefieldList.length == 0">
+            <div class="fz-48-px text-center text--darken-1 grey--text">
+              空空如也
+            </div>
+          </template>
+        </v-card-text>
+        <v-card-text v-if="battleTypeTab == 2">
+          <template>
+            <v-simple-table
+              v-if="battleDetailCurrId == 0"
+              class="battle-records-table"
+            >
+              <template v-slot:default>
+                <thead>
+                  <tr>
+                    <th class="text-left">戰役發生日期</th>
+                    <th class="text-left">戰役名稱</th>
+                    <th class="text-left">勝利勢力</th>
+                    <th class="text-left">攻擊方</th>
+                    <th class="text-left">防守方</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="item in battleRecords"
+                    :key="item.id"
+                    @click="clickBattleRecord({ battleId: item.id })"
+                  >
+                    <td>{{ item.date }}</td>
+                    <td>{{ item.mapName }}之戰</td>
+                    <td>{{ item.winnerCountryName }}</td>
+                    <td>{{ item.attackCountryName }}</td>
+                    <td>{{ item.defenceCountryName }}</td>
+                  </tr>
+                </tbody>
+              </template>
+            </v-simple-table>
+            <div v-if="battleDetailCurrId != 0" class="battle-box">
+              <div class="battle-info-group">
+                <div class="battle-date">
+                  競賽日
+                  {{
+                    moment(battleRecordDetails.timestamp).format(
+                      'YYYY-MM-DD HH:mm'
+                    )
+                  }}
+                </div>
+                <div class="battle-place flag-vertical">
+                  <div>{{ battleRecordDetails.map.name }}之戰</div>
+                  <div
+                    v-if="battleRecordDetails.gameId > 0"
+                    class="fz-22-px mt-80-px grey--text text--darken-1"
+                  >
+                    {{ battleRecordDetails.game.name }}
+                  </div>
+                </div>
+              </div>
+              <div class="battle-top text-center">
+                <div class="battle-info-text">
+                  <div class="area area-l flex-row-reverse">
+                    <span
+                      class="country-name"
+                      :style="{
+                        color: battleRecordDetails.attackCountry.color[1],
+                        background: battleRecordDetails.attackCountry.color[0]
+                      }"
+                      >{{ battleRecordDetails.attackCountry.name }}</span
+                    >
+                    <span>{{ battleRecordDetails.attackSoldierTotal }}</span>
+                  </div>
+                  <div class="area area-c">VS</div>
+                  <div class="area area-r">
+                    <span
+                      class="country-name"
+                      :style="{
+                        color: battleRecordDetails.defenceCountry.color[1],
+                        background: battleRecordDetails.defenceCountry.color[0]
+                      }"
+                      >{{ battleRecordDetails.defenceCountry.name }}</span
+                    >
+                    <span>{{ battleRecordDetails.defenceSoldierTotal }}</span>
+                  </div>
+                </div>
+                <span
+                  class="d-inline-block px-10-px py-6-px posi-re fz-16-px"
+                  :z-index="3"
+                  >※ 【攻方】總兵力於截止時間結算小於【守方】直接戰敗 ※</span
+                >
+              </div>
+              <div class="d-flex field-block">
+                <div class="battle-team-area d-flex">
+                  <template v-for="(type, type_i) in battleType">
+                    <div
+                      v-if="battleRecordDetails[type + 'Country']"
+                      class="field-group"
+                      :class="[type + '-group']"
+                      :key="type_i"
+                    >
+                      <div
+                        class="user-group"
+                        :class="{
+                          winner:
+                            battleRecordDetails.winId ==
+                            battleRecordDetails[type + 'Country'].id
+                        }"
+                      >
+                        <template>
+                          <div
+                            class="user-block"
+                            v-for="(user, u_i) in battleRecordDetails[
+                              type + 'Users'
+                            ]"
+                            :key="u_i"
+                          >
+                            <div class="user">
+                              <div
+                                class="bd-bg"
+                                :style="{
+                                  background:
+                                    battleRecordDetails[type + 'Country']
+                                      .color[0]
+                                }"
+                              ></div>
+                              <img
+                                v-if="user"
+                                :src="'/images/user/' + user.code + '.png'"
+                                alt=""
+                              />
+                            </div>
+                            <div class="bd">
+                              <img :src="'/images/border03.png'" alt="" />
+                              <div
+                                class="country-name"
+                                :style="{
+                                  color:
+                                    battleRecordDetails[type + 'Country']
+                                      .color[0]
+                                }"
+                              >
+                                {{ battleRecordDetails[type + 'Country'].name }}
+                              </div>
+                              <div class="user-name">
+                                <div class="type">
+                                  {{ type == 'defence' ? '守' : '攻' }}
+                                </div>
+                                <div
+                                  v-if="user"
+                                  class="name-text flag-vertical"
+                                >
+                                  {{ user.nickname }}
+                                </div>
+                              </div>
+                              <div
+                                v-if="battleRecordDetails"
+                                class="soldier-group"
+                              >
+                                {{ battleRecordDetails[type + 'Soldier'][u_i] }}
+                              </div>
+                            </div>
+                          </div>
+                        </template>
+                      </div>
+                    </div>
+                  </template>
+                  <img class="vs-img" src="/images/vs.png" />
+                </div>
+                <div class="field-group other-group">
+                  <div class="user-group">
+                    <div
+                      class="user-block"
+                      v-for="(type, key) in client.battle_worker_type"
+                      :key="key"
+                    >
+                      <div v-if="battleRecordDetails[key].id" class="user">
+                        <div
+                          class="bd-bg"
+                          :style="{
+                            background:
+                              battleRecordDetails[key].country.color[0]
+                          }"
+                        ></div>
+                        <img
+                          :src="
+                            '/images/user/' +
+                            battleRecordDetails[key].code +
+                            '.png'
+                          "
+                          alt=""
+                        />
+                      </div>
+                      <div class="bd">
+                        <img :src="'/images/border03.png'" alt="" />
+                        <div
+                          v-if="battleRecordDetails[key]"
+                          class="country-name"
+                          :style="{
+                            color: battleRecordDetails[key].country.color[0]
+                          }"
+                        >
+                          {{ battleRecordDetails[key].country.name }}
+                        </div>
+                        <div class="user-name">
+                          <div class="type">
+                            {{ type[0] }}
+                          </div>
+                          <div
+                            v-if="battleRecordDetails[key]"
+                            class="name-text flag-vertical"
+                          >
+                            {{ battleRecordDetails[key].nickname }}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+          <template v-if="battleRecords.length == 0">
             <div class="fz-48-px text-center text--darken-1 grey--text">
               空空如也
             </div>
@@ -1100,7 +1319,8 @@ export default Vue.extend({
       3: '_0'
     },
     setWiner: {},
-    setGame: {}
+    setGame: {},
+    battleDetailCurrId: 0
   }),
 
   computed: {
@@ -1152,61 +1372,9 @@ export default Vue.extend({
     },
     battlefields: function () {
       const battles = JSON.parse(JSON.stringify(this.global.battlefieldMap))
-      const games = JSON.parse(JSON.stringify(this.global.gameMap))
-      const countries = JSON.parse(JSON.stringify(this.countries))
-      const users = JSON.parse(JSON.stringify(this.users))
-      const strongholds = JSON.parse(JSON.stringify(this.strongholds))
 
       for (const i in battles) {
-        const curr = battles[i]
-        const currDate = this.$moment(curr.timestamp)
-        curr.timestamp = currDate.format('YYYY-MM-DD HH:mm')
-        curr.timestampLimit = currDate
-          .subtract(3, 'days')
-          .format('YYYY-MM-DD HH:mm')
-
-        curr.game = games[curr.gameId] ? games[curr.gameId] : {}
-
-        curr.attackCountry = countries.find((item) => {
-          return item.id == curr.attackCountryIds[0]
-        })
-        curr.attackUsers = []
-        for (const u in curr.atkUserIds) {
-          const currUserId = curr.atkUserIds[u]
-          curr.attackUsers.push(users.find((item) => item.id == currUserId))
-        }
-        curr.attackSoldier = curr.detail.atkSoldiers
-        curr.attackSoldierTotal = curr.attackSoldier.reduce((a, b) => a + b)
-
-        curr.defenceCountry = countries.find((item) => {
-          return item.id == curr.defenceCountryId
-        })
-        curr.defenceUsers = []
-        for (const u in curr.defUserIds) {
-          const currUserId = curr.defUserIds[u]
-          curr.defenceUsers.push(users.find((item) => item.id == currUserId))
-        }
-        curr.defenceSoldier = curr.detail.defSoldiers
-        curr.defenceSoldierTotal = curr.defenceSoldier.reduce((a, b) => a + b)
-
-        curr.judge = users.find((item) => item.id == curr.judgeId)
-        curr.toolman = users.find((item) => item.id == curr.toolmanId)
-        curr.map = strongholds.find((item) => item.id == curr.mapId)
-
-        if (!curr.judge) {
-          curr.judge = {
-            country: {
-              color: this.defaultColor
-            }
-          }
-        }
-        if (!curr.toolman) {
-          curr.toolman = {
-            country: {
-              color: this.defaultColor
-            }
-          }
-        }
+        battles[i] = this.setBattleFieldData(battles[i])
       }
       return battles
     },
@@ -1443,8 +1611,35 @@ export default Vue.extend({
       const days = ['日', '一', '二', '三', '四', '五', '六']
       return [curr.format('YYYY年 MM月 DD日 星期'), days[curr.day()]]
     },
+    battleRecordDetails: function () {
+      let detail = JSON.parse(JSON.stringify(this.global.battleRecordDetails))
+      if (detail.id != 0) {
+        detail = this.setBattleFieldData(detail)
+      }
+      return detail
+    },
     battleRecords: function () {
       const records = JSON.parse(JSON.stringify(this.global.warRecords))
+      for (const i in records) {
+        const record = records[i]
+        record.attackCountryId = record.attackCountryIds[0]
+        const attackCountry = this.countries.find(
+          (e) => e.id == record.attackCountryId
+        )
+        record.attackCountryName = attackCountry ? attackCountry.name : ''
+        const defenceCountry = this.countries.find(
+          (e) => e.id == record.defenceCountryId
+        )
+        record.defenceCountryName = defenceCountry ? defenceCountry.name : ''
+        const winnerCountry = this.countries.find(
+          (e) => e.id == record.winnerCountryId
+        )
+        record.winnerCountryName = winnerCountry ? winnerCountry.name : ''
+        const map = this.global.maps.find((e) => e.id == record.mapId)
+        record.mapName = map ? map.name : ''
+
+        record.date = this.$moment(record.timestamp).format('YYYY-MM-DD HH:mm')
+      }
       return records
     }
   },
@@ -1532,8 +1727,69 @@ export default Vue.extend({
       'actLevelUpCity',
       'actBattleJoin',
       'actBattleJudge',
-      'actSelectGame'
+      'actSelectGame',
+      'getWarRecord'
     ]),
+    clickBattleRecord: function (data) {
+      this.battleDetailCurrId = data.battleId
+      this.getWarRecord(data)
+    },
+    setBattleFieldData: function (data) {
+      console.log(data)
+      const games = JSON.parse(JSON.stringify(this.global.gameMap))
+      const countries = JSON.parse(JSON.stringify(this.countries))
+      const users = JSON.parse(JSON.stringify(this.users))
+      const strongholds = JSON.parse(JSON.stringify(this.strongholds))
+      const currDate = this.$moment(data.timestamp)
+      data.timestamp = currDate.format('YYYY-MM-DD HH:mm')
+      data.timestampLimit = currDate
+        .subtract(3, 'days')
+        .format('YYYY-MM-DD HH:mm')
+
+      data.game = games[data.gameId] ? games[data.gameId] : {}
+
+      data.attackCountry = countries.find((item) => {
+        return item.id == data.attackCountryIds[0]
+      })
+      data.attackUsers = []
+      for (const u in data.atkUserIds) {
+        const currUserId = data.atkUserIds[u]
+        data.attackUsers.push(users.find((item) => item.id == currUserId))
+      }
+      data.attackSoldier = data.detail.atkSoldiers
+      data.attackSoldierTotal = data.attackSoldier.reduce((a, b) => a + b)
+
+      data.defenceCountry = countries.find((item) => {
+        return item.id == data.defenceCountryId
+      })
+      data.defenceUsers = []
+      for (const u in data.defUserIds) {
+        const currUserId = data.defUserIds[u]
+        data.defenceUsers.push(users.find((item) => item.id == currUserId))
+      }
+      data.defenceSoldier = data.detail.defSoldiers
+      data.defenceSoldierTotal = data.defenceSoldier.reduce((a, b) => a + b)
+
+      data.judge = users.find((item) => item.id == data.judgeId)
+      data.toolman = users.find((item) => item.id == data.toolmanId)
+      data.map = strongholds.find((item) => item.id == data.mapId)
+
+      if (!data.judge) {
+        data.judge = {
+          country: {
+            color: this.defaultColor
+          }
+        }
+      }
+      if (!data.toolman) {
+        data.toolman = {
+          country: {
+            color: this.defaultColor
+          }
+        }
+      }
+      return data
+    },
     moment: function (date) {
       return this.$moment(date)
     },
@@ -2826,6 +3082,15 @@ html {
   font-family: '華康行楷體W5';
   background: rgba(0, 0, 0, 0.7) !important;
   backdrop-filter: blur(5px);
+  .battle-records-table {
+    background: transparent !important;
+    tr {
+      th,
+      td {
+        font-size: 26px !important;
+      }
+    }
+  }
   .toolbar {
     background: transparent !important;
   }
@@ -3000,6 +3265,20 @@ html {
     .user-group {
       text-align: center;
       &.overtime {
+        &.winner {
+          &::after {
+            position: absolute;
+            left: 0;
+            top: 0;
+            z-index: 4;
+            content: '';
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: url('/images/win.png') no-repeat center center;
+            filter: drop-shadow(0 0 3px #111);
+          }
+        }
         &.curr-user-judge {
           cursor: pointer;
           opacity: 0.8;
