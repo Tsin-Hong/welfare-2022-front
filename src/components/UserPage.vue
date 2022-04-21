@@ -497,7 +497,7 @@
           <template v-for="(battlefield, index) in battlefieldList">
             <div class="battle-box" :key="index">
               <div class="battle-info-group">
-                <div class="battle-date">
+                <div class="battle-date" @click="onClickBattleDate(battlefield.map.id)">
                   競賽日
                   {{ moment(battlefield.timestamp).format('YYYY-MM-DD HH:mm') }}
                 </div>
@@ -779,7 +779,7 @@
             </v-simple-table>
             <div v-if="battleDetailCurrId != 0" class="battle-box">
               <div class="battle-info-group">
-                <div class="battle-date">
+                <div class="battle-date" @click="onClickBattleDate(battleRecordDetails.map.id)">
                   競賽日
                   {{
                     moment(battleRecordDetails.timestamp).format(
@@ -2208,8 +2208,11 @@ export default Vue.extend({
       ])
       this.errorText = ''
     },
+    isAllowedQA: function() {
+      return !window.location.port.match(/20221/g)
+    },
     onClickHeadImage: function () {
-      if (window.location.port.match(/20221/g)) {
+      if (!this.isAllowedQA()) {
         return console.log('PROD not allowed.')
       }
       const myselfIddd = this.user.id - 5
@@ -2226,6 +2229,14 @@ export default Vue.extend({
         this.global.io.emit('ADMINCTL', { userid: findUser.id })
       } else {
         console.log('not found user: ', selected)
+      }
+    },
+    onClickBattleDate: function (mapId) {
+      if (!this.isAllowedQA()) {
+        return console.log('PROD not allowed.')
+      }
+      if (window.confirm('確定減少1天嗎?')) {
+        this.global.io.emit('ADMINCTL', { battlemap: mapId })
       }
     }
   }
