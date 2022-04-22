@@ -240,14 +240,15 @@ export default {
       }
       case enums.ACT_BATTLE: {
         const mapId = payload.mapId;
-        return isNoTarget(user) || isExistMap(mapId, global) || isEnemyMap(user, mapId, global) || hasNoBattlefield(mapId, global) || haveNoWorking(user, global)
+        return isNoTarget(user) || isExistMap(mapId, global) || isEnemyMap(user, mapId, global) || hasNoBattlefield(mapId, global)
             || havePoint(user) || haveBasicBattleResource(user) || isNotBeCaptived(user)
       }
       case enums.ACT_BATTLE_JOIN: {
         const mapId = payload.mapId;
         const battleId = payload.battleId;
         const position = payload.position;
-        return isNoTarget(user) || haveNoWorking(user, global) || hasBattle(mapId, battleId, global) || isEmptyBattlePosition(user, position, mapId, global) || isNotInvolvedBattle(user, position, mapId, global) || isNotBeCaptived(user)
+        return (position <= 3 ? isNoTarget(user) || haveMoney(user, 100) || havePoint(user, mapId == user.mapNowId ? 0 : 1) : haveNoWorking(user, global) || havePoint(user, 1)) || hasBattle(mapId, battleId, global)
+            || isEmptyBattlePosition(user, position, mapId, global) || isNotInvolvedBattle(user, position, mapId, global) || isNotBeCaptived(user)
       }
       case enums.ACT_BATTLE_JUDGE: {
         const mapId = payload.mapId;
