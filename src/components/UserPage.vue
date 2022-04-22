@@ -777,9 +777,9 @@
                 </tbody>
               </template>
             </v-simple-table>
-            <div v-if="battleDetailCurrId != 0" class="battle-box">
+            <div v-if="battleDetailCurrId != 0 && battleDetailCurrId == battleRecordDetails.id" class="battle-box">
               <div class="battle-info-group">
-                <div class="battle-date" @click="onClickBattleDate(battleRecordDetails.map.id)">
+                <div class="battle-date">
                   競賽日
                   {{
                     moment(battleRecordDetails.timestamp).format(
@@ -799,6 +799,9 @@
               </div>
               <div class="battle-top text-center">
                 <div class="battle-info-text">
+                  <v-btn icon dark @click="battleDetailCurrId=0">
+                    <v-icon>mdi-reply</v-icon>
+                  </v-btn>
                   <div class="area area-l flex-row-reverse">
                     <span
                       class="country-name"
@@ -823,11 +826,11 @@
                     <span>{{ battleRecordDetails.defenceSoldierTotal }}</span>
                   </div>
                 </div>
-                <span
+                <!-- <span
                   class="d-inline-block px-10-px py-6-px posi-re fz-16-px"
                   :z-index="3"
                   >※ 【攻方】總兵力於截止時間結算小於【守方】直接戰敗 ※</span
-                >
+                > -->
               </div>
               <div class="d-flex field-block">
                 <div class="battle-team-area d-flex">
@@ -897,6 +900,7 @@
                                 class="soldier-group"
                               >
                                 {{ battleRecordDetails[type + 'Soldier'][u_i] }}
+                                <span> - </span>
                               </div>
                             </div>
                           </div>
@@ -987,7 +991,7 @@
             </v-btn>
           </v-toolbar>
           <v-card-text class="py-15-px">
-            <v-card-subtitle class="grey--text">據點資訊</v-card-subtitle>
+            <v-card-subtitle class="grey--text">據點資訊<span style="font-size: 12px; padding: 2px 16px; float: right;"> 項目類別: {{ selectedMapInfo.gameTypes.join(',') }}</span></v-card-subtitle>
             <v-divider class="mb-10-px"></v-divider>
             <table class="map-info-table">
               <tr>
@@ -1386,6 +1390,7 @@ export default Vue.extend({
         if (this.selectedMapInfo) {
           if (curr.mapId == this.selectedMapInfo.id) {
             newBattles.push(curr)
+            break
           }
         } else {
           if (this.battleTypeTab == 0 && curr.timestamp >= this.dateFormat) {
@@ -1577,6 +1582,7 @@ export default Vue.extend({
         (ownCountry.color = ownCountry.color.split(','))
 
       // const battle = this.battlefields[_map.id] ? this.battlefields[_map.id] : false
+      const gameTypes = String(_map.gameType).split('').map(t => enums.CHINESE_GAMETYPE_NAMES[t]);
 
       return {
         ..._map,
@@ -1584,6 +1590,7 @@ export default Vue.extend({
         basicInfos,
         ownCountry,
         city,
+        gameTypes,
         basicDefense
         // battle
       }
@@ -1616,6 +1623,7 @@ export default Vue.extend({
       if (detail.id != 0) {
         detail = this.setBattleFieldData(detail)
       }
+      console.log('battleRecordDetails: ', detail)
       return detail
     },
     battleRecords: function () {
@@ -1967,6 +1975,8 @@ export default Vue.extend({
           break
         case 2:
           this.ChangeState(['dialog_battle_list', true])
+          this.battleTypeTab = 0
+          this.battleDetailCurrId = 0
           break
       }
     },
