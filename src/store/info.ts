@@ -50,6 +50,13 @@ const info = {
               const adds = received.payload.money - content.rootState.user.money
               msg = `商業執行成功! 獲得【黃金】X ${adds}`
             } break
+            case enums.ACT_ESCAPE: {
+              if (received.payload.mapNowId > 0) {
+                msg = '逃脫成功'
+              } else {
+                msg = '逃脫失敗'
+              }
+            } break
             default:
           }
           content.dispatch('showClientDialog', msg)

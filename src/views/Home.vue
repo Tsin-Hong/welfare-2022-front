@@ -68,6 +68,7 @@
 import Vue from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import UserPage from '../components/UserPage.vue'
+import enums from '@/unit/enum'
 
 export default Vue.extend({
   name: 'Home',
@@ -127,8 +128,8 @@ export default Vue.extend({
             id: 1004,
             icon: '',
             title: '遷都',
-            is_show: false,
-            couldBeUseRoleIds: [],
+            is_show: true,
+            couldBeUseRoleIds: [1],
             couldBeUseByCity: true,
             couldBeUseByOther: false
           }
@@ -138,7 +139,7 @@ export default Vue.extend({
         id: 2,
         title: '論功',
         icon: 'hops',
-        is_show: false,
+        is_show: true,
         is_click: false,
         couldBeUseByCity: true,
         couldBeUseByOther: false,
@@ -148,8 +149,8 @@ export default Vue.extend({
             id: 2001,
             icon: '',
             title: '任命',
-            is_show: false,
-            couldBeUseRoleIds: [],
+            is_show: true,
+            couldBeUseRoleIds: [1],
             couldBeUseByCity: true,
             couldBeUseByOther: false
           },
@@ -157,8 +158,8 @@ export default Vue.extend({
             id: 2002,
             icon: '',
             title: '解任',
-            is_show: false,
-            couldBeUseRoleIds: [],
+            is_show: true,
+            couldBeUseRoleIds: [1],
             couldBeUseByCity: true,
             couldBeUseByOther: false
           },
@@ -167,7 +168,7 @@ export default Vue.extend({
             icon: '',
             title: '招募',
             is_show: false,
-            couldBeUseRoleIds: [],
+            couldBeUseRoleIds: [1, 2],
             couldBeUseByCity: true,
             couldBeUseByOther: false
           },
@@ -175,8 +176,8 @@ export default Vue.extend({
             id: 2004,
             icon: '',
             title: '配給',
-            is_show: false,
-            couldBeUseRoleIds: [],
+            is_show: true,
+            couldBeUseRoleIds: [1, 2],
             couldBeUseByCity: true,
             couldBeUseByOther: false
           }
@@ -224,7 +225,7 @@ export default Vue.extend({
             icon: '',
             title: '起義',
             is_show: false,
-            couldBeUseRoleIds: [],
+            couldBeUseRoleIds: [3],
             couldBeUseByCity: true,
             couldBeUseByOther: false
           },
@@ -232,8 +233,8 @@ export default Vue.extend({
             id: 3004,
             icon: '',
             title: '逃脫',
-            is_show: false,
-            couldBeUseRoleIds: [],
+            is_show: true,
+            couldBeUseRoleIds: [2],
             couldBeUseByCity: true,
             couldBeUseByOther: false
           },
@@ -242,7 +243,7 @@ export default Vue.extend({
             icon: '',
             title: '交易',
             is_show: false,
-            couldBeUseRoleIds: [],
+            couldBeUseRoleIds: [1, 2],
             couldBeUseByCity: true,
             couldBeUseByOther: false
           },
@@ -376,10 +377,13 @@ export default Vue.extend({
 
   methods: {
     ...mapMutations(['ChangeState', 'ChangeApiCheck', 'ChangeDialogCheck']),
-    ...mapActions(['ApiMove', 'ApiBattle']),
+    ...mapActions(['ApiMove', 'ApiBattle', 'actAppointOccupation', 'actDismissOccupation', 'actShare', 'actEscape']),
     menuShow: function (item, child) {
       let show = false
       const mapTargetIdUnableTitle = ['移動', '出征']
+      if (this.currUser.captiveDate && item.title != '攻略') {
+        return show
+      }
       if (
         item.is_show &&
         !['move', 'battal'].includes(this.client.status_type)
@@ -401,7 +405,18 @@ export default Vue.extend({
                   (mapTargetIdUnableTitle.includes(child.title) &&
                     this.currUser.mapTargetId == 0))
               ) {
-                show = true
+                switch (child.title) {
+                  case '配給': {
+                    const occupation = this.global.occupationMap[this.currUser.occupationId]
+                    show = this.currUser.role == 1 || (occupation && occupation.isAllowedShare)
+                  } break
+                  case '遷都': {
+                    const mycountry = this.global.countries.find(c => c.id == this.user.countryId)
+                    show = mycountry && mycountry.originCityId == 0
+                  } break
+                  default:
+                    show = true
+                }
               }
             }
           }
@@ -437,10 +452,95 @@ export default Vue.extend({
           case 1005:
             this.ChangeState(['dialog_level_up_city', true])
             break
+          case 2001: // 任命
+            this.handlePromptAppointment()
+            break
+          case 2002: // 解任
+            this.handlePromptDismiss()
+            break
+          case 2004: // 配給
+            this.handlePromptShare()
+            break
+          case 1004: // 遷都
+            this.handlePromptMigrateOriginCity()
+            break
           default:
             this.ChangeDialogCheck({ content: key })
         }
       }
+    },
+    handlePromptAppointment: function () {
+      const occupationMap = this.global.occupationMap
+      const users = this.global.users.filter(user => user.countryId == this.user.countryId && user.role == 2)
+      let occListString = '請輸入你想任命的官吏ID: \r\n'
+      Object.values(occupationMap).map((occ:any) => {
+        const assignedUser = users.find(user => user.occupationId == occ.id)
+        let _str = `[ ${occ.id} ] ${occ.name} => ${assignedUser ? assignedUser.nickname : '空'}\r\n`
+        occListString += _str
+      })
+      const occId = window.prompt(occListString)
+      const selected = occupationMap[occId]
+      if (selected) {
+        const matchedUsers = users.filter(user => user.contribution >= selected.contributionCondi && user.occupationId == 0)
+        if (matchedUsers.length > 0) {
+          let showOccStr = `官吏 [ ${selected.name} ] 所需貢獻直: ${selected.contributionCondi} \r\n`
+          showOccStr += '請輸入欲任命的武將編號 (以下為符合條件的武將): \r\n'
+          matchedUsers.sort((a,b) => b.contribution - a.contribution)
+          matchedUsers.map((user, idx) => {
+            showOccStr += `${idx}. ${user.nickname}`.padEnd(10, '　')
+            if (idx % 3 == 2) { showOccStr+= '\r\n' }
+          })
+          const selectedUserIdx = window.prompt(showOccStr)
+          if (matchedUsers[selectedUserIdx]) {
+            this.actAppointOccupation({userId: matchedUsers[selectedUserIdx].id, occupationId: parseInt(occId)})
+          }
+        } else {
+          window.alert('沒有武將符合條件')
+        }
+      } else {
+        occId && window.alert('錯誤的ID')
+      }
+    },
+    handlePromptDismiss: function() {
+      const occupationMap = this.global.occupationMap
+      const users = this.global.users.filter(user => user.countryId == this.user.countryId && user.occupationId > 0)
+      let occListString = '請輸入你想解任的官吏: \r\n'
+      users.map((user:any, idx) => {
+        const occ = occupationMap[user.occupationId]
+        if (occ) {
+          occListString += `${idx}. [ ${occ.name} ] => ${user.nickname}\r\n`
+        }
+      })
+      const useridx = window.prompt(occListString)
+      if (users[useridx]) {
+        this.actDismissOccupation({userId: users[useridx].id})
+      }
+    },
+    handlePromptShare: function() {
+      const users = this.global.users.filter(user => user.countryId == this.user.countryId && this.user.id != user.id)
+      let _str = '請選擇想配給的武將: \r\n'
+      users.map((user, idx) => {
+        _str += `${idx}. ${user.nickname}`.padEnd(8, '　')
+        if (idx % 4 == 3) { _str+= '\r\n' }
+      })
+      const userIdx = window.prompt(_str)
+      const selectedUser = users[userIdx]
+      if (selectedUser) {
+        const money = parseInt(window.prompt(`請輸入要贈與 [ ${selectedUser.nickname} ] 的黃金`)) || 0
+        const soldier = parseInt(window.prompt(`請輸入要託付給 [ ${selectedUser.nickname} ] 的士兵`)) || 0
+        if (isNaN(money) || isNaN(soldier) || (money == 0 && soldier == 0)) {
+          window.alert('取消配給')
+        } else {
+          this.actShare({userId: selectedUser.id, money, soldier})
+        }
+      }
+    },
+    handlePromptMigrateOriginCity: function() {
+      // const cities = this.global.maps.filter(m => m.ownCountryId == this.user.countryId && m.cityId > 0);
+      // const gameTypes = Object.keys(enums.CHINESE_GAMETYPE_NAMES).map(key => [parseInt(key), enums.CHINESE_GAMETYPE_NAMES[key]]);
+      // const enterTheNumber = parseInt(window.prompt(cities.map(f => `${f.cityId} -> ${f.name}`).join('\r\n')));
+      // const enterGameId = parseInt(window.prompt(gameTypes.map(f => `${f[0]} -> ${f[1]}`).join('\r\n')));
+      window.alert('先找福委幫您處理嚕')
     }
   }
 

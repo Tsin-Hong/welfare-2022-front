@@ -60,7 +60,9 @@
                       <i class="role_type" v-if="currUser.loyalUserId !== 0"
                         >元老</i
                       ></span
-                    ><span class="type w-33-pct">{{ currUser.roleName }}</span>
+                    ><span class="type w-33-pct">{{ currUser.roleName }}<i class="role_type" v-if="currUser.occupationId > 0 && global.occupationMap[currUser.occupationId]"
+                        >{{global.occupationMap[currUser.occupationId].name}}</i
+                      ></span>
                     <span class="class-1 w-33-pct"
                       >{{ currUser.mapNowName }}
                       <v-btn
@@ -991,7 +993,7 @@
             </v-btn>
           </v-toolbar>
           <v-card-text class="py-15-px">
-            <v-card-subtitle class="grey--text">據點資訊<span style="font-size: 12px; padding: 2px 16px; float: right;"> 項目類別: {{ selectedMapInfo.gameTypes.join(',') }}</span></v-card-subtitle>
+            <v-card-subtitle class="grey--text">據點資訊<span style="font-size: 12px; padding: 2px 16px; float: right;"> 屬性: {{ selectedMapInfo.gameTypes.join(',') }}</span></v-card-subtitle>
             <v-divider class="mb-10-px"></v-divider>
             <table class="map-info-table">
               <tr>
@@ -1050,9 +1052,8 @@
               :class="{ captived: !!uu.captiveDate }"
             >
               <span class="title-name">{{ uu.occupation }}</span>
-              <span class="user-name">{{ uu.nickname }}</span>
+              <span class="user-name" :title="uu.code">{{ uu.nickname }}</span>
               <span class="user-other-info">( {{ uu.soldier }} )</span>
-              <span class="user-other-info">( {{ uu.code }} )</span>
             </span>
           </v-card-text>
         </template>
@@ -1729,6 +1730,7 @@ export default Vue.extend({
       'actSearchWild',
       'actLeaveCountry',
       'actEnterCountry',
+      'actEscape',
       'actBusiness',
       'ApiRes',
       'actBattle',
@@ -2030,6 +2032,10 @@ export default Vue.extend({
         case 3002:
           this.actLeaveCountry()
           break
+        case 3004: {
+          const money = parseInt(window.prompt('請輸入要花多少黃金疏通 (不需要則輸入0):')) || 0;
+          this.actEscape({money})
+        } break
         case 1001:
           this.actBusiness()
           break

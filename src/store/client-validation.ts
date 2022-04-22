@@ -54,7 +54,7 @@ function isAllowedShareUser(user, global) {
 }
 
 function isNotBeCaptived(user) {
-  return !user.captiveDate ? '' : `被俘虜中. [${user.captiveDate.toLocaleDateString()}]`
+  return !user.captiveDate ? '' : `被俘虜中. [${new Date(user.captiveDate).toLocaleDateString()}]`
 }
 
 function isBeCaptived(user) {
@@ -167,7 +167,7 @@ function haveBasicBattleResource(user) {
 
 function isOccupationEnoughContribution(userId, occupationId, global) {
   const _occu = global.occupationMap[occupationId];
-  const _user = global.userMap[userId];
+  const _user = global.users.find(user => user.id == userId);
   return _occu && _user && _user.contribution >= _occu.contributionCondi ? '' : '貢獻值不足.';
 }
 
