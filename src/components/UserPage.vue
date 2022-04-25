@@ -511,22 +511,15 @@
                   "
                   class="grey darken-4 p-10-px"
                 >
-                  開放選擇競賽項目時段<br />
-                  {{ battlefield.timestampLimit }} ~
+                  開放選擇競賽項目截止時間<br />
                   {{
                     moment(battlefield.timestamp)
-                      .subtract(1, 'days')
+                      .subtract(3, 'days')
                       .format('YYYY-MM-DD HH:mm')
                   }}
                   <v-overflow-btn
                     class="my-2"
-                    :disabled="
-                      battlefield.timestampLimit > dateFormat ||
-                      dateFormat >
-                        moment(battlefield.timestamp)
-                          .subtract(1, 'days')
-                          .format('YYYY-MM-DD HH:mm')
-                    "
+                    :disabled="battlefield.timestampLimit < dateFormat || battlefield.gameId > 0"
                     :items="beAbleToSelectGameList(battlefield)"
                     item-text="name"
                     item-value="id"
@@ -1600,20 +1593,27 @@ export default Vue.extend({
     },
     currUser: function () {
       const user = JSON.parse(JSON.stringify(this.getUser()))
-      const battlefields = JSON.parse(JSON.stringify(this.battlefields))
-      user.alreadyJoined = false
-      let userIds = []
+      // const battlefields = JSON.parse(JSON.stringify(this.battlefields))
+      const battles = Object.values(this.battlefields)
+      user.alreadeyWorking = false
+      user.alreadyJoined = user.mapTargetId > 0
+      battles.map((battle: any) => {
+        if ([battle.judgeId, battle.toolmanId].includes(user.id)) {
+          user.alreadeyWorking = true
+        }
+      })
+      // let userIds = []
 
-      for (const i in battlefields) {
-        const curr = battlefields[i]
-        userIds = [].concat(curr.atkUserIds, curr.defUserIds, [
-          curr.judgeId,
-          curr.toolmanI
-        ])
-      }
-      if (userIds.includes(user.id)) {
-        user.alreadyJoined = true
-      }
+      // for (const i in battlefields) {
+      //   const curr = battlefields[i]
+      //   userIds = [].concat(curr.atkUserIds, curr.defUserIds, [
+      //     curr.judgeId,
+      //     curr.toolmanI
+      //   ])
+      // }
+      // if (userIds.includes(user.id)) {
+      //   user.alreadyJoined = true
+      // }
       return user
     },
     today: function () {
@@ -2128,7 +2128,7 @@ export default Vue.extend({
       // 到期、已加入、行動力不足
       if (
         battlefield.timestampLimit < this.dateFormat ||
-        this.currUser.alreadyJoined ||
+        // this.currUser.alreadyJoined ||
         this.currUser.actPoint == 0
       ) {
         return true
@@ -2138,9 +2138,9 @@ export default Vue.extend({
         case 'join':
           if (
             battlefield[type + 'Country'].id != this.currUser.countryId ||
-            (!battlefield.map.route.includes(this.currUser.mapNowId) &&
-              this.currUser.mapNowId != battlefield.mapId) ||
-            this.currUser.soldier == 0
+            (!battlefield.map.route.includes(this.currUser.mapNowId) && this.currUser.mapNowId != battlefield.mapId) ||
+            this.currUser.soldier == 0 ||
+            this.currUser.alreadyJoined
           ) {
             return true
           }
@@ -2150,7 +2150,8 @@ export default Vue.extend({
             [
               battlefield.defenceCountry.id,
               battlefield.attackCountry.id
-            ].includes(this.currUser.countryId)
+            ].includes(this.currUser.countryId) ||
+            this.currUser.alreadeyWorking
           ) {
             return true
           }

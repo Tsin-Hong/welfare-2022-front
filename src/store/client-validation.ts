@@ -201,8 +201,8 @@ function availableSetGameInBattle(gameId, mapId, global) {
   const battle = global.battlefieldMap[mapId];
   const now = new Date();
   now.setDate(now.getDate()+3);
-  if (now < new Date(battle.timestamp)) {
-      return '戰役還未進入備戰期間';
+  if (now > new Date(battle.timestamp)) {
+      return '戰役超過備戰期間';
   }
   const vsAry = [battle.atkUserIds.filter((u: number)=> u > 0).length, battle.defUserIds.filter((u: number) => u > 0).length];
   vsAry.sort((a,b) => a-b);
