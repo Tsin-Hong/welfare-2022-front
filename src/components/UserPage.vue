@@ -2036,8 +2036,11 @@ export default Vue.extend({
           this.actLeaveCountry()
           break
         case 3004: {
-          const money = parseInt(window.prompt('請輸入要花多少黃金疏通 (不需要則輸入0):')) || 0;
-          this.actEscape({money})
+          const inputed = window.prompt('請輸入要花多少黃金疏通 (不需要則輸入0):');
+          if (typeof inputed == 'string' && inputed.length > 0) {
+            const money = parseInt(inputed) || 0;
+            this.actEscape({money})
+          }
         } break
         case 1001:
           this.actBusiness()

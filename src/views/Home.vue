@@ -199,7 +199,7 @@ export default Vue.extend({
         is_show: true,
         is_click: false,
         couldBeUseByCity: true,
-        couldBeUseByOther: false,
+        couldBeUseByOther: true,
         couldBeUseRoleIds: [1, 2, 3],
         items: [
           {
@@ -234,9 +234,9 @@ export default Vue.extend({
             icon: '',
             title: '逃脫',
             is_show: true,
-            couldBeUseRoleIds: [2],
+            couldBeUseRoleIds: [1, 2],
             couldBeUseByCity: true,
-            couldBeUseByOther: false
+            couldBeUseByOther: true
           },
           {
             id: 3005,
@@ -381,14 +381,14 @@ export default Vue.extend({
     menuShow: function (item, child) {
       let show = false
       const mapTargetIdUnableTitle = ['移動', '出征']
-      if (this.currUser.captiveDate && item.title != '攻略') {
-        return show
-      }
       if (
         item.is_show &&
         !['move', 'battal'].includes(this.client.status_type)
       ) {
         if (child) {
+          if (this.currUser.captiveDate && item.title != '攻略') {
+            return show
+          }
           if (
             child.is_show &&
             this.currUser.actPoint > 0 &&
