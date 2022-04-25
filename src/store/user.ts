@@ -34,12 +34,13 @@ const user = {
     wsOnAUTHORIZE: (state: any, message: any) => {
       const parsedMsg = parser.arrayBufferToJSON(message) // byte array 轉回 json
       console.log('Socket On Authorize Parsed: ', parsedMsg)
-      const payload = parsedMsg.payload
+      const payload = parsedMsg.payload || {}
 
       switch (parsedMsg.act) {
         case enums.FAILED: {
           window.localStorage.removeItem('_token_')
           window.alert(parsedMsg.reason)
+          window.location.reload()
           break
         }
         case enums.AUTHORIZE:
@@ -51,6 +52,11 @@ const user = {
           break
       }
 
+      if (parsedMsg.logout) {
+        window.localStorage.removeItem('_token_')
+        window.alert('有其他裝置也登入了此帳號.')
+        window.location.reload()
+      }
       if (parsedMsg.redirect) {
         window.location.href = parsedMsg.redirect
       }
