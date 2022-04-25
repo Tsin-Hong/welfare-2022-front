@@ -805,6 +805,7 @@
                     <v-icon>mdi-reply</v-icon>
                   </v-btn>
                   <div class="area area-l flex-row-reverse">
+                    <span>勝利！</span>
                     <span
                       class="country-name"
                       :style="{
@@ -813,9 +814,10 @@
                       }"
                       >{{ battleRecordDetails.attackCountry.name }}</span
                     >
-                    <span>{{ battleRecordDetails.attackSoldierTotal }}</span>
+                    <!-- <span>{{ battleRecordDetails.attackSoldierTotal }}</span> -->
+                    
                   </div>
-                  <div class="area area-c">VS</div>
+                  <!-- <div class="area area-c">VS</div>
                   <div class="area area-r">
                     <span
                       class="country-name"
@@ -826,7 +828,7 @@
                       >{{ battleRecordDetails.defenceCountry.name }}</span
                     >
                     <span>{{ battleRecordDetails.defenceSoldierTotal }}</span>
-                  </div>
+                  </div> -->
                 </div>
                 <!-- <span
                   class="d-inline-block px-10-px py-6-px posi-re fz-16-px"
@@ -902,7 +904,7 @@
                                 class="soldier-group"
                               >
                                 {{ battleRecordDetails[type + 'Soldier'][u_i] }}
-                                <span> - </span>
+                                <span style="color: red;"> - {{ battleRecordDetails[type + 'SoldierLoses'][u_i] }}</span>
                               </div>
                             </div>
                           </div>
@@ -1624,7 +1626,6 @@ export default Vue.extend({
       if (detail.id != 0) {
         detail = this.setBattleFieldData(detail)
       }
-      console.log('battleRecordDetails: ', detail)
       return detail
     },
     battleRecords: function () {
@@ -1745,7 +1746,7 @@ export default Vue.extend({
       this.getWarRecord(data)
     },
     setBattleFieldData: function (data) {
-      console.log(data)
+      // console.log(data)
       const games = JSON.parse(JSON.stringify(this.global.gameMap))
       const countries = JSON.parse(JSON.stringify(this.countries))
       const users = JSON.parse(JSON.stringify(this.users))
@@ -1767,6 +1768,7 @@ export default Vue.extend({
         data.attackUsers.push(users.find((item) => item.id == currUserId))
       }
       data.attackSoldier = data.detail.atkSoldiers
+      data.attackSoldierLoses = data.detail.atkSoldierLoses || [0,0,0,0]
       data.attackSoldierTotal = data.attackSoldier.reduce((a, b) => a + b)
 
       data.defenceCountry = countries.find((item) => {
@@ -1778,6 +1780,7 @@ export default Vue.extend({
         data.defenceUsers.push(users.find((item) => item.id == currUserId))
       }
       data.defenceSoldier = data.detail.defSoldiers
+      data.defenceSoldierLoses = data.detail.defSoldierLoses || [0,0,0,0]
       data.defenceSoldierTotal = data.defenceSoldier.reduce((a, b) => a + b)
 
       data.judge = users.find((item) => item.id == data.judgeId)

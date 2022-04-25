@@ -75,6 +75,9 @@ const global = {
             })
           })
         } break
+        case enums.ACT_GET_GLOBAL_USERS_INFO: {
+          state.users = parser.parseArraiesToObjects(payload.users, enums.UserGlobalAttributes)
+        } break
         case enums.ACT_NOTIFICATION: {
           const newNoti = [new Date(payload[0]), payload[1]]
           state.notifications = [newNoti].concat(state.notifications);
@@ -291,7 +294,14 @@ const global = {
        */
       content.dispatch('emitMessage', {act: enums.ACT_RELEASE_CAPTIVE, payload: args});
     },
-
+    actSetOriginCity: (content: any, args: any) => {
+      /**
+       * 重設主城
+       * @param {number} cityId
+       * @param {number} gameTypeId
+       */
+      content.dispatch('emitMessage', {act: enums.ACT_SET_ORIGIN_CITY, payload: args});
+    }
   },
   getters: {
   }

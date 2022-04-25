@@ -167,7 +167,7 @@ export default Vue.extend({
             id: 2003,
             icon: '',
             title: '招募',
-            is_show: false,
+            is_show: true,
             couldBeUseRoleIds: [1, 2],
             couldBeUseByCity: true,
             couldBeUseByOther: false
@@ -251,8 +251,8 @@ export default Vue.extend({
             id: 3006,
             icon: '',
             title: '俘虜',
-            is_show: false,
-            couldBeUseRoleIds: [],
+            is_show: true,
+            couldBeUseRoleIds: [1],
             couldBeUseByCity: true,
             couldBeUseByOther: false
           },
@@ -377,7 +377,7 @@ export default Vue.extend({
 
   methods: {
     ...mapMutations(['ChangeState', 'ChangeApiCheck', 'ChangeDialogCheck']),
-    ...mapActions(['ApiMove', 'ApiBattle', 'actAppointOccupation', 'actDismissOccupation', 'actShare', 'actEscape']),
+    ...mapActions(['ApiMove', 'ApiBattle', 'actAppointOccupation', 'actDismissOccupation', 'actShare', 'actEscape', 'actSetOriginCity', 'actRecruit', 'actRecruitCaptive', 'actReleaseCaptive']),
     menuShow: function (item, child) {
       let show = false
       const mapTargetIdUnableTitle = ['移動', '出征']
@@ -412,7 +412,14 @@ export default Vue.extend({
                   } break
                   case '遷都': {
                     const mycountry = this.global.countries.find(c => c.id == this.user.countryId)
-                    show = mycountry && mycountry.originCityId == 0
+                    show = this.currUser.role == 1 && mycountry && mycountry.originCityId == 0
+                  } break
+                  case '招募': {
+                    const occupation = this.global.occupationMap[this.currUser.occupationId]
+                    show = this.currUser.role == 1 || (occupation && occupation.isAllowedRecurit)
+                  } break
+                  case '逃脫': {
+                    show = !!this.currUser.captiveDate
                   } break
                   default:
                     show = true
@@ -464,6 +471,12 @@ export default Vue.extend({
           case 1004: // 遷都
             this.handlePromptMigrateOriginCity()
             break
+          case 2003: // 招募
+            this.handlePromptRecurit()
+            break
+          case 3006: // 俘虜
+            this.handlePromptCaptives()
+            break
           default:
             this.ChangeDialogCheck({ content: key })
         }
@@ -473,7 +486,7 @@ export default Vue.extend({
       const occupationMap = this.global.occupationMap
       const users = this.global.users.filter(user => user.countryId == this.user.countryId && user.role == 2)
       let occListString = '請輸入你想任命的官吏ID: \r\n'
-      Object.values(occupationMap).map((occ:any) => {
+      Object.values(occupationMap).map((occ: any) => {
         const assignedUser = users.find(user => user.occupationId == occ.id)
         let _str = `[ ${occ.id} ] ${occ.name} => ${assignedUser ? assignedUser.nickname : '空'}\r\n`
         occListString += _str
@@ -536,11 +549,50 @@ export default Vue.extend({
       }
     },
     handlePromptMigrateOriginCity: function() {
-      // const cities = this.global.maps.filter(m => m.ownCountryId == this.user.countryId && m.cityId > 0);
-      // const gameTypes = Object.keys(enums.CHINESE_GAMETYPE_NAMES).map(key => [parseInt(key), enums.CHINESE_GAMETYPE_NAMES[key]]);
-      // const enterTheNumber = parseInt(window.prompt(cities.map(f => `${f.cityId} -> ${f.name}`).join('\r\n')));
-      // const enterGameId = parseInt(window.prompt(gameTypes.map(f => `${f[0]} -> ${f[1]}`).join('\r\n')));
-      window.alert('先找福委幫您處理嚕')
+      const cities = this.global.maps.filter(m => m.ownCountryId == this.user.countryId && m.cityId > 0)
+      const gameTypes = Object.keys(enums.CHINESE_GAMETYPE_NAMES).map(key => [parseInt(key), enums.CHINESE_GAMETYPE_NAMES[key]])
+      if (cities.length > 0) {
+        const cityId = parseInt(window.prompt(cities.map(f => `${f.cityId} -> ${f.name}`).join('\r\n')))
+        const gameTypeId = parseInt(window.prompt(gameTypes.map(f => `${f[0]} -> ${f[1]}`).join('\r\n')))
+        this.actSetOriginCity({cityId, gameTypeId})
+      } else {
+        window.alert('沒有城池.')
+      }
+    },
+    handlePromptRecurit: function() {
+      const users = this.global.users.filter(user => user.role == 3);
+      if (users.length > 0) {
+        const _str = '請選擇要招募的浪人: \r\n';
+        const userIdx = parseInt(window.prompt(_str + users.map((u, idx) => `${idx} -> ${u.nickname}`).join('\r\n')))
+        if (users[userIdx]) {
+          const userId = users[userIdx].id || 0;
+          this.actRecruit({userId})
+        } else {
+          window.alert('取消.')
+        }
+      } else {
+        window.alert('沒有浪人.')
+      }
+    },
+    handlePromptCaptives: function() {
+      const ownMapIds = this.global.maps.filter(map => map.ownCountryId == this.user.countryId).map(map => map.id)
+      const users = this.global.users.filter(user => user.captiveDate && ownMapIds.includes(user.mapNowId))
+      if (users.length > 0) {
+        const _str = '請選擇要處置的俘虜: \r\n';
+        const userIdx = parseInt(window.prompt(_str + users.map((u, idx) => `${idx} -> ${u.nickname}`).join('\r\n')))
+        const user = users[userIdx]
+        if (user) {
+          const doing = parseInt(window.prompt(`請選擇要針對俘虜 ( ${user.nickname} ) 的處置 \r\n1.招募該俘虜. \r\n2.釋放該俘虜. `))
+          if (doing==1) {
+            return this.actRecruitCaptive({userId: user.id})
+          } else if (doing ==2) {
+            return this.actReleaseCaptive({userId: user.id})
+          }
+        }
+        window.alert('取消.')
+      } else {
+        window.alert('沒有俘虜.')
+      }
     }
   }
 

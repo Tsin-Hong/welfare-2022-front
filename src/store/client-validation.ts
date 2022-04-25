@@ -181,6 +181,11 @@ function isExistOriginCity(user, global) {
   return country && isExistCity(country.originCityId, global) == '' ? '' : '不存在主城.';
 }
 
+function isNoOriginCity(user, global) {
+  const country = hash.getCountry(user.countryId, global.countries);
+  return country && isExistCity(country.originCityId, global) != '' ? '' : '已有主城.';
+}
+
 function isOriginCity(mapId, global) {
   const map = hash.getMap(mapId, global.maps);
   const country = hash.getCountry(map.ownCountryId, global.countries);
@@ -303,6 +308,10 @@ export default {
       case enums.ACT_RELEASE_CAPTIVE: {
         const userId = payload.userId;
         return isRoleEmperor(user) || havePoint(user, 1) || isCaptived(userId, global) || isInMyCountry(userId, user, global);
+      }
+      case enums.ACT_SET_ORIGIN_CITY: {
+        const cityId = payload.cityId;
+        return isRoleEmperor(user) || havePoint(user, 1) || isNoOriginCity(user, global) || isExistCity(cityId, global);
       }
     }
     return ''

@@ -57,6 +57,25 @@ const info = {
                 msg = '逃脫失敗'
               }
             } break
+            case enums.ACT_RECRUIT: {
+              const success = received.payload.success;
+              if (success) {
+                msg = '招募成功'
+              } else {
+                msg = '招募失敗'
+              }
+            } break
+            case enums.ACT_RECRUIT_CAPTIVE: {
+              const success = received.payload.success;
+              if (success) {
+                msg = '招募成功'
+              } else {
+                msg = '招募失敗'
+              }
+            } break
+            case enums.ACT_RELEASE_CAPTIVE: {
+              msg = '釋放俘虜成功'
+            } break
             default:
           }
           content.dispatch('showClientDialog', msg)
