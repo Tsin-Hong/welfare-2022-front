@@ -1153,7 +1153,7 @@ export default Vue.extend({
     date: new Date(),
     battleTypeTab: 0,
     tab: 0,
-    inCurrStrongholdIndex: '',
+    // inCurrStrongholdIndex: '',
     _mouse_dataset: {},
     viewX: 0,
     viewY: 0,
@@ -1656,13 +1656,14 @@ export default Vue.extend({
 
   watch: {
     currUser: {
-      handler: function (val) {
+      handler: function (val, oldVal) {
         if (
           val &&
-          val.mapNowIndex !== -1 &&
-          this.inCurrStrongholdIndex !== val.mapNowIndex
+          val.mapNowIndex !== -1
         ) {
-          this.goToXY(val.mapNowIndex)
+          if (!oldVal || oldVal.mapNowIndex != val.mapNowIndex) {
+            this.goToXY(val.mapNowIndex)
+          }
         }
       },
       deep: true,

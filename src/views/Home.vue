@@ -218,7 +218,7 @@ export default Vue.extend({
             is_show: true,
             couldBeUseRoleIds: [2],
             couldBeUseByCity: true,
-            couldBeUseByOther: false
+            couldBeUseByOther: true
           },
           {
             id: 3003,
