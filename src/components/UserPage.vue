@@ -1732,6 +1732,7 @@ export default Vue.extend({
       'actSearchWild',
       'actLeaveCountry',
       'actEnterCountry',
+      'actRaiseCountry',
       'actEscape',
       'actBusiness',
       'ApiRes',
@@ -2036,6 +2037,20 @@ export default Vue.extend({
         case 3002:
           this.actLeaveCountry()
           break
+        case 3003: {
+          const here = this.currUser.mapNowId
+          const users = Object.values(this.global.users).filter((user: any) => user.mapNowId == here)
+          const freemans = users.filter((user: any) => user.role == enums.ROLE_FREEMAN)
+          if (freemans.length >= 5 && users.length == freemans.length) {
+            this.actRaiseCountry()
+          } else {
+            this.ChangeApiResult({
+              title: '',
+              text: '人數不足 或 城池有其他人，不能起義',
+              img: ''
+            })
+          }
+        } break
         case 3004: {
           const inputed = window.prompt('請輸入要花多少黃金疏通 (不需要則輸入0):');
           if (typeof inputed == 'string' && inputed.length > 0) {

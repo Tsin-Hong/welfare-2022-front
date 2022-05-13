@@ -115,15 +115,15 @@ export default Vue.extend({
             couldBeUseByCity: true,
             couldBeUseByOther: false
           },
-          {
-            id: 1003,
-            icon: '',
-            title: '政策',
-            is_show: false,
-            couldBeUseRoleIds: [],
-            couldBeUseByCity: true,
-            couldBeUseByOther: false
-          },
+          // {
+          //   id: 1003,
+          //   icon: '',
+          //   title: '政策',
+          //   is_show: false,
+          //   couldBeUseRoleIds: [],
+          //   couldBeUseByCity: true,
+          //   couldBeUseByOther: false
+          // },
           {
             id: 1004,
             icon: '',
@@ -224,7 +224,7 @@ export default Vue.extend({
             id: 3003,
             icon: '',
             title: '起義',
-            is_show: false,
+            is_show: true,
             couldBeUseRoleIds: [3],
             couldBeUseByCity: true,
             couldBeUseByOther: false
@@ -256,15 +256,15 @@ export default Vue.extend({
             couldBeUseByCity: true,
             couldBeUseByOther: false
           },
-          {
-            id: 3007,
-            icon: '',
-            title: '叛亂',
-            is_show: false,
-            couldBeUseRoleIds: [],
-            couldBeUseByCity: true,
-            couldBeUseByOther: false
-          }
+          // {
+          //   id: 3007,
+          //   icon: '',
+          //   title: '叛亂',
+          //   is_show: false,
+          //   couldBeUseRoleIds: [],
+          //   couldBeUseByCity: true,
+          //   couldBeUseByOther: false
+          // }
         ]
       },
       // {
@@ -342,6 +342,15 @@ export default Vue.extend({
             couldBeUseRoleIds: [1, 2],
             couldBeUseByCity: false,
             couldBeUseByOther: true
+          },
+          {
+            id: 5004,
+            icon: '',
+            title: '錦囊',
+            is_show: true,
+            couldBeUseRoleIds: [1, 2],
+            couldBeUseByCity: true,
+            couldBeUseByOther: true
           }
         ]
       },
@@ -363,6 +372,9 @@ export default Vue.extend({
     ...mapGetters(['getUser']),
     currUser: function () {
       return this.getUser()
+    },
+    isSelectMapMode() {
+      return ['move', 'battal'].includes(this.client.status_type)
     }
   },
 
@@ -380,70 +392,51 @@ export default Vue.extend({
     ...mapActions(['ApiMove', 'ApiBattle', 'actAppointOccupation', 'actDismissOccupation', 'actShare', 'actEscape', 'actSetOriginCity', 'actRecruit', 'actRecruitCaptive', 'actReleaseCaptive']),
     menuShow: function (item, child) {
       let show = false
-      const mapTargetIdUnableTitle = ['移動', '出征']
-      if (
-        item.is_show &&
-        !['move', 'battal'].includes(this.client.status_type)
-      ) {
-        if (child) {
-          if (this.currUser.captiveDate && item.title != '攻略') {
-            return show
-          }
-          if (
-            child.is_show &&
-            this.currUser.actPoint > 0 &&
-            child.couldBeUseRoleIds.indexOf(this.currUser.role) !== -1
-          ) {
-            if (
-              child.title !== '下野' ||
-              (child.title === '下野' && this.currUser.loyalUserId === 0)
-            ) {
-              if (
-                ((this.currUser.mapNowIsCity && child.couldBeUseByCity) ||
-                  (!this.currUser.mapNowIsCity && child.couldBeUseByOther)) &&
-                (!mapTargetIdUnableTitle.includes(child.title) ||
-                  (mapTargetIdUnableTitle.includes(child.title) &&
-                    this.currUser.mapTargetId == 0))
-              ) {
-                switch (child.title) {
-                  case '配給': {
-                    const occupation = this.global.occupationMap[this.currUser.occupationId]
-                    show = this.currUser.role == 1 || (occupation && occupation.isAllowedShare)
-                  } break
-                  case '遷都': {
-                    const mycountry = this.global.countries.find(c => c.id == this.user.countryId)
-                    show = this.currUser.role == 1 && mycountry && mycountry.originCityId == 0
-                  } break
-                  case '招募': {
-                    const occupation = this.global.occupationMap[this.currUser.occupationId]
-                    show = this.currUser.role == 1 || (occupation && occupation.isAllowedRecurit)
-                  } break
-                  case '逃脫': {
-                    show = !!this.currUser.captiveDate
-                  } break
-                  default:
-                    show = true
-                }
-              }
-            }
-          }
-        } else {
-          if (
-            item.title === '離開' ||
-            (item.title !== '離開' &&
-              this.currUser.actPoint > 0 &&
-              item.couldBeUseRoleIds.indexOf(this.currUser.role) !== -1)
-          ) {
-            if (
-              (this.currUser.mapNowIsCity && item.couldBeUseByCity) ||
-              (!this.currUser.mapNowIsCity && item.couldBeUseByOther)
-            ) {
-              show = true
-            }
-          }
-        }
+      switch (false) {  // 母類別 不顯示的條件
+        case item.is_show:
+        case item.couldBeUseRoleIds.includes(this.currUser.role):
+        case (this.currUser.mapNowIsCity ? item.couldBeUseByCity : item.couldBeUseByOther):
+        case this.currUser.actPoint > 0 || item.title === '離開':
+        case !(this.currUser.captiveDate && ['內政', '論功'].includes(item.title)):
+        case !this.isSelectMapMode:
+          return show
       }
 
+      if (child) {
+        switch (false) {  // 子類別 不顯示的條件
+          case child.is_show:
+          case child.couldBeUseRoleIds.includes(this.currUser.role):
+          case (this.currUser.captiveDate ? ['逃脫', '錦囊'].includes(child.title) : true):
+          case (this.currUser.mapNowIsCity ? child.couldBeUseByCity : child.couldBeUseByOther):
+          case (this.currUser.mapTargetId == 0 ? true: !['移動', '出征'].includes(child.title)):
+            return show
+        }
+
+        switch (child.title) {  // 特定子類別 的特殊條件
+          case '下野': {
+            show = this.currUser.loyalUserId === 0
+          } break
+          case '配給': {
+            const occupation = this.global.occupationMap[this.currUser.occupationId]
+            show = this.currUser.role == 1 || (occupation && occupation.isAllowedShare)
+          } break
+          case '招募': {
+            const occupation = this.global.occupationMap[this.currUser.occupationId]
+            show = this.currUser.role == 1 || (occupation && occupation.isAllowedRecurit)
+          } break
+          case '遷都': {
+            const mycountry = this.global.countries.find(c => c.id == this.user.countryId)
+            show = this.currUser.role == 1 && mycountry && mycountry.originCityId == 0
+          } break
+          case '逃脫': {
+            show = !!this.currUser.captiveDate
+          } break
+          default:
+            show = true
+        }
+      } else {
+        show = true
+      }
       return show
     },
     chickBtn: function (go: any, key = '', index = '', id = 0) {

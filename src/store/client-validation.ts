@@ -161,6 +161,10 @@ function haveMoney(user, money = 0) {
   return 0 <= money && money <= user.money ? '' : '黃金不足.';
 }
 
+function haveSoldier(user, soldier = 0) {
+  return 0 <= soldier && soldier <= user.soldier ? '' : '兵力不足.';
+}
+
 function haveBasicBattleResource(user) {
   return user.money >= enums.NUM_BATTLE_MONEY_MIN && user.soldier >= enums.NUM_BATTLE_SOLDIER_MIN ? '' : '資源不足以出征'
 }
@@ -214,6 +218,14 @@ function isAllowedRecurit(user, global) {
   if (user.role == enums.ROLE_EMPEROR) return '';
   const _myOccupation = global.occupationMap[user.occupationId];
   return _myOccupation && _myOccupation.isAllowedRecurit ? '' : '不能招募.';
+}
+
+function isAllowedCountryName(name) {
+  return name && name.length <= 2 && !name.match(/[\w\s]+/g) ? '' : '國家名稱不合法.';
+}
+
+function isRGBFormat(color) {
+  return typeof color == 'string' && color.match(/^\#[\w]{6}$/i) ? '' : 'RGB顏色格式不合法.';
 }
 
 
@@ -278,10 +290,10 @@ export default {
       }
       case enums.ACT_SHARE: {
         const userId = payload.userId;
-        // const soldier = payload.soldier;
-        // const money = payload.money;
+        const soldier = payload.soldier;
+        const money = payload.money;
         // const packetId = payload.packetId;
-        return isNotBeCaptived(user) || havePoint(user, 1) || isAllowedShareUser(user, global) || isSameCountryPartner(user, userId, global)
+        return isNotBeCaptived(user) || havePoint(user, 1) || haveMoney(user, money) || haveSoldier(user, soldier) || isAllowedShareUser(user, global) || isSameCountryPartner(user, userId, global)
       }
       case enums.ACT_ESCAPE: {
         const money = payload.money;
@@ -312,6 +324,13 @@ export default {
       case enums.ACT_SET_ORIGIN_CITY: {
         const cityId = payload.cityId;
         return isRoleEmperor(user) || havePoint(user, 1) || isNoOriginCity(user, global) || isExistCity(cityId, global);
+      }
+      case enums.ACT_RAISE_COUNTRY: {
+        const countryName = payload.countryName;
+        // const gameTypeId = payload.gameTypeId;
+        const colorBg = payload.colorBg;
+        const colorText = payload.colorText;
+        return isAllowedCountryName(countryName) || havePoint(user, 1) || isRGBFormat(colorBg) || isRGBFormat(colorText);
       }
     }
     return ''
