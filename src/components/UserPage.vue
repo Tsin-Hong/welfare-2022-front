@@ -1188,7 +1188,6 @@ export default Vue.extend({
     ],
     leftList: [
       {
-        no: '壹',
         title: '群雄割據',
         date: '一月二十四日',
         img: '',
@@ -1197,7 +1196,6 @@ export default Vue.extend({
         hasImg: true
       },
       {
-        no: '貳',
         title: '萬箭齊發',
         date: '四月一日',
         img: '',
@@ -1205,101 +1203,42 @@ export default Vue.extend({
         disabled: false,
         hasImg: true
       },
+      // {
+      //   title: '父親節',
+      //   date: '八月八日',
+      //   img: '',
+      //   link: '',
+      //   disabled: false,
+      //   hasImg: true
+      // },
       {
-        no: '叁',
-        title: '知己知彼',
-        date: '四月三十日',
-        img: '',
-        link: 'https://rv.rv88.tw/office/oo/r/nsBxWlzg4HdV9UVYeYSCS6GWGu6tMpte',
-        link_res: '',
-        disabled: false,
-        hasImg: true
-      },
-      {
-        no: '伍',
-        title: '草船借箭',
-        date: '五月',
-        img: '',
-        link: 'https://rv.rv88.tw/office/oo/r/nsBxSMVAEtR80U5KRxePjV6SjAhJzd8i',
-        disabled: true,
-        hasImg: true
-      },
-      {
-        no: '陸',
-        title: '唉唷我的媽',
-        date: '五月六日',
-        img: '',
-        link: 'https://rv.rv88.tw/office/oo/r/nsBxNZJ934Tb85BxKYU9B3t1QxMQvr9z',
-        disabled: true,
-        hasImg: true
-      },
-      {
-        no: '柒',
-        title: '赤壁之戰',
-        date: '六月',
-        img: '',
-        link: 'https://rv.rv88.tw/office/oo/r/nsBxIADfzbZhAe83qj8XhyxnDINSIkBI',
-        disabled: true,
-        hasImg: true
-      },
-      {
-        no: '捌',
         title: '官渡之戰',
-        date: '七月',
+        date: '九月',
         img: '',
         link: 'https://rv.rv88.tw/office/oo/r/nsBxEc5kcNUP2TZ42jSf0SD0PnPZXuPC',
         disabled: true,
         hasImg: true
       },
       {
-        no: '玖',
-        title: '甲巴霸找爸爸',
-        date: '八月五日',
+        title: '知己知彼',
+        date: '十月十五日',
         img: '',
-        link: 'https://rv.rv88.tw/office/oo/r/nsBx7OAjMGPQx27PtwPWexyFSKWBoGPW',
+        link: 'https://rv.rv88.tw/office/oo/r/nsBxWlzg4HdV9UVYeYSCS6GWGu6tMpte',
+        link_res: '',
         disabled: true,
         hasImg: true
       },
       {
-        no: '拾',
-        title: '兵不厭詐、這是戰爭',
-        date: '八月',
-        img: '',
-        link: 'https://rv.rv88.tw/office/oo/r/nsBwz6XZUFxz55M77H9T81Mh3dZ9GzZq',
-        disabled: true,
-        hasImg: true
-      },
-      {
-        no: '壹拾壹',
-        title: '草木皆兵',
-        date: '九月',
-        img: '',
-        link: 'https://rv.rv88.tw/office/oo/r/nsBwvtPxjpmrowgnhlpfWks5grEjs9Kg',
-        disabled: true,
-        hasImg: true
-      },
-      {
-        no: '壹拾貳',
         title: '四面楚歌',
-        date: '十月七日',
+        date: '十一月二十五日',
         img: '',
         link: 'https://rv.rv88.tw/office/oo/r/nsBwt3iGDhu30Kf0LGLniSrcc47a22W5',
         disabled: true,
         hasImg: true
       },
       {
-        no: '壹拾叁',
-        title: '一夫當關之我不是拖椅子',
-        date: '十一月',
-        img: '',
-        link: 'https://rv.rv88.tw/office/oo/r/nsBwps9RgaGOPJ37b71i0D2DTuPZNIqJ',
-        disabled: true,
-        hasImg: true
-      },
-      {
-        no: '壹拾肆',
         title: '睿訊群英傳結算',
-        date: '十二月二十三日',
+        date: '十二月',
         img: '',
         link: 'https://rv.rv88.tw/office/oo/r/nsBwhtxoE2kTWi2YHK8xVnXW3lRR9akW',
         disabled: true,
