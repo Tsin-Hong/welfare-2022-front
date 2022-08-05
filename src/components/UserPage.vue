@@ -1136,6 +1136,9 @@
         </template>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="client.dialog_gc_selection" width="600">
+      <DailogGCSection />
+    </v-dialog>
   </v-container>
 </template>
 
@@ -1146,6 +1149,7 @@
 import enums from '@/unit/enum'
 import Vue from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import DailogGCSection from '@/components/DailogGCSelection.vue'
 
 export default Vue.extend({
   name: 'UserPage',
@@ -2217,7 +2221,11 @@ export default Vue.extend({
         this.global.io.emit('ADMINCTL', { battlemap: mapId })
       }
     }
-  }
+  },
+
+  components: {
+    DailogGCSection
+  },
 })
 </script>
 

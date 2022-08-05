@@ -8,6 +8,7 @@ const client = {
     dialog_info: false,
     dialog: false,
     dialog_level_up_city: false,
+    dialog_gc_selection: false,
     dialog_content: {
       title: '',
       text: '',
@@ -24,6 +25,17 @@ const client = {
       title: '',
       content: ''
     },
+    /**
+     * dialog_gc_selection_dataset 存放要帶入給彈出方塊的內容
+     * data 格式 [ {display, value, enable},.. ]
+     * callback (values) 為選擇結束 每一層的選項 value
+     */
+    dialog_gc_selection_dataset: {
+      title: '',
+      data: [],
+      callback: (values) => false,
+    },
+    dialog_gc_selection_answers: [],
     status_type: '',
     could_be_move_to: [],
     battle_worker_type: {
