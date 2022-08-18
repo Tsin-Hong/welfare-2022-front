@@ -20,6 +20,9 @@ const global = {
       mapId: 0
     },
     battleRecordDetails: { id: 0, winnerCountryId: 0, defenceCountryId: 0, attackCountryIds: [0], atkUserIds: [0,0,0,0], defUserIds: [0,0,0,0], judgeId: 0, toolmanId: 0, gameId: 0, timestamp: '', detail: {}},
+    itemMap: {},
+    items: [],
+    selectedItemId: 0,
     io: null
   },
   mutations: {
@@ -52,6 +55,9 @@ const global = {
           }
           if (payload.gameMap) {
             state.gameMap = payload.gameMap;
+          }
+          if (payload.itemMap) {
+            state.itemMap = payload.itemMap;
           }
           valication.cacheGlobal(state)
           break
@@ -121,11 +127,28 @@ const global = {
         case enums.ACT_GET_BATTLE_DETAIL: {
           state.battleRecordDetails = payload;
         } break
+        case enums.ACT_GET_ITEMS: {
+          state.items = payload
+          break
+        }
         default:
       }
     },
     setIO: (state: any, io: any) => {
       state.io = io
+    },
+    updateGlobal: (state: any, payload: any) => {
+      if (payload) {
+        Object.keys(payload).map(key => {
+          if (typeof state[key] != 'undefined') {
+            state[key] = payload[key]
+          } else {
+            console.log('payload key not found: ', key, payload)
+          }
+        })
+      } else {
+        console.log('global mutation failed: ', payload)
+      }
     }
   },
   actions: {
@@ -324,10 +347,59 @@ const global = {
       content.commit('updateGlobal', {items: []});
     },
     actUseItem: (content: any, args: any) => {
+      /**
+       * 使用錦囊
+       * @param {number} itemId
+       * @param {number} itemPkId
+       * @param {number} mapId
+       */
       content.dispatch('emitMessage', {act: enums.ACT_USE_ITEM, payload: args});
     },
   },
   getters: {
+    mapIdMap (state) {
+      const hashmap = {}
+      state.maps.map(map => {
+        hashmap[map.id] = map
+      })
+      return hashmap
+    },
+    getItemAllowedMapIds (state, getters) {
+      const mapIdMap = getters.mapIdMap
+      const itemMap = state.itemMap
+      const maps = state.maps
+      const selectedItemId = state.selectedItemId
+      return (myself, itemid = 0) => {
+        const itemdata = itemid ? itemMap[itemid] : itemMap[selectedItemId]
+        if (!itemdata) return []
+        let filterFn = null
+        let filterMaps = []
+        if (itemdata.lv == 0) {
+          filterMaps = maps.map(m => m.id)
+        } else if (itemdata.lv == 1) {
+          const standMap = mapIdMap[myself.mapNowId]
+          filterMaps = !!standMap ? standMap.route.concat(myself.mapNowId) : []
+        }
+        // console.log('filterMaps: ', filterMaps)
+        switch (itemdata.object) {
+            case 1: /* '任意據點' */ break;
+            case 2: /* '己方據點' */ filterFn = (mid) => mapIdMap[mid].ownCountryId == myself.countryId; break;
+            case 3: /* '敵方據點' */ filterFn = (mid) => mapIdMap[mid].ownCountryId !== myself.countryId; break;
+            case 4: /* '任何城池' */ filterFn = (mid) => mapIdMap[mid].cityId > 0; break;
+            case 5: /* '友方城池' */ filterFn = (mid) => mapIdMap[mid].cityId > 0 && mapIdMap[mid].ownCountryId == myself.countryId;break;
+            case 6: /* '敵方城池' */ filterFn = (mid) => mapIdMap[mid].cityId > 0 && mapIdMap[mid].ownCountryId !== myself.countryId;break;
+            case 7: /* '任意野區' */ filterFn = (mid) => mapIdMap[mid].cityId == 0; break;
+            case 8: /* '友方野區' */ filterFn = (mid) => mapIdMap[mid].cityId == 0 && mapIdMap[mid].ownCountryId == myself.countryId;break;
+            case 9: /* '敵方野區' */ filterFn = (mid) => mapIdMap[mid].cityId == 0 && mapIdMap[mid].ownCountryId !== myself.countryId;break;
+            default:
+
+        }
+        if (typeof filterFn == 'function') {
+          filterMaps = filterMaps.filter(filterFn)
+        }
+        return filterMaps
+      }
+    }
   }
 }
 
