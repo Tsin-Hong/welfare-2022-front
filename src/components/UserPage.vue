@@ -126,6 +126,10 @@
             <img src="/images/戰役.png" alt="" />
             <div class="text">戰役</div>
           </span>
+          <span class="battle" :disabled="false" @click="showInfoArea(3)">
+            <img src="/images/戰役說明.png" alt="" />
+            <div class="text">戰役說明</div>
+          </span>
           <span class="notice" @click="showInfoArea(0)">
             <img src="/images/公告.png" alt="" />
             <div class="text">活動公告</div>
@@ -1650,6 +1654,7 @@ export default Vue.extend({
 
   mounted: function () {
     this._mouse_dataset = {}
+    console.log(JSON.stringify(this.users))
     // localStorage.setItem('show_country_details', 'true')
   },
 
@@ -1927,6 +1932,12 @@ export default Vue.extend({
           this.ChangeState(['dialog_battle_list', true])
           this.battleTypeTab = 0
           this.battleDetailCurrId = 0
+          break
+        case 3:
+          window.open(
+            'http://172.16.20.73:20221/upload/battlegame_instructions.pdf',
+            '_blank'
+          )
           break
       }
     },
