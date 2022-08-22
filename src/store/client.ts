@@ -9,6 +9,7 @@ const client = {
     dialog: false,
     dialog_level_up_city: false,
     dialog_gc_selection: false,
+    dialog_item: false,
     dialog_content: {
       title: '',
       text: '',
@@ -27,7 +28,7 @@ const client = {
     },
     /**
      * dialog_gc_selection_dataset 存放要帶入給彈出方塊的內容
-     * data 格式 [ {display, value, enable},.. ]
+     * data 格式 [ { text, options: [{display, value, enable},..] | inputs: [{label, type, max, min}] },.. ]
      * callback (values) 為選擇結束 每一層的選項 value
      */
     dialog_gc_selection_dataset: {

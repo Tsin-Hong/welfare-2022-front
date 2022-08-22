@@ -42,6 +42,9 @@
                                     </li>
                                 </ul>
                             </div>
+                            <div v-else>
+                                <p style="padding: 20px; text-align:center;">無選項</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -55,20 +58,19 @@
 </template>
 
 <script lang="ts">
-import enums from '@/unit/enum'
+// import enums from '@/unit/enum'
 import Vue from 'vue'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapMutations, mapState } from 'vuex'
 
 export default Vue.extend({
-    name: 'UserPage',
+    name: 'DailogGCSelection',
     data: () => {
         return {
             tmpinputs: new Array(8).fill(0)
         }
     },
     computed: {
-        ...mapState(['user', 'global', 'client', 'info']),
-        // ...mapGetters(['getUser']),
+        ...mapState(['client']),
         isOpenSubmitBtn: function() {
             return this.tmpinputs.findIndex(e => e > 0) >= 0
         }

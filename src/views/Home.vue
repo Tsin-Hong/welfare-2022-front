@@ -347,7 +347,7 @@ export default Vue.extend({
             id: 5004,
             icon: '',
             title: '錦囊',
-            is_show: false,
+            is_show: true,
             couldBeUseRoleIds: [1, 2],
             couldBeUseByCity: true,
             couldBeUseByOther: true
@@ -375,7 +375,17 @@ export default Vue.extend({
     },
     isSelectMapMode() {
       return ['move', 'battal'].includes(this.client.status_type)
-    }
+    },
+    myPacketItems() {
+      const user = this.user;
+      const hashItemMap = this.global.itemMap;
+      const items = this.global.items;
+      return Object.values(hashItemMap).map((info: any) => {
+        const quantity = items.filter(e => e.itemId == info.id).length;
+        const allow = quantity > 0 && (info.when == 0 || !user.captiveDate);
+        return {quantity, allow, ...info};
+      })
+    },
   },
 
   mounted: function () {
@@ -389,7 +399,7 @@ export default Vue.extend({
 
   methods: {
     ...mapMutations(['ChangeState', 'ChangeApiCheck', 'ChangeDialogCheck']),
-    ...mapActions(['ApiMove', 'ApiBattle', 'actAppointOccupation', 'actDismissOccupation', 'actShare', 'actEscape', 'actSetOriginCity', 'actRecruit', 'actRecruitCaptive', 'actReleaseCaptive']),
+    ...mapActions(['ApiMove', 'ApiBattle', 'actAppointOccupation', 'actDismissOccupation', 'actShare', 'actEscape', 'actSetOriginCity', 'actRecruit', 'actRecruitCaptive', 'actReleaseCaptive', 'getItems']),
     menuShow: function (item, child) {
       let show = false
       switch (false) {  // 母類別 不顯示的條件
@@ -440,6 +450,7 @@ export default Vue.extend({
       return show
     },
     chickBtn: function (go: any, key = '', index = '', id = 0) {
+      // console.log('global: ', this.global)
       if (go) {
         this.ChangeApiCheck({ key: key, index: index, id: id })
         switch (id) {
@@ -468,7 +479,11 @@ export default Vue.extend({
             this.showDialogGCSelection('招募', this.getRecuritData(), this.handleRecurit)
             break
           case 3006: // 俘虜
-            this.handlePromptCaptives()
+            // this.handlePromptCaptives()
+            this.showDialogGCSelection('俘虜', this.getCaptivesData(), this.handleCaptives)
+            break
+          case 5004: // 錦囊
+            this.showItemData()
             break
           default:
             this.ChangeDialogCheck({ content: key })
@@ -476,13 +491,17 @@ export default Vue.extend({
       }
     },
     showDialogGCSelection: function(title: string, data: any, callback: any) {
-      this.ChangeState(['dialog_gc_selection', true])
-      this.ChangeState(['dialog_gc_selection_answers', []]);
-      this.ChangeState(['dialog_gc_selection_dataset', {
-        title,
-        callback,
-        data,
-      }])
+      if (title && data && data.length > 0) {
+        this.ChangeState(['dialog_gc_selection', true])
+        this.ChangeState(['dialog_gc_selection_answers', []]);
+        this.ChangeState(['dialog_gc_selection_dataset', {
+          title,
+          callback,
+          data,
+        }])
+      } else {
+        console.log('showDialogGCSelection failed: ', data)
+      }
     },
     getAppointmentData: function () {
       const occupationMap = this.global.occupationMap
@@ -629,41 +648,63 @@ export default Vue.extend({
         window.alert('沒有城池.')
       }
     },
-    handlePromptRecurit: function() {
-      const users = this.global.users.filter(user => user.role == 3);
-      if (users.length > 0) {
-        const _str = '請選擇要招募的浪人: \r\n';
-        const userIdx = parseInt(window.prompt(_str + users.map((u, idx) => `${idx} -> ${u.nickname}`).join('\r\n')))
-        if (users[userIdx]) {
-          const userId = users[userIdx].id || 0;
-          this.actRecruit({userId})
-        } else {
-          window.alert('取消.')
+    getCaptivesData: function() {
+      // console.log('global: ', this.global)
+      const now = new Date().getTime()
+      const result = []
+      const myself = this.user
+      const ownMapIds = this.global.maps.filter(map => map.ownCountryId == myself.countryId).map(map => map.id)
+      const users = this.global.users.filter(user => user.captiveDate && ownMapIds.includes(user.mapNowId))
+      .map((user: any) => {
+        const timeGap = now - new Date(user.captiveDate).getTime()
+        const ratio = Math.min((Math.ceil(timeGap/1000/60/60/24) * 2.5) + 25, 100)
+        return {
+          ratio,
+          display: `${user.nickname} - 受俘日 (${new Date(user.captiveDate).toLocaleDateString()})  招募成功率: ${ratio}%`,
+          value: user,
+          enable: true
         }
-      } else {
-        window.alert('沒有浪人.')
+      })
+      users.sort((a,b) => b.timeGap - a.timeGap)
+      // 
+      result.push({
+        text: '選擇要處置的俘虜',
+        options: users
+      })
+      result.push({
+        text: '處置俘虜',
+        options: [
+          {display: '招募', value: 1, enable: true},
+          {display: '釋放', value: 2, enable: true},
+        ]
+      })
+      return result
+    },
+    handleCaptives: function(selectedValues) {
+      let yes = false
+      switch (selectedValues[1]) {
+        case 1:
+          yes = window.confirm(`確定招募俘虜 [${selectedValues[0].nickname}] 嗎?`)
+          break
+        case 2:
+          yes = window.confirm(`確定釋放俘虜 [${selectedValues[0].nickname}] 嗎?`)
+          break
+          default:
+            console.log('handleCaptives failed: ', selectedValues)
+      }
+      if (yes) {
+        if (selectedValues[1]==1) {
+          return this.actRecruitCaptive({userId: selectedValues[0].id})
+        } else {
+          return this.actReleaseCaptive({userId: selectedValues[0].id})
+        }
       }
     },
-    handlePromptCaptives: function() {
-      const ownMapIds = this.global.maps.filter(map => map.ownCountryId == this.user.countryId).map(map => map.id)
-      const users = this.global.users.filter(user => user.captiveDate && ownMapIds.includes(user.mapNowId))
-      if (users.length > 0) {
-        const _str = '請選擇要處置的俘虜: \r\n';
-        const userIdx = parseInt(window.prompt(_str + users.map((u, idx) => `${idx} -> ${u.nickname}`).join('\r\n')))
-        const user = users[userIdx]
-        if (user) {
-          const doing = parseInt(window.prompt(`請選擇要針對俘虜 ( ${user.nickname} ) 的處置 \r\n1.招募該俘虜. \r\n2.釋放該俘虜. `))
-          if (doing==1) {
-            return this.actRecruitCaptive({userId: user.id})
-          } else if (doing ==2) {
-            return this.actReleaseCaptive({userId: user.id})
-          }
-        }
-        window.alert('取消.')
-      } else {
-        window.alert('沒有俘虜.')
-      }
-    }
+    showItemData: function() {
+      console.log('global: ', this.global)
+      this.getItems()
+      this.ChangeState(['dialog_item', true])
+    },
   }
 
   // sockets: {

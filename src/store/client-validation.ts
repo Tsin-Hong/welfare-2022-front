@@ -111,8 +111,15 @@ function haveNoWorking(user, global) {
   return _uid > 0 && Object.keys(_bm).map(k => _bm[k].judgeId == _uid || _bm[k].toolmanId == _uid).filter(e => e).length == 0 ? '' : '已經擔任裁判或工作人員.';
 }
 
-function hasNoBattlefield(mapId, globa) {
-  return !globa.battlefieldMap[mapId] ? '' : '該地點已經有戰役.';
+function hasNoBattlefield(mapId, global) {
+  return !global.battlefieldMap[mapId] ? '' : '該地點已經有戰役.';
+}
+
+function isOnBuilding(mapId, global) {
+  const map = hash.getMap(mapId, global.maps);
+  const now = new Date();
+  const nowTimeMinutes = Math.floor(now.getTime() / 1000 / 60);
+  return nowTimeMinutes >= map.adventureId ? '' : '';
 }
 
 function hasBattle(mapId, battleId, globa) {
