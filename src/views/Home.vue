@@ -347,7 +347,7 @@ export default Vue.extend({
             id: 5004,
             icon: '',
             title: '錦囊',
-            is_show: true,
+            is_show: false,
             couldBeUseRoleIds: [1, 2],
             couldBeUseByCity: true,
             couldBeUseByOther: true

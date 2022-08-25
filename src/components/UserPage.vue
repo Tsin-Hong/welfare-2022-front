@@ -26,12 +26,7 @@
             <img
               v-if="currUser.code"
               class="user-img"
-              :src="
-                '/images/user/' +
-                currUser.code +
-                picTypeName[currUser.role] +
-                '.png'
-              "
+              :src="getUserImgUrl()"
               alt=""
             />
             <img class="img-border" src="/images/人物頭像框.png" alt="" />
@@ -60,9 +55,19 @@
                       <i class="role_type" v-if="currUser.loyalUserId !== 0"
                         >元老</i
                       ></span
-                    ><span class="type w-33-pct">{{ currUser.roleName }}<i class="role_type" v-if="currUser.occupationId > 0 && global.occupationMap[currUser.occupationId]"
-                        >{{global.occupationMap[currUser.occupationId].name}}</i
-                      ></span>
+                    ><span class="type w-33-pct"
+                      >{{ currUser.roleName
+                      }}<i
+                        class="role_type"
+                        v-if="
+                          currUser.occupationId > 0 &&
+                          global.occupationMap[currUser.occupationId]
+                        "
+                        >{{
+                          global.occupationMap[currUser.occupationId].name
+                        }}</i
+                      ></span
+                    >
                     <span class="class-1 w-33-pct"
                       >{{ currUser.mapNowName }}
                       <v-btn
@@ -127,8 +132,8 @@
             <div class="text">戰役</div>
           </span>
           <span class="battle" :disabled="false" @click="showInfoArea(3)">
-            <img src="/images/戰役說明.png" alt="" />
-            <div class="text">戰役說明</div>
+            <img src="/images/競賽說明.png" alt="" />
+            <div class="text">競賽說明</div>
           </span>
           <span class="notice" @click="showInfoArea(0)">
             <img src="/images/公告.png" alt="" />
@@ -158,7 +163,7 @@
       </div>
       <div class="bottom-btn-area" v-if="client.status_type != ''">
         <div class="btn-title">
-          請選擇 {{ client.dialog_check_curr.key }} 目標
+          請選擇{{ client.dialog_check_curr.key }}目的地
         </div>
         <div v-if="client.status_type == 'move'" class="btn-info">
           只能在勢力所在據點間移動
@@ -503,7 +508,10 @@
           <template v-for="(battlefield, index) in battlefieldList">
             <div class="battle-box" :key="index">
               <div class="battle-info-group">
-                <div class="battle-date" @click="onClickBattleDate(battlefield.map.id)">
+                <div
+                  class="battle-date"
+                  @click="onClickBattleDate(battlefield.map.id)"
+                >
                   競賽日
                   {{ moment(battlefield.timestamp).format('YYYY-MM-DD HH:mm') }}
                 </div>
@@ -523,7 +531,10 @@
                   }}
                   <v-overflow-btn
                     class="my-2"
-                    :disabled="battlefield.timestampLimit < dateFormat || battlefield.gameId > 0"
+                    :disabled="
+                      battlefield.timestampLimit < dateFormat ||
+                      battlefield.gameId > 0
+                    "
                     :items="beAbleToSelectGameList(battlefield)"
                     item-text="name"
                     item-value="id"
@@ -776,7 +787,13 @@
                 </tbody>
               </template>
             </v-simple-table>
-            <div v-if="battleDetailCurrId != 0 && battleDetailCurrId == battleRecordDetails.id" class="battle-box">
+            <div
+              v-if="
+                battleDetailCurrId != 0 &&
+                battleDetailCurrId == battleRecordDetails.id
+              "
+              class="battle-box"
+            >
               <div class="battle-info-group">
                 <div class="battle-date">
                   競賽日
@@ -798,7 +815,7 @@
               </div>
               <div class="battle-top text-center">
                 <div class="battle-info-text">
-                  <v-btn icon dark @click="battleDetailCurrId=0">
+                  <v-btn icon dark @click="battleDetailCurrId = 0">
                     <v-icon>mdi-reply</v-icon>
                   </v-btn>
                   <div class="area area-l flex-row-reverse">
@@ -812,7 +829,6 @@
                       >{{ battleRecordDetails.attackCountry.name }}</span
                     >
                     <!-- <span>{{ battleRecordDetails.attackSoldierTotal }}</span> -->
-                    
                   </div>
                   <!-- <div class="area area-c">VS</div>
                   <div class="area area-r">
@@ -901,7 +917,14 @@
                                 class="soldier-group"
                               >
                                 {{ battleRecordDetails[type + 'Soldier'][u_i] }}
-                                <span style="color: red;"> - {{ battleRecordDetails[type + 'SoldierLoses'][u_i] }}</span>
+                                <span style="color: red">
+                                  -
+                                  {{
+                                    battleRecordDetails[type + 'SoldierLoses'][
+                                      u_i
+                                    ]
+                                  }}</span
+                                >
                               </div>
                             </div>
                           </div>
@@ -985,7 +1008,6 @@
           >
             <v-toolbar-title v-if="selectedMapInfo.name" class="d-block">
               <span>{{ selectedMapInfo.name }}</span>
-              <span v-if="selectedMapInfo.buildingTime" style="padding-left: 20px; font-size: 0.4em;">🔨{{selectedMapInfo.buildingTime}}</span>
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn icon dark @click="openMapInfo = false">
@@ -993,7 +1015,13 @@
             </v-btn>
           </v-toolbar>
           <v-card-text class="py-15-px">
-            <v-card-subtitle class="grey--text">據點資訊<span style="font-size: 12px; padding: 2px 16px; float: right;"> 屬性: {{ selectedMapInfo.gameTypes.join(',') }}</span></v-card-subtitle>
+            <v-card-subtitle class="grey--text"
+              >據點資訊<span
+                style="font-size: 12px; padding: 2px 16px; float: right"
+              >
+                屬性: {{ selectedMapInfo.gameTypes.join(',') }}</span
+              ></v-card-subtitle
+            >
             <v-divider class="mb-10-px"></v-divider>
             <table class="map-info-table">
               <tr>
@@ -1144,9 +1172,6 @@
     <v-dialog v-model="client.dialog_gc_selection" width="600">
       <DailogGCSection />
     </v-dialog>
-    <v-dialog v-model="client.dialog_item" width="600">
-      <DailogItem />
-    </v-dialog>
   </v-container>
 </template>
 
@@ -1158,7 +1183,6 @@ import enums from '@/unit/enum'
 import Vue from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import DailogGCSection from '@/components/DailogGCSelection.vue'
-import DailogItem from '@/components/DailogItem.vue'
 
 export default Vue.extend({
   name: 'UserPage',
@@ -1180,8 +1204,7 @@ export default Vue.extend({
     showCountyDetails: localStorage.getItem('show_country_details') === 'true',
     showRoninDetails: localStorage.getItem('show_ronin_details') === 'true',
     infoTypeNow: 0,
-    selectedItem: 1,
-    // curStronghold: {},
+    curStronghold: {},
     constructionName: enums.CHINESE_CONSTRUCTION_NAMES,
     numCN: [
       '壹',
@@ -1199,6 +1222,7 @@ export default Vue.extend({
       '壹拾叁',
       '壹拾肆'
     ],
+    selectedItem: 2,
     leftList: [
       {
         title: '群雄割據',
@@ -1216,20 +1240,12 @@ export default Vue.extend({
         disabled: false,
         hasImg: true
       },
-      // {
-      //   title: '父親節',
-      //   date: '八月八日',
-      //   img: '',
-      //   link: '',
-      //   disabled: false,
-      //   hasImg: true
-      // },
       {
         title: '官渡之戰',
         date: '九月',
         img: '',
-        link: 'https://rv.rv88.tw/office/oo/r/nsBxEc5kcNUP2TZ42jSf0SD0PnPZXuPC',
-        disabled: true,
+        link: 'http://172.16.20.73:20221/upload/官渡之戰.pdf',
+        disabled: false,
         hasImg: true
       },
       {
@@ -1265,10 +1281,21 @@ export default Vue.extend({
     openMapInfoIdx: -1,
     storage: {},
     formateStr: 'YYYY-MM-DD HH-mm',
-    picTypeName: {
+    roleMapObj: {
       1: '_1',
       2: '',
       3: '_0'
+    },
+    occupationIdMapObj: {
+      1: '_2',
+      2: '_2',
+      3: '_3',
+      4: '_3',
+      5: '_3',
+      6: '_3',
+      7: '_3',
+      8: '_3',
+      9: '_4',
     },
     setWiner: {},
     setGame: {},
@@ -1277,7 +1304,7 @@ export default Vue.extend({
 
   computed: {
     ...mapState(['user', 'global', 'client', 'info']),
-    ...mapGetters(['getUser', 'mapIdMap', 'getItemAllowedMapIds']),
+    ...mapGetters(['getUser']),
     dateFormat: function () {
       return this.$moment(this.date).format(this.formateStr)
     },
@@ -1375,56 +1402,31 @@ export default Vue.extend({
       return text
     },
     strongholds: function () {
-      const myself = this.user
-      const globalData = this.global
-      const clientData = this.client
-      const defaultColor = this.defaultColor
-      const mapIdMap = this.mapIdMap
+      const state = this.$store.state
       const hashMapIdUser = {}
-      globalData.users.map((user: any) => {
+      state.global.users.map((user: any) => {
         if (hashMapIdUser[user.mapNowId]) {
           hashMapIdUser[user.mapNowId].push(user)
         } else {
           hashMapIdUser[user.mapNowId] = [user]
         }
       })
-      const battles = Object.values(globalData.battlefieldMap)
-      const showMap = {}
-      let showState = false
-      switch (clientData.status_type) {
-        case 'move':
-          clientData.could_be_move_to.map(mid => {
-            showMap[mid] = true
-          })
-          break
-        case 'battal': {
-          const standMap = mapIdMap[myself.mapNowId]
-          standMap && standMap.route.map(mid => {
-            showMap[mid] = mapIdMap[mid].ownCountryId !== myself.countryId
-          })
-        } break
-        case 'item': {
-          const filterMaps = this.getItemAllowedMapIds(myself)
-          filterMaps.map(mid => { showMap[mid] = true })
-        } break
-        case '':
-        default:
-          showState = true
-      }
-
-      const result = globalData.maps
-        ? globalData.maps.map((m: any) => {
+      const battles = Object.values(
+        JSON.parse(JSON.stringify(this.global.battlefieldMap))
+      )
+      const result = state.global.maps
+        ? state.global.maps.map((m: any) => {
             const cid = m.ownCountryId
-            const country = globalData.countries.find((e) => e.id === cid)
+            const country = state.global.countries.find((e) => e.id === cid)
             const cname = country ? country.name : '空'
             const colors = country
               ? Array.isArray(country.color)
                 ? country.color
                 : country.color.split(',')
-              : defaultColor
+              : this.defaultColor
             const usersInThisMap = hashMapIdUser[m.id] || []
             // console.log('usersInThisMap: ', usersInThisMap)
-            // m.id === myself.mapNowId && (this.curStronghold = m)
+            m.id === state.user.mapNowId && (this.curStronghold = m)
             return {
               ...m,
               type: m.cityId > 0 ? 1 : 2,
@@ -1439,14 +1441,13 @@ export default Vue.extend({
               ),
               is_fire: battles.find((e: any) => e.mapId == m.id) ? true : false,
               is_main: country ? country.originCityId === m.cityId : false,
-              is_here: m.id === myself.mapNowId,
+              is_here: m.id === state.user.mapNowId,
               conutry: {
                 id: cid,
                 name: cname,
                 color: colors[0],
                 t_color: colors[1]
-              },
-              show: showState || showMap[m.id]
+              }
             }
           })
         : []
@@ -1556,9 +1557,9 @@ export default Vue.extend({
         (ownCountry.color = ownCountry.color.split(','))
 
       // const battle = this.battlefields[_map.id] ? this.battlefields[_map.id] : false
-      const gameTypes = String(_map.gameType).split('').map(t => enums.CHINESE_GAMETYPE_NAMES[t]);
-      const dateAdv = _map.adventureId > 0 ? new Date(_map.adventureId*60*1000) : false
-      const buildingTime = dateAdv && dateAdv > new Date() ? ` 修整中 ( 完成時間 ${dateAdv.toLocaleString()} ) ` : '';
+      const gameTypes = String(_map.gameType)
+        .split('')
+        .map((t) => enums.CHINESE_GAMETYPE_NAMES[t])
 
       return {
         ..._map,
@@ -1567,8 +1568,7 @@ export default Vue.extend({
         ownCountry,
         city,
         gameTypes,
-        basicDefense,
-        buildingTime
+        basicDefense
         // battle
       }
     },
@@ -1632,19 +1632,13 @@ export default Vue.extend({
         record.date = this.$moment(record.timestamp).format('YYYY-MM-DD HH:mm')
       }
       return records
-    },
-    selectedStrategyItem: function() {
-      return this.global.itemMap[this.global.selectedItemId]
-    },
+    }
   },
 
   watch: {
     currUser: {
       handler: function (val, oldVal) {
-        if (
-          val &&
-          val.mapNowIndex !== -1
-        ) {
+        if (val && val.mapNowIndex !== -1) {
           if (!oldVal || oldVal.mapNowIndex != val.mapNowIndex) {
             this.goToXY(val.mapNowIndex)
           }
@@ -1691,7 +1685,6 @@ export default Vue.extend({
 
   mounted: function () {
     this._mouse_dataset = {}
-    console.log(JSON.stringify(this.users))
     // localStorage.setItem('show_country_details', 'true')
   },
 
@@ -1726,9 +1719,17 @@ export default Vue.extend({
       'actBattleJoin',
       'actBattleJudge',
       'actSelectGame',
-      'actUseItem',
       'getWarRecord'
     ]),
+    getUserImgUrl: function () {
+      const user = this.currUser
+      const useUserKey = user.occupationId > 0 ? 'occupationId'  : 'role'
+      const mapObj = this[useUserKey + 'MapObj']
+      return '/images/user/' +
+                user.code +
+                mapObj[user[useUserKey]] +
+                '.png'
+    },
     clickBattleRecord: function (data) {
       this.battleDetailCurrId = data.battleId
       this.getWarRecord(data)
@@ -1756,7 +1757,7 @@ export default Vue.extend({
         data.attackUsers.push(users.find((item) => item.id == currUserId))
       }
       data.attackSoldier = data.detail.atkSoldiers
-      data.attackSoldierLoses = data.detail.atkSoldierLoses || [0,0,0,0]
+      data.attackSoldierLoses = data.detail.atkSoldierLoses || [0, 0, 0, 0]
       data.attackSoldierTotal = data.attackSoldier.reduce((a, b) => a + b)
 
       data.defenceCountry = countries.find((item) => {
@@ -1768,7 +1769,7 @@ export default Vue.extend({
         data.defenceUsers.push(users.find((item) => item.id == currUserId))
       }
       data.defenceSoldier = data.detail.defSoldiers
-      data.defenceSoldierLoses = data.detail.defSoldierLoses || [0,0,0,0]
+      data.defenceSoldierLoses = data.detail.defSoldierLoses || [0, 0, 0, 0]
       data.defenceSoldierTotal = data.defenceSoldier.reduce((a, b) => a + b)
 
       data.judge = users.find((item) => item.id == data.judgeId)
@@ -1901,19 +1902,15 @@ export default Vue.extend({
     },
     strongholdClass: function (stronghold) {
       let classNames = 'stronghold'
-      // if (
-      //   this.client.status_type == '' ||
-      //   (this.client.status_type == 'move' &&
-      //     this.client.could_be_move_to.indexOf(stronghold.id) !== -1) ||
-      //   (this.client.status_type == 'battal' &&
-      //     this.curStronghold.route.includes(stronghold.id) &&
-      //     stronghold.ownCountryId != this.user.countryId) ||
-      //   this.user.mapNowId === stronghold.id
-      // ) {
-      //   classNames += ' show'
-      // }
-
-      if (stronghold.show) {
+      if (
+        this.client.status_type == '' ||
+        (this.client.status_type == 'move' &&
+          this.client.could_be_move_to.indexOf(stronghold.id) !== -1) ||
+        (this.client.status_type == 'battal' &&
+          this.curStronghold.route.includes(stronghold.id) &&
+          stronghold.ownCountryId != this.user.countryId) ||
+        this.user.mapNowId === stronghold.id
+      ) {
         classNames += ' show'
       }
 
@@ -2033,27 +2030,37 @@ export default Vue.extend({
         case 3002:
           this.actLeaveCountry()
           break
-        case 3003: {
-          const here = this.currUser.mapNowId
-          const users = Object.values(this.global.users).filter((user: any) => user.mapNowId == here)
-          const freemans = users.filter((user: any) => user.role == enums.ROLE_FREEMAN)
-          if (freemans.length >= 5 && users.length == freemans.length) {
-            this.actRaiseCountry()
-          } else {
-            this.ChangeApiResult({
-              title: '',
-              text: '人數不足 或 城池有其他人，不能起義',
-              img: ''
-            })
+        case 3003:
+          {
+            const here = this.currUser.mapNowId
+            const users = Object.values(this.global.users).filter(
+              (user: any) => user.mapNowId == here
+            )
+            const freemans = users.filter(
+              (user: any) => user.role == enums.ROLE_FREEMAN
+            )
+            if (freemans.length >= 5 && users.length == freemans.length) {
+              this.actRaiseCountry()
+            } else {
+              this.ChangeApiResult({
+                title: '',
+                text: '人數不足 或 城池有其他人，不能起義',
+                img: ''
+              })
+            }
           }
-        } break
-        case 3004: {
-          const inputed = window.prompt('請輸入要花多少黃金疏通 (不需要則輸入0):');
-          if (typeof inputed == 'string' && inputed.length > 0) {
-            const money = parseInt(inputed) || 0;
-            this.actEscape({money})
+          break
+        case 3004:
+          {
+            const inputed = window.prompt(
+              '請輸入要花多少黃金疏通 (不需要則輸入0):'
+            )
+            if (typeof inputed == 'string' && inputed.length > 0) {
+              const money = parseInt(inputed) || 0
+              this.actEscape({ money })
+            }
           }
-        } break
+          break
         case 1001:
           this.actBusiness()
           break
@@ -2072,18 +2079,6 @@ export default Vue.extend({
           this.ChangeState(['status_type', ''])
           this.ChangeState(['could_be_move_to', []])
           break
-        case 5004: {
-          const itemId = this.selectedStrategyItem.id
-          const itempk = this.global.items.find(e => e.itemId == itemId)
-          if (itempk && itempk.id) {
-            const itemPkId = itempk.id;
-            this.actUseItem({ mapId: this.goToCityId, itemId, itemPkId })
-          } else {
-            console.log('id 5004 failed. this.selectedStrategyItem: ', this.selectedStrategyItem);
-          }
-          this.goToCityId = 0
-          this.ChangeState(['status_type', ''])
-        } break
         case 9001: {
           const battlefield = this.storage.battlefield
           const type = this.storage.type
@@ -2162,7 +2157,8 @@ export default Vue.extend({
         case 'join':
           if (
             battlefield[type + 'Country'].id != this.currUser.countryId ||
-            (!battlefield.map.route.includes(this.currUser.mapNowId) && this.currUser.mapNowId != battlefield.mapId) ||
+            (!battlefield.map.route.includes(this.currUser.mapNowId) &&
+              this.currUser.mapNowId != battlefield.mapId) ||
             this.currUser.soldier == 0 ||
             this.currUser.alreadyJoined
           ) {
@@ -2199,11 +2195,6 @@ export default Vue.extend({
         this.goToCityId = stronghold.id
         this.goToCityObj = stronghold
         this.ChangeDialogCheck({ content: '出征 ' + stronghold.name })
-      } else if (
-        this.client.status_type === 'item'
-      ) {
-        this.goToCityId = stronghold.id
-        this.ChangeDialogCheck({ content: `對 [${stronghold.name}] 使用 [${this.selectedStrategyItem.name}] 嗎?`})
       }
       if (this.client.status_type === '') {
         this.goToXY(index)
@@ -2260,7 +2251,7 @@ export default Vue.extend({
       ])
       this.errorText = ''
     },
-    isAllowedQA: function() {
+    isAllowedQA: function () {
       return !window.location.port.match(/20221/g)
     },
     onClickHeadImage: function () {
@@ -2294,9 +2285,8 @@ export default Vue.extend({
   },
 
   components: {
-    DailogGCSection,
-    DailogItem
-  },
+    DailogGCSection
+  }
 })
 </script>
 
