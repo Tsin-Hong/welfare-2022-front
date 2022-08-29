@@ -261,7 +261,7 @@ export default Vue.extend({
             id: 3007,
             icon: '',
             title: '叛亂',
-            is_show: false,
+            is_show: true,
             couldBeUseRoleIds: [2],
             couldBeUseByCity: true,
             couldBeUseByOther: false
@@ -460,9 +460,35 @@ export default Vue.extend({
             break
           case '叛亂':
             {
+              const mapNowUsers = this.global.users.filter(
+                (item) => item.mapNowId === this.currUser.mapNowId
+              )
+              const mapNowUserNum = mapNowUsers.length
+              const mapNowUsersHasLoyal = mapNowUsers.find(
+                (item) => item.role == 1
+              )
               const occupation =
                 this.global.occupationMap[this.currUser.occupationId]
-              show = occupation && occupation.name == '軍師'
+              let battleUsersId = []
+              for (const i in this.global.battlefieldMap) {
+                const curr = this.global.battlefieldMap[i]
+                battleUsersId = battleUsersId.concat(
+                  curr.atkUserIds,
+                  curr.defUserIds
+                )
+              }
+              battleUsersId = [...new Set(battleUsersId)].filter(
+                (item) => item != 0
+              )
+              const userInBattle = mapNowUsers.find((item) =>
+                battleUsersId.includes(item.id)
+              )
+              show =
+                occupation &&
+                occupation.name == '軍師' &&
+                mapNowUserNum >= 5 &&
+                !mapNowUsersHasLoyal &&
+                !userInBattle
             }
             break
           case '錦囊':
