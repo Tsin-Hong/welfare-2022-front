@@ -203,6 +203,17 @@ function isOriginCity(mapId, global) {
   return isExistCity(map.cityId, global) == '' && country.originCityId == map.cityId ? '' : '此地點不是主城.';
 }
 
+function isNotOriginCity(mapId, global) {
+  const map = hash.getMap(mapId, global.maps);
+  const country = hash.getCountry(map.ownCountryId, global.countries);
+  return country.originCityId !== map.cityId ? '' : '不能是主城.';
+}
+
+function hasNotExistKing(mapId, global) {
+  const kigns = global.users.filter(user => user.mapNowId == mapId && user.role == 1);
+  return kigns.length == 0 ? '' : '存在主公';
+}
+
 function isExistGame(gameId, global) {
   return global.gameMap[gameId] ? '' : '不存在的遊戲項目.';
 }
@@ -236,9 +247,13 @@ function isRGBFormat(color) {
 }
 
 function haveEnoughPeople(user, global, num) {
-  const people = global.users.filter(u => u.mapNowId == user.mapNowId && u.role == 2);
-  console.log('haveEnoughPeople: ', people);
+  const people = global.users.filter(u => u.mapNowId == user.mapNowId && u.role == 2 && !u.captiveDate);
   return people.length >= num ? '' : '人員不足';
+}
+
+function haveNoCountryMan(user, global) {
+  const people = global.users.filter(u => u.mapNowId == user.mapNowId && (u.role == 2 || u.role == 1));
+  return people.length == 0 ? '' : '存在武將或主公';
 }
 
 
@@ -343,14 +358,14 @@ export default {
         // const gameTypeId = payload.gameTypeId;
         const colorBg = payload.colorBg;
         const colorText = payload.colorText;
-        return isAllowedCountryName(countryName) || havePoint(user, 1) || isRGBFormat(colorBg) || isRGBFormat(colorText);
+        return isAllowedCountryName(countryName) || havePoint(user, 1) || isRGBFormat(colorBg) || isRGBFormat(colorText) || haveNoCountryMan(user, global) || isNotOriginCity(user.mapNowId, global);
       }
       case enums.ACT_REBELLION: {
         const countryName = payload.countryName;
         // const gameTypeId = payload.gameTypeId;
         const colorBg = payload.colorBg;
         const colorText = payload.colorText;
-        return isAllowedCountryName(countryName) || havePoint(user, 1) || isRGBFormat(colorBg) || isRGBFormat(colorText) || haveEnoughPeople(user, global, 5);
+        return isAllowedCountryName(countryName) || havePoint(user, 1) || isRGBFormat(colorBg) || isRGBFormat(colorText) || haveEnoughPeople(user, global, 5) || isNotOriginCity(user.mapNowId, global) || hasNotExistKing(user.mapNowId, global);
       }
     }
     return ''
