@@ -33,9 +33,7 @@
             <img
               v-else
               class="user-img"
-              :src="
-                '/images/user/' + user.code + '.png'
-              "
+              :src="'/images/user/' + user.code + '.png'"
             />
             <img class="img-border" src="/images/人物頭像框.png" alt="" />
           </div>
@@ -2157,10 +2155,12 @@ export default Vue.extend({
           const mapId = battlefield.mapId
           const battleId = battlefield.id
           const soldier = this.goToBattleSoldier
+          const isDef = battlefield.defenceCountryId == this.currUser.countryId
 
           if (
             soldier < this.battalSoldierMin ||
-            soldier > this.currUser.soldier
+            soldier > this.currUser.soldier ||
+            (isDef && soldier > 10000)
           ) {
             this.ChangeApiResult({
               title: '',
