@@ -245,7 +245,7 @@ export default Vue.extend({
             is_show: false,
             couldBeUseRoleIds: [1, 2],
             couldBeUseByCity: true,
-            couldBeUseByOther: false
+            couldBeUseByOther: true
           },
           {
             id: 3006,
@@ -256,15 +256,15 @@ export default Vue.extend({
             couldBeUseByCity: true,
             couldBeUseByOther: false
           },
-          // {
-          //   id: 3007,
-          //   icon: '',
-          //   title: '叛亂',
-          //   is_show: false,
-          //   couldBeUseRoleIds: [],
-          //   couldBeUseByCity: true,
-          //   couldBeUseByOther: false
-          // }
+          {
+            id: 3007,
+            icon: '',
+            title: '叛亂',
+            is_show: true,
+            couldBeUseRoleIds: [2],
+            couldBeUseByCity: true,
+            couldBeUseByOther: false
+          }
         ]
       },
       // {
@@ -399,7 +399,7 @@ export default Vue.extend({
 
   methods: {
     ...mapMutations(['ChangeState', 'ChangeApiCheck', 'ChangeDialogCheck']),
-    ...mapActions(['ApiMove', 'ApiBattle', 'actAppointOccupation', 'actDismissOccupation', 'actShare', 'actEscape', 'actSetOriginCity', 'actRecruit', 'actRecruitCaptive', 'actReleaseCaptive', 'getItems']),
+    ...mapActions(['ApiMove', 'ApiBattle', 'actAppointOccupation', 'actDismissOccupation', 'actShare', 'actEscape', 'actSetOriginCity', 'actRecruit', 'actRecruitCaptive', 'actReleaseCaptive', 'getItems', 'actRebellion']),
     menuShow: function (item, child) {
       let show = false
       switch (false) {  // 母類別 不顯示的條件
@@ -441,6 +441,13 @@ export default Vue.extend({
           case '逃脫': {
             show = !!this.currUser.captiveDate
           } break
+          case '叛亂': {
+            const occupation = this.global.occupationMap[this.currUser.occupationId]
+            show = occupation && occupation.name == '軍師'
+          } break
+          case '錦囊': {
+            show = this.currUser.role == 1 || this.currUser.occupationId > 0
+          } break
           default:
             show = true
         }
@@ -478,9 +485,15 @@ export default Vue.extend({
           case 2003: // 招募
             this.showDialogGCSelection('招募', this.getRecuritData(), this.handleRecurit)
             break
+          case 3005: // 交易
+            console.log("交易!")
+            break
           case 3006: // 俘虜
             // this.handlePromptCaptives()
             this.showDialogGCSelection('俘虜', this.getCaptivesData(), this.handleCaptives)
+            break
+          case 3007: // 叛亂
+            this.actRebellion()
             break
           case 5004: // 錦囊
             this.showItemData()

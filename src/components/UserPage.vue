@@ -163,7 +163,7 @@
       </div>
       <div class="bottom-btn-area" v-if="client.status_type != ''">
         <div class="btn-title">
-          請選擇{{ client.dialog_check_curr.key }}目的地
+          請選擇 {{ client.dialog_check_curr.key }} 目標
         </div>
         <div v-if="client.status_type == 'move'" class="btn-info">
           只能在勢力所在據點間移動
@@ -1008,6 +1008,7 @@
           >
             <v-toolbar-title v-if="selectedMapInfo.name" class="d-block">
               <span>{{ selectedMapInfo.name }}</span>
+              <span v-if="selectedMapInfo.buildingTime" style="padding-left: 20px; font-size: 0.4em;">🔨{{selectedMapInfo.buildingTime}}</span>
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn icon dark @click="openMapInfo = false">
@@ -1172,6 +1173,9 @@
     <v-dialog v-model="client.dialog_gc_selection" width="600">
       <DailogGCSection />
     </v-dialog>
+    <v-dialog v-model="client.dialog_item" width="600">
+      <DailogItem />
+    </v-dialog>
   </v-container>
 </template>
 
@@ -1183,6 +1187,7 @@ import enums from '@/unit/enum'
 import Vue from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import DailogGCSection from '@/components/DailogGCSelection.vue'
+import DailogItem from '@/components/DailogItem.vue'
 
 export default Vue.extend({
   name: 'UserPage',
@@ -1304,7 +1309,7 @@ export default Vue.extend({
 
   computed: {
     ...mapState(['user', 'global', 'client', 'info']),
-    ...mapGetters(['getUser']),
+    ...mapGetters(['getUser', 'mapIdMap', 'getItemAllowedMapIds']),
     dateFormat: function () {
       return this.$moment(this.date).format(this.formateStr)
     },
@@ -1560,6 +1565,8 @@ export default Vue.extend({
       const gameTypes = String(_map.gameType)
         .split('')
         .map((t) => enums.CHINESE_GAMETYPE_NAMES[t])
+      const dateAdv = _map.adventureId > 0 ? new Date(_map.adventureId*60*1000) : false
+      const buildingTime = dateAdv && dateAdv > new Date() ? ` 修整中 ( 完成時間 ${dateAdv.toLocaleString()} ) ` : ''
 
       return {
         ..._map,
@@ -1568,7 +1575,8 @@ export default Vue.extend({
         ownCountry,
         city,
         gameTypes,
-        basicDefense
+        basicDefense,
+        buildingTime
         // battle
       }
     },
@@ -1632,7 +1640,13 @@ export default Vue.extend({
         record.date = this.$moment(record.timestamp).format('YYYY-MM-DD HH:mm')
       }
       return records
-    }
+    },
+    selectedStrategyItem: function() {
+      return this.global.itemMap[this.global.selectedItemId]
+    },
+    nowItemAllowedMapIds: function () {
+      return this.getItemAllowedMapIds(this.user)
+    },
   },
 
   watch: {
@@ -1719,6 +1733,7 @@ export default Vue.extend({
       'actBattleJoin',
       'actBattleJudge',
       'actSelectGame',
+      'actUseItem',
       'getWarRecord'
     ]),
     getUserImgUrl: function () {
@@ -1902,17 +1917,25 @@ export default Vue.extend({
     },
     strongholdClass: function (stronghold) {
       let classNames = 'stronghold'
-      if (
-        this.client.status_type == '' ||
-        (this.client.status_type == 'move' &&
-          this.client.could_be_move_to.indexOf(stronghold.id) !== -1) ||
-        (this.client.status_type == 'battal' &&
-          this.curStronghold.route.includes(stronghold.id) &&
-          stronghold.ownCountryId != this.user.countryId) ||
-        this.user.mapNowId === stronghold.id
-      ) {
-        classNames += ' show'
+      if (this.client.status_type == 'item') {
+        const mapIds = this.nowItemAllowedMapIds
+        if (mapIds.includes(stronghold.id)) {
+          classNames += ' show'
+        }
+      } else {
+        if (
+          this.client.status_type == '' ||
+          (this.client.status_type == 'move' &&
+            this.client.could_be_move_to.indexOf(stronghold.id) !== -1) ||
+          (this.client.status_type == 'battal' &&
+            this.curStronghold.route.includes(stronghold.id) &&
+            stronghold.ownCountryId != this.user.countryId) ||
+          this.user.mapNowId === stronghold.id
+        ) {
+          classNames += ' show'
+        }
       }
+      
 
       if (stronghold.type == 2) {
         classNames += ' jungle'
@@ -2079,6 +2102,18 @@ export default Vue.extend({
           this.ChangeState(['status_type', ''])
           this.ChangeState(['could_be_move_to', []])
           break
+        case 5004: {
+          const itemId = this.selectedStrategyItem.id
+          const itempk = this.global.items.find(e => e.itemId == itemId)
+          if (itempk && itempk.id) {
+            const itemPkId = itempk.id;
+            this.actUseItem({ mapId: this.goToCityId, itemId, itemPkId })
+          } else {
+            console.log('id 5004 failed. this.selectedStrategyItem: ', this.selectedStrategyItem);
+          }
+          this.goToCityId = 0
+          this.ChangeState(['status_type', ''])
+        } break
         case 9001: {
           const battlefield = this.storage.battlefield
           const type = this.storage.type
@@ -2195,6 +2230,11 @@ export default Vue.extend({
         this.goToCityId = stronghold.id
         this.goToCityObj = stronghold
         this.ChangeDialogCheck({ content: '出征 ' + stronghold.name })
+      } else if (
+        this.client.status_type === 'item'
+      ) {
+        this.goToCityId = stronghold.id
+        this.ChangeDialogCheck({ content: `對 [${stronghold.name}] 使用 [${this.selectedStrategyItem.name}] 嗎?`})
       }
       if (this.client.status_type === '') {
         this.goToXY(index)
@@ -2285,7 +2325,8 @@ export default Vue.extend({
   },
 
   components: {
-    DailogGCSection
+    DailogGCSection,
+    DailogItem
   }
 })
 </script>

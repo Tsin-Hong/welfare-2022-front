@@ -235,6 +235,12 @@ function isRGBFormat(color) {
   return typeof color == 'string' && color.match(/^\#[\w]{6}$/i) ? '' : 'RGB顏色格式不合法.';
 }
 
+function haveEnoughPeople(user, global, num) {
+  const people = global.users.filter(u => u.mapNowId == user.mapNowId && u.role == 2);
+  console.log('haveEnoughPeople: ', people);
+  return people.length >= num ? '' : '人員不足';
+}
+
 
 export default {
   cacheGlobal(global) {
@@ -338,6 +344,13 @@ export default {
         const colorBg = payload.colorBg;
         const colorText = payload.colorText;
         return isAllowedCountryName(countryName) || havePoint(user, 1) || isRGBFormat(colorBg) || isRGBFormat(colorText);
+      }
+      case enums.ACT_REBELLION: {
+        const countryName = payload.countryName;
+        // const gameTypeId = payload.gameTypeId;
+        const colorBg = payload.colorBg;
+        const colorText = payload.colorText;
+        return isAllowedCountryName(countryName) || havePoint(user, 1) || isRGBFormat(colorBg) || isRGBFormat(colorText) || haveEnoughPeople(user, global, 5);
       }
     }
     return ''

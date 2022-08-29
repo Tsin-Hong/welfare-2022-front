@@ -340,6 +340,21 @@ const global = {
       const gameTypeId = parseInt(window.prompt(gameTypes.map(f => `${f[0]} -> ${f[1]}`).join('\r\n')))
       content.dispatch('emitMessage', {act: enums.ACT_RAISE_COUNTRY, payload: {countryName, colorBg, colorText, gameTypeId}});
     },
+    actRebellion: (content: any) => {
+      /**
+       * 叛亂
+       * @param {number} countryName
+       * @param {number} colorBg
+       * @param {number} colorText
+       * @param {number} gameTypeId
+       */
+       const countryName = window.prompt('輸入國家名稱(兩中文字內): ');
+       const colorBg = window.prompt('輸入國家背景色RGB,例如#ff00ff): ');
+       const colorText = window.prompt('輸入國家字色(RGB,例如#ffff00): ');
+       const gameTypes = Object.keys(enums.CHINESE_GAMETYPE_NAMES).map(key => [parseInt(key), enums.CHINESE_GAMETYPE_NAMES[key]]);
+       const gameTypeId = parseInt(window.prompt(gameTypes.map(f => `${f[0]} -> ${f[1]}`).join('\r\n')));
+      content.dispatch('emitMessage', {act: enums.ACT_REBELLION, payload: {countryName, colorBg, colorText, gameTypeId}});
+    },
     getItems: (content: any) => {
       content.dispatch('emitMessage', {act: enums.ACT_GET_ITEMS});
     },
