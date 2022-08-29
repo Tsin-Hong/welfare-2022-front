@@ -1191,6 +1191,9 @@ import DailogItem from '@/components/DailogItem.vue'
 
 export default Vue.extend({
   name: 'UserPage',
+  
+  props: ['initData'],
+
   data: () => ({
     date: new Date(),
     battleTypeTab: 0,
@@ -1980,13 +1983,14 @@ export default Vue.extend({
       return classNames
     },
     showInfoArea: function (type) {
+      const initData = this.initData
       switch (type) {
         case 0:
           this.ChangeState(['dialog_info', true])
           break
         case 1:
           window.open(
-            'http://172.16.20.73:20221/upload/game_instructions.pdf',
+            'http://172.16.20.73:20221/upload/game_instructions'+ initData.gameInstructionsVerNum +'.pdf',
             '_blank'
           )
           break

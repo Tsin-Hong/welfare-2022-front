@@ -1,7 +1,7 @@
 <template>
   <v-container class="home" fluid>
     <v-card class="left-menu" height="100vh">
-      <UserPage />
+      <UserPage :initData="initData" />
       <v-list class="menu-area" absolute>
         <v-list-item-group>
           <template v-for="(item, index) in items">
@@ -76,6 +76,7 @@ export default Vue.extend({
     UserPage
   },
   data: () => ({
+    initData: {},
     currMainMenu: '',
     items: [
       {
@@ -260,52 +261,13 @@ export default Vue.extend({
             id: 3007,
             icon: '',
             title: '叛亂',
-            is_show: true,
+            is_show: false,
             couldBeUseRoleIds: [2],
             couldBeUseByCity: true,
             couldBeUseByOther: false
           }
         ]
       },
-      // {
-      //   id: 4,
-      //   title: '外交',
-      //   icon: 'hexagon-multiple',
-      //   is_show: false,
-      //   is_click: false,
-      //   couldBeUseByCity: true,
-      //   couldBeUseByOther: false,
-      //   couldBeUseRoleIds: [1, 2, 3],
-      //   items: [
-      //     {
-      //       id: 4001,
-      //       icon: '',
-      //       title: '親善',
-      //       is_show: false,
-      //       couldBeUseRoleIds: [],
-      //       couldBeUseByCity: true,
-      //       couldBeUseByOther: false
-      //     },
-      //     {
-      //       id: 4002,
-      //       icon: '',
-      //       title: '同盟',
-      //       is_show: false,
-      //       couldBeUseRoleIds: [],
-      //       couldBeUseByCity: true,
-      //       couldBeUseByOther: false
-      //     },
-      //     {
-      //       id: 4003,
-      //       icon: '',
-      //       title: '合攻',
-      //       is_show: false,
-      //       couldBeUseRoleIds: [],
-      //       couldBeUseByCity: true,
-      //       couldBeUseByOther: false
-      //     }
-      //   ]
-      // },
       {
         id: 5,
         title: '軍議',
@@ -377,18 +339,23 @@ export default Vue.extend({
       return ['move', 'battal'].includes(this.client.status_type)
     },
     myPacketItems() {
-      const user = this.user;
-      const hashItemMap = this.global.itemMap;
-      const items = this.global.items;
+      const user = this.user
+      const hashItemMap = this.global.itemMap
+      const items = this.global.items
       return Object.values(hashItemMap).map((info: any) => {
-        const quantity = items.filter(e => e.itemId == info.id).length;
-        const allow = quantity > 0 && (info.when == 0 || !user.captiveDate);
-        return {quantity, allow, ...info};
+        const quantity = items.filter((e) => e.itemId == info.id).length
+        const allow = quantity > 0 && (info.when == 0 || !user.captiveDate)
+        return { quantity, allow, ...info }
       })
-    },
+    }
   },
 
   mounted: function () {
+    fetch('./data/init.json')
+      .then((res) => res.json())
+      .then((data) => {
+        this.initData = data
+      })
     // if (!this.user.connected) {
     //   const token = window.localStorage.getItem('_token_')
     //   if (token) {
@@ -399,55 +366,110 @@ export default Vue.extend({
 
   methods: {
     ...mapMutations(['ChangeState', 'ChangeApiCheck', 'ChangeDialogCheck']),
-    ...mapActions(['ApiMove', 'ApiBattle', 'actAppointOccupation', 'actDismissOccupation', 'actShare', 'actEscape', 'actSetOriginCity', 'actRecruit', 'actRecruitCaptive', 'actReleaseCaptive', 'getItems', 'actRebellion']),
+    ...mapActions([
+      'ApiMove',
+      'ApiBattle',
+      'actAppointOccupation',
+      'actDismissOccupation',
+      'actShare',
+      'actEscape',
+      'actSetOriginCity',
+      'actRecruit',
+      'actRecruitCaptive',
+      'actReleaseCaptive',
+      'getItems',
+      'actRebellion'
+    ]),
     menuShow: function (item, child) {
       let show = false
-      switch (false) {  // 母類別 不顯示的條件
+      switch (
+        false // 母類別 不顯示的條件
+      ) {
         case item.is_show:
         case item.couldBeUseRoleIds.includes(this.currUser.role):
-        case (this.currUser.mapNowIsCity ? item.couldBeUseByCity : item.couldBeUseByOther):
+        case this.currUser.mapNowIsCity
+          ? item.couldBeUseByCity
+          : item.couldBeUseByOther:
         case this.currUser.actPoint > 0 || item.title === '離開':
-        case !(this.currUser.captiveDate && ['內政', '論功'].includes(item.title)):
+        case !(
+          this.currUser.captiveDate && ['內政', '論功'].includes(item.title)
+        ):
         case !this.isSelectMapMode:
           return show
       }
 
       if (child) {
-        switch (false) {  // 子類別 不顯示的條件
+        switch (
+          false // 子類別 不顯示的條件
+        ) {
           case child.is_show:
           case child.couldBeUseRoleIds.includes(this.currUser.role):
-          case (this.currUser.captiveDate ? ['逃脫', '錦囊'].includes(child.title) : true):
-          case (this.currUser.mapNowIsCity ? child.couldBeUseByCity : child.couldBeUseByOther):
-          case (this.currUser.mapTargetId == 0 ? true: !['移動', '出征'].includes(child.title)):
+          case this.currUser.captiveDate
+            ? ['逃脫', '錦囊'].includes(child.title)
+            : true:
+          case this.currUser.mapNowIsCity
+            ? child.couldBeUseByCity
+            : child.couldBeUseByOther:
+          case this.currUser.mapTargetId == 0
+            ? true
+            : !['移動', '出征'].includes(child.title):
             return show
         }
 
-        switch (child.title) {  // 特定子類別 的特殊條件
-          case '下野': {
-            show = this.currUser.loyalUserId === 0
-          } break
-          case '配給': {
-            const occupation = this.global.occupationMap[this.currUser.occupationId]
-            show = this.currUser.role == 1 || (occupation && occupation.isAllowedShare)
-          } break
-          case '招募': {
-            const occupation = this.global.occupationMap[this.currUser.occupationId]
-            show = this.currUser.role == 1 || (occupation && occupation.isAllowedRecurit)
-          } break
-          case '遷都': {
-            const mycountry = this.global.countries.find(c => c.id == this.user.countryId)
-            show = this.currUser.role == 1 && mycountry && mycountry.originCityId == 0
-          } break
-          case '逃脫': {
-            show = !!this.currUser.captiveDate
-          } break
-          case '叛亂': {
-            const occupation = this.global.occupationMap[this.currUser.occupationId]
-            show = occupation && occupation.name == '軍師'
-          } break
-          case '錦囊': {
-            show = this.currUser.role == 1 || this.currUser.occupationId > 0
-          } break
+        switch (
+          child.title // 特定子類別 的特殊條件
+        ) {
+          case '下野':
+            {
+              show = this.currUser.loyalUserId === 0
+            }
+            break
+          case '配給':
+            {
+              const occupation =
+                this.global.occupationMap[this.currUser.occupationId]
+              show =
+                this.currUser.role == 1 ||
+                (occupation && occupation.isAllowedShare)
+            }
+            break
+          case '招募':
+            {
+              const occupation =
+                this.global.occupationMap[this.currUser.occupationId]
+              show =
+                this.currUser.role == 1 ||
+                (occupation && occupation.isAllowedRecurit)
+            }
+            break
+          case '遷都':
+            {
+              const mycountry = this.global.countries.find(
+                (c) => c.id == this.user.countryId
+              )
+              show =
+                this.currUser.role == 1 &&
+                mycountry &&
+                mycountry.originCityId == 0
+            }
+            break
+          case '逃脫':
+            {
+              show = !!this.currUser.captiveDate
+            }
+            break
+          case '叛亂':
+            {
+              const occupation =
+                this.global.occupationMap[this.currUser.occupationId]
+              show = occupation && occupation.name == '軍師'
+            }
+            break
+          case '錦囊':
+            {
+              show = this.currUser.role == 1 || this.currUser.occupationId > 0
+            }
+            break
           default:
             show = true
         }
@@ -471,26 +493,46 @@ export default Vue.extend({
             this.ChangeState(['dialog_level_up_city', true])
             break
           case 2001: // 任命
-            this.showDialogGCSelection('任命', this.getAppointmentData(), this.handleAppointment)
+            this.showDialogGCSelection(
+              '任命',
+              this.getAppointmentData(),
+              this.handleAppointment
+            )
             break
           case 2002: // 解任
-            this.showDialogGCSelection('解任', this.getDismissData(), this.handleDismiss)
+            this.showDialogGCSelection(
+              '解任',
+              this.getDismissData(),
+              this.handleDismiss
+            )
             break
           case 2004: // 配給
-            this.showDialogGCSelection('配給', this.getShareData(), this.handleShare)
+            this.showDialogGCSelection(
+              '配給',
+              this.getShareData(),
+              this.handleShare
+            )
             break
           case 1004: // 遷都
             this.handlePromptMigrateOriginCity()
             break
           case 2003: // 招募
-            this.showDialogGCSelection('招募', this.getRecuritData(), this.handleRecurit)
+            this.showDialogGCSelection(
+              '招募',
+              this.getRecuritData(),
+              this.handleRecurit
+            )
             break
           case 3005: // 交易
-            console.log("交易!")
+            console.log('交易!')
             break
           case 3006: // 俘虜
             // this.handlePromptCaptives()
-            this.showDialogGCSelection('俘虜', this.getCaptivesData(), this.handleCaptives)
+            this.showDialogGCSelection(
+              '俘虜',
+              this.getCaptivesData(),
+              this.handleCaptives
+            )
             break
           case 3007: // 叛亂
             this.actRebellion()
@@ -503,36 +545,47 @@ export default Vue.extend({
         }
       }
     },
-    showDialogGCSelection: function(title: string, data: any, callback: any) {
+    showDialogGCSelection: function (title: string, data: any, callback: any) {
       if (title && data && data.length > 0) {
         this.ChangeState(['dialog_gc_selection', true])
-        this.ChangeState(['dialog_gc_selection_answers', []]);
-        this.ChangeState(['dialog_gc_selection_dataset', {
-          title,
-          callback,
-          data,
-        }])
+        this.ChangeState(['dialog_gc_selection_answers', []])
+        this.ChangeState([
+          'dialog_gc_selection_dataset',
+          {
+            title,
+            callback,
+            data
+          }
+        ])
       } else {
         console.log('showDialogGCSelection failed: ', data)
       }
     },
     getAppointmentData: function () {
       const occupationMap = this.global.occupationMap
-      const myself = this.user;
-      const users = this.global.users.filter(user => user.countryId == myself.countryId && user.role == 2)
+      const myself = this.user
+      const users = this.global.users.filter(
+        (user) => user.countryId == myself.countryId && user.role == 2
+      )
       const results = []
-      
+
       if (occupationMap) {
         let options = []
         let text = '選擇欲任命之官吏'
         Object.values(occupationMap).map((occ: any) => {
-          const assignedUser = users.find((user: any) => user.occupationId == occ.id)
-          let display = ` ${occ.name}  [ ${(assignedUser ? assignedUser.nickname : ` 貢獻值需求: ${occ.contributionCondi} `)} ]  `
+          const assignedUser = users.find(
+            (user: any) => user.occupationId == occ.id
+          )
+          let display = ` ${occ.name}  [ ${
+            assignedUser
+              ? assignedUser.nickname
+              : ` 貢獻值需求: ${occ.contributionCondi} `
+          } ]  `
           let value = occ
           let enable = !assignedUser
-          options.push({display, value, enable})
+          options.push({ display, value, enable })
         })
-        results.push({text, options})
+        results.push({ text, options })
       }
 
       if (users.length > 0) {
@@ -542,144 +595,190 @@ export default Vue.extend({
           if (user.occupationId == 0) {
             let display = ` ${user.nickname}   ( 貢獻值: ${user.contribution} )`
             let value = user
-            let enable = (parentValue: any) => user.contribution >= parentValue.contributionCondi
-            options.push({display, value, enable})
+            let enable = (parentValue: any) =>
+              user.contribution >= parentValue.contributionCondi
+            options.push({ display, value, enable })
           }
         })
-        options.sort((a,b) => b.value.contribution - a.value.contribution)
-        results.push({text, options})
+        options.sort((a, b) => b.value.contribution - a.value.contribution)
+        results.push({ text, options })
       }
-      
+
       return results
     },
-    handleAppointment: function(selectedValues) {
-      const ary = selectedValues.filter(s => s && s.id)
+    handleAppointment: function (selectedValues) {
+      const ary = selectedValues.filter((s) => s && s.id)
       if (ary.length == 2) {
-        const yes = window.confirm(`是否確定任命 [ ${ary[1].nickname} ] 為 [ ${ary[0].name} ] `)
-        yes && this.actAppointOccupation({userId: ary[1].id, occupationId: ary[0].id})
+        const yes = window.confirm(
+          `是否確定任命 [ ${ary[1].nickname} ] 為 [ ${ary[0].name} ] `
+        )
+        yes &&
+          this.actAppointOccupation({
+            userId: ary[1].id,
+            occupationId: ary[0].id
+          })
       } else {
         console.log('handleAppointment failed: ', selectedValues)
         window.alert('Failed')
       }
     },
-    getDismissData: function() {
+    getDismissData: function () {
       const occupationMap = this.global.occupationMap
       const results = []
-      
+
       if (occupationMap) {
         const myself = this.user
-        const users = this.global.users.filter((user: any) => user.countryId == myself.countryId && user.occupationId > 0)
+        const users = this.global.users.filter(
+          (user: any) =>
+            user.countryId == myself.countryId && user.occupationId > 0
+        )
         let options = []
         let text = '選擇欲解任之武將'
         Object.values(occupationMap).map((occ: any) => {
-          const assignedUser = users.find((user: any) => user.occupationId == occ.id)
+          const assignedUser = users.find(
+            (user: any) => user.occupationId == occ.id
+          )
           if (assignedUser) {
-            let display = `[ ${occ.name} ] ${assignedUser ? assignedUser.nickname : ''} `
+            let display = `[ ${occ.name} ] ${
+              assignedUser ? assignedUser.nickname : ''
+            } `
             let value = assignedUser
             let enable = true
-            options.push({display, value, enable})
+            options.push({ display, value, enable })
           }
         })
-        results.push({text, options})
+        results.push({ text, options })
       }
       return results
     },
-    handleDismiss: function(selectedValues) {
+    handleDismiss: function (selectedValues) {
       if (selectedValues.length == 1) {
-        const yes = window.confirm(`是否確定解任 [ ${selectedValues[0].nickname} ] ?`)
-        yes && this.actDismissOccupation({userId: selectedValues[0].id})
+        const yes = window.confirm(
+          `是否確定解任 [ ${selectedValues[0].nickname} ] ?`
+        )
+        yes && this.actDismissOccupation({ userId: selectedValues[0].id })
       }
     },
-    getShareData: function() {
+    getShareData: function () {
       const result = []
       const myself = this.user
-      const users = this.global.users.filter((user: any) => user.countryId == myself.countryId && myself.id != user.id)
-      .map((user: any) => {
-        return {
-          display: user.nickname,
-          value: user,
-          enable: true
-        }
-      })
+      const users = this.global.users
+        .filter(
+          (user: any) =>
+            user.countryId == myself.countryId && myself.id != user.id
+        )
+        .map((user: any) => {
+          return {
+            display: user.nickname,
+            value: user,
+            enable: true
+          }
+        })
       result.push({
         text: '選擇想配給的武將',
-        options: users,
+        options: users
       })
       result.push({
         text: '欲配給的數量',
         inputs: [
-          {label: '黃金', type: 'number', max: myself.money, min: 0},
-          {label: '兵力', type: 'number', max: myself.soldier, min: 0},
+          { label: '黃金', type: 'number', max: myself.money, min: 0 },
+          { label: '兵力', type: 'number', max: myself.soldier, min: 0 }
         ]
       })
       return result
     },
-    handleShare: function(selectedValues) {
+    handleShare: function (selectedValues) {
       // console.log('handleShare: ', selectedValues)
       const money = selectedValues[1][0]
       const soldier = selectedValues[1][1]
-      const yes = window.confirm(`確定配給 [ ${selectedValues[0].nickname} ] 黃金: ${money}, 士兵: ${soldier} 嗎?`)
+      const yes = window.confirm(
+        `確定配給 [ ${selectedValues[0].nickname} ] 黃金: ${money}, 士兵: ${soldier} 嗎?`
+      )
       if (yes) {
-        this.actShare({userId: selectedValues[0].id, money, soldier})
+        this.actShare({ userId: selectedValues[0].id, money, soldier })
       }
     },
-    getRecuritData: function() {
+    getRecuritData: function () {
       const result = []
       const myself = this.user
-      const mymaps = this.global.maps.filter(map => map.ownCountryId == myself.countryId).map(map => map.id)
-      const users = this.global.users.filter(user => user.role == 3)
-      .map((user: any) => {
-        const ratio = mymaps.includes(user.mapNowId) ? 20 : 10
-        return {
-          ratio,
-          display: `${user.nickname} - 成功率: ${ratio}%`,
-          value: user,
-          enable: true
-        }
-      })
-      users.sort((a,b) => b.ratio - a.ratio)
+      const mymaps = this.global.maps
+        .filter((map) => map.ownCountryId == myself.countryId)
+        .map((map) => map.id)
+      const users = this.global.users
+        .filter((user) => user.role == 3)
+        .map((user: any) => {
+          const ratio = mymaps.includes(user.mapNowId) ? 20 : 10
+          return {
+            ratio,
+            display: `${user.nickname} - 成功率: ${ratio}%`,
+            value: user,
+            enable: true
+          }
+        })
+      users.sort((a, b) => b.ratio - a.ratio)
       result.push({
         text: '選擇要招募的浪人',
-        options: users,
+        options: users
       })
       return result
     },
-    handleRecurit: function(selectedValues) {
-      const yes = window.confirm(`確定招募浪人 [${selectedValues[0].nickname}] 嗎?`)
+    handleRecurit: function (selectedValues) {
+      const yes = window.confirm(
+        `確定招募浪人 [${selectedValues[0].nickname}] 嗎?`
+      )
       if (yes) {
-        this.actRecruit({userId: selectedValues[0].id})
+        this.actRecruit({ userId: selectedValues[0].id })
       }
     },
-    handlePromptMigrateOriginCity: function() {
-      const cities = this.global.maps.filter(m => m.ownCountryId == this.user.countryId && m.cityId > 0)
-      const gameTypes = Object.keys(enums.CHINESE_GAMETYPE_NAMES).map(key => [parseInt(key), enums.CHINESE_GAMETYPE_NAMES[key]])
+    handlePromptMigrateOriginCity: function () {
+      const cities = this.global.maps.filter(
+        (m) => m.ownCountryId == this.user.countryId && m.cityId > 0
+      )
+      const gameTypes = Object.keys(enums.CHINESE_GAMETYPE_NAMES).map((key) => [
+        parseInt(key),
+        enums.CHINESE_GAMETYPE_NAMES[key]
+      ])
       if (cities.length > 0) {
-        const cityId = parseInt(window.prompt(cities.map(f => `${f.cityId} -> ${f.name}`).join('\r\n')))
-        const gameTypeId = parseInt(window.prompt(gameTypes.map(f => `${f[0]} -> ${f[1]}`).join('\r\n')))
-        this.actSetOriginCity({cityId, gameTypeId})
+        const cityId = parseInt(
+          window.prompt(
+            cities.map((f) => `${f.cityId} -> ${f.name}`).join('\r\n')
+          )
+        )
+        const gameTypeId = parseInt(
+          window.prompt(gameTypes.map((f) => `${f[0]} -> ${f[1]}`).join('\r\n'))
+        )
+        this.actSetOriginCity({ cityId, gameTypeId })
       } else {
         window.alert('沒有城池.')
       }
     },
-    getCaptivesData: function() {
+    getCaptivesData: function () {
       // console.log('global: ', this.global)
       const now = new Date().getTime()
       const result = []
       const myself = this.user
-      const ownMapIds = this.global.maps.filter(map => map.ownCountryId == myself.countryId).map(map => map.id)
-      const users = this.global.users.filter(user => user.captiveDate && ownMapIds.includes(user.mapNowId))
-      .map((user: any) => {
-        const timeGap = now - new Date(user.captiveDate).getTime()
-        const ratio = Math.min((Math.ceil(timeGap/1000/60/60/24) * 2.5) + 25, 100)
-        return {
-          ratio,
-          display: `${user.nickname} - 受俘日 (${new Date(user.captiveDate).toLocaleDateString()})  招募成功率: ${ratio}%`,
-          value: user,
-          enable: true
-        }
-      })
-      users.sort((a,b) => b.timeGap - a.timeGap)
-      // 
+      const ownMapIds = this.global.maps
+        .filter((map) => map.ownCountryId == myself.countryId)
+        .map((map) => map.id)
+      const users = this.global.users
+        .filter((user) => user.captiveDate && ownMapIds.includes(user.mapNowId))
+        .map((user: any) => {
+          const timeGap = now - new Date(user.captiveDate).getTime()
+          const ratio = Math.min(
+            Math.ceil(timeGap / 1000 / 60 / 60 / 24) * 2.5 + 25,
+            100
+          )
+          return {
+            ratio,
+            display: `${user.nickname} - 受俘日 (${new Date(
+              user.captiveDate
+            ).toLocaleDateString()})  招募成功率: ${ratio}%`,
+            value: user,
+            enable: true
+          }
+        })
+      users.sort((a, b) => b.timeGap - a.timeGap)
+      //
       result.push({
         text: '選擇要處置的俘虜',
         options: users
@@ -687,37 +786,41 @@ export default Vue.extend({
       result.push({
         text: '處置俘虜',
         options: [
-          {display: '招募', value: 1, enable: true},
-          {display: '釋放', value: 2, enable: true},
+          { display: '招募', value: 1, enable: true },
+          { display: '釋放', value: 2, enable: true }
         ]
       })
       return result
     },
-    handleCaptives: function(selectedValues) {
+    handleCaptives: function (selectedValues) {
       let yes = false
       switch (selectedValues[1]) {
         case 1:
-          yes = window.confirm(`確定招募俘虜 [${selectedValues[0].nickname}] 嗎?`)
+          yes = window.confirm(
+            `確定招募俘虜 [${selectedValues[0].nickname}] 嗎?`
+          )
           break
         case 2:
-          yes = window.confirm(`確定釋放俘虜 [${selectedValues[0].nickname}] 嗎?`)
+          yes = window.confirm(
+            `確定釋放俘虜 [${selectedValues[0].nickname}] 嗎?`
+          )
           break
-          default:
-            console.log('handleCaptives failed: ', selectedValues)
+        default:
+          console.log('handleCaptives failed: ', selectedValues)
       }
       if (yes) {
-        if (selectedValues[1]==1) {
-          return this.actRecruitCaptive({userId: selectedValues[0].id})
+        if (selectedValues[1] == 1) {
+          return this.actRecruitCaptive({ userId: selectedValues[0].id })
         } else {
-          return this.actReleaseCaptive({userId: selectedValues[0].id})
+          return this.actReleaseCaptive({ userId: selectedValues[0].id })
         }
       }
     },
-    showItemData: function() {
+    showItemData: function () {
       console.log('global: ', this.global)
       this.getItems()
       this.ChangeState(['dialog_item', true])
-    },
+    }
   }
 
   // sockets: {
