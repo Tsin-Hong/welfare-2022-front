@@ -24,10 +24,18 @@
         <div class="user-info">
           <div class="img-area d-inline-block" @click="onClickHeadImage">
             <img
-              v-if="currUser.code"
+              v-if="currUser.code && userImageDone"
               class="user-img"
               :src="getUserImgUrl()"
+              @load="onUserImgLoad"
               alt=""
+            />
+            <img
+              v-else
+              class="user-img"
+              :src="
+                '/images/user/' + user.code + '.png'
+              "
             />
             <img class="img-border" src="/images/人物頭像框.png" alt="" />
           </div>
@@ -1008,7 +1016,11 @@
           >
             <v-toolbar-title v-if="selectedMapInfo.name" class="d-block">
               <span>{{ selectedMapInfo.name }}</span>
-              <span v-if="selectedMapInfo.buildingTime" style="padding-left: 20px; font-size: 0.4em;">🔨{{selectedMapInfo.buildingTime}}</span>
+              <span
+                v-if="selectedMapInfo.buildingTime"
+                style="padding-left: 20px; font-size: 0.4em"
+                >🔨{{ selectedMapInfo.buildingTime }}</span
+              >
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn icon dark @click="openMapInfo = false">
@@ -1191,11 +1203,12 @@ import DailogItem from '@/components/DailogItem.vue'
 
 export default Vue.extend({
   name: 'UserPage',
-  
+
   props: ['initData'],
 
   data: () => ({
     date: new Date(),
+    userImageDone: false,
     battleTypeTab: 0,
     tab: 0,
     // inCurrStrongholdIndex: '',
@@ -1303,7 +1316,7 @@ export default Vue.extend({
       6: '_3',
       7: '_3',
       8: '_3',
-      9: '_4',
+      9: '_4'
     },
     setWiner: {},
     setGame: {},
@@ -1568,8 +1581,12 @@ export default Vue.extend({
       const gameTypes = String(_map.gameType)
         .split('')
         .map((t) => enums.CHINESE_GAMETYPE_NAMES[t])
-      const dateAdv = _map.adventureId > 0 ? new Date(_map.adventureId*60*1000) : false
-      const buildingTime = dateAdv && dateAdv > new Date() ? ` 修整中 ( 完成時間 ${dateAdv.toLocaleString()} ) ` : ''
+      const dateAdv =
+        _map.adventureId > 0 ? new Date(_map.adventureId * 60 * 1000) : false
+      const buildingTime =
+        dateAdv && dateAdv > new Date()
+          ? ` 修整中 ( 完成時間 ${dateAdv.toLocaleString()} ) `
+          : ''
 
       return {
         ..._map,
@@ -1644,12 +1661,12 @@ export default Vue.extend({
       }
       return records
     },
-    selectedStrategyItem: function() {
+    selectedStrategyItem: function () {
       return this.global.itemMap[this.global.selectedItemId]
     },
     nowItemAllowedMapIds: function () {
       return this.getItemAllowedMapIds(this.user)
-    },
+    }
   },
 
   watch: {
@@ -1741,12 +1758,12 @@ export default Vue.extend({
     ]),
     getUserImgUrl: function () {
       const user = this.currUser
-      const useUserKey = user.occupationId > 0 ? 'occupationId'  : 'role'
+      const useUserKey = user.occupationId > 0 ? 'occupationId' : 'role'
       const mapObj = this[useUserKey + 'MapObj']
-      return '/images/user/' +
-                user.code +
-                mapObj[user[useUserKey]] +
-                '.png'
+      return '/images/user/' + user.code + mapObj[user[useUserKey]] + '.png'
+    },
+    onUserImgLoad: function () {
+      this.userImageDone = true
     },
     clickBattleRecord: function (data) {
       this.battleDetailCurrId = data.battleId
@@ -1938,7 +1955,6 @@ export default Vue.extend({
           classNames += ' show'
         }
       }
-      
 
       if (stronghold.type == 2) {
         classNames += ' jungle'
@@ -1990,7 +2006,9 @@ export default Vue.extend({
           break
         case 1:
           window.open(
-            'http://172.16.20.73:20221/upload/game_instructions'+ initData.gameInstructionsVerNum +'.pdf',
+            'http://172.16.20.73:20221/upload/game_instructions' +
+              initData.gameInstructionsVerNum +
+              '.pdf',
             '_blank'
           )
           break
@@ -2106,18 +2124,23 @@ export default Vue.extend({
           this.ChangeState(['status_type', ''])
           this.ChangeState(['could_be_move_to', []])
           break
-        case 5004: {
-          const itemId = this.selectedStrategyItem.id
-          const itempk = this.global.items.find(e => e.itemId == itemId)
-          if (itempk && itempk.id) {
-            const itemPkId = itempk.id;
-            this.actUseItem({ mapId: this.goToCityId, itemId, itemPkId })
-          } else {
-            console.log('id 5004 failed. this.selectedStrategyItem: ', this.selectedStrategyItem);
+        case 5004:
+          {
+            const itemId = this.selectedStrategyItem.id
+            const itempk = this.global.items.find((e) => e.itemId == itemId)
+            if (itempk && itempk.id) {
+              const itemPkId = itempk.id
+              this.actUseItem({ mapId: this.goToCityId, itemId, itemPkId })
+            } else {
+              console.log(
+                'id 5004 failed. this.selectedStrategyItem: ',
+                this.selectedStrategyItem
+              )
+            }
+            this.goToCityId = 0
+            this.ChangeState(['status_type', ''])
           }
-          this.goToCityId = 0
-          this.ChangeState(['status_type', ''])
-        } break
+          break
         case 9001: {
           const battlefield = this.storage.battlefield
           const type = this.storage.type
@@ -2234,11 +2257,11 @@ export default Vue.extend({
         this.goToCityId = stronghold.id
         this.goToCityObj = stronghold
         this.ChangeDialogCheck({ content: '出征 ' + stronghold.name })
-      } else if (
-        this.client.status_type === 'item'
-      ) {
+      } else if (this.client.status_type === 'item') {
         this.goToCityId = stronghold.id
-        this.ChangeDialogCheck({ content: `對 [${stronghold.name}] 使用 [${this.selectedStrategyItem.name}] 嗎?`})
+        this.ChangeDialogCheck({
+          content: `對 [${stronghold.name}] 使用 [${this.selectedStrategyItem.name}] 嗎?`
+        })
       }
       if (this.client.status_type === '') {
         this.goToXY(index)
