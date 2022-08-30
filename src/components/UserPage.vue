@@ -1905,7 +1905,7 @@ export default Vue.extend({
         input_name: '派出兵力數',
         content:
           '加入<br>' +
-          battlefield.timestampLimit +
+          battlefield.timestamp +
           '<br>在【' +
           battlefield.map.name +
           '】<br> 【' +
@@ -1925,7 +1925,7 @@ export default Vue.extend({
           '】與【' +
           battlefield.attackCountry.name +
           '】於<br>' +
-          battlefield.timestampLimit +
+          battlefield.timestamp +
           '<br>在【' +
           battlefield.map.name +
           '】戰役的' +
@@ -2210,7 +2210,7 @@ export default Vue.extend({
       if (
         battlefield.timestampLimit < this.dateFormat ||
         // this.currUser.alreadyJoined ||
-        this.currUser.actPoint == 0
+        (this.currUser.actPoint == 0 && type == 'attack')
       ) {
         return true
       }
