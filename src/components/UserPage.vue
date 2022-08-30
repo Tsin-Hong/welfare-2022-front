@@ -2209,8 +2209,7 @@ export default Vue.extend({
       // 到期、已加入、行動力不足
       if (
         battlefield.timestampLimit < this.dateFormat ||
-        // this.currUser.alreadyJoined ||
-        (this.currUser.actPoint == 0 && type == 'attack')
+        (this.currUser.actPoint == 0 && (type == 'attack' || (type == 'defence' && this.currUser.mapNowId != battlefield.mapId)))
       ) {
         return true
       }
