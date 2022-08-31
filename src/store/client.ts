@@ -2,6 +2,8 @@ import mapAlgorithm from '@/unit/mapAlgorithm'
 
 const client = {
   state: {
+    toolMen: ['R001', 'R064', 'R343'],
+    toolKey: 'rv2496',
     tempName: 'None',
     dialog_battle_list: false,
     dialog_battle: false,

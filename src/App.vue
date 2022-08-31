@@ -13,13 +13,15 @@ import { mapState, mapMutations } from 'vuex'
 import None from '@/views/None.vue'
 import Login from '@/views/Login.vue'
 import Home from '@/views/Home.vue'
+import Tool from '@/views/Tool.vue'
 
 export default Vue.extend({
   name: 'App',
   components: {
     None,
     Login,
-    Home
+    Home,
+    Tool
   },
   computed: {
     ...mapState(['user', 'global', 'client'])
@@ -40,8 +42,11 @@ export default Vue.extend({
     ...mapMutations(['ChangeState']),
     changePage: function () {
       const token = window.localStorage.getItem('_token_')
+      const isTool = localStorage.getItem('isTool')
       if (token) {
         this.ChangeState(['tempName', 'Home'])
+      } else if (isTool) {
+        this.ChangeState(['tempName', 'Tool'])
       } else {
         this.ChangeState(['tempName', 'Login'])
       }

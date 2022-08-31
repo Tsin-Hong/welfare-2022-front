@@ -116,15 +116,6 @@ export default Vue.extend({
             couldBeUseByCity: true,
             couldBeUseByOther: false
           },
-          // {
-          //   id: 1003,
-          //   icon: '',
-          //   title: '政策',
-          //   is_show: false,
-          //   couldBeUseRoleIds: [],
-          //   couldBeUseByCity: true,
-          //   couldBeUseByOther: false
-          // },
           {
             id: 1004,
             icon: '',
@@ -182,15 +173,6 @@ export default Vue.extend({
             couldBeUseByCity: true,
             couldBeUseByOther: false
           }
-          // {
-          //   id: 2005,
-          //   icon: '',
-          //   title: '進貢',
-          //   is_show: false,
-          //   couldBeUseRoleIds: [],
-          //   couldBeUseByCity: true,
-          //   couldBeUseByOther: false
-          // }
         ]
       },
       {

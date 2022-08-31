@@ -33,7 +33,17 @@
                 @click:append="passwordCheckShow = !passwordCheckShow"
               ></v-text-field>
               <v-switch v-model="firstLogin" label="首次登入"></v-switch>
-              <v-btn rounded block class="mx-auto" @click="login">進入遊戲</v-btn>
+              <v-btn rounded block class="mx-auto" @click="login"
+                >進入遊戲</v-btn
+              >
+              <v-btn
+                v-if="showTool()"
+                rounded
+                block
+                class="mx-auto m-3 yellow darken-3"
+                @click="tool"
+                >武朝名冊</v-btn
+              >
             </form>
           </v-list-item-content>
         </v-list-item>
@@ -59,7 +69,7 @@ export default {
     passwordCheck: ''
   }),
   computed: {
-    ...mapState(['user'])
+    ...mapState(['user', 'client'])
   },
   updated: function () {
     this.checkLoginStaus()
@@ -98,16 +108,18 @@ export default {
       } else {
         this.ChangeState(['tempName', 'Login'])
       }
+    },
+    showTool: function () {
+      const { toolMen, toolKey } = this.client
+      return (toolMen.includes(this.account) && toolKey === this.password) || localStorage.getItem('isTool')
+    },
+    tool: function () {
+      if (this.showTool()) {
+        localStorage.setItem('isTool', 'true')
+        this.ChangeState(['tempName', 'Tool'])
+      }
     }
   }
-  // sockets: {
-  //   connect: function () {
-  //     const token = window.localStorage.getItem('_token_')
-  //     if (token) {
-  //       this.$socket.emit('AUTHORIZE', { token })
-  //     }
-  //   }
-  // }
 }
 </script>
 
