@@ -313,7 +313,7 @@
                 <v-slider
                   v-model="goToBattleSoldier"
                   class="align-center"
-                  :max="currUser.soldier"
+                  :max="battalSoldierMax"
                   :min="battalSoldierMin"
                   hide-details
                 >
@@ -323,7 +323,7 @@
                       class="mt-0 pt-0"
                       hide-details
                       single-line
-                      :max="currUser.soldier"
+                      :max="battalSoldierMax"
                       :min="battalSoldierMin"
                       type="number"
                       style="width: 60px"
@@ -676,7 +676,8 @@
                                 </div>
                               </div>
                               <div v-if="battlefield" class="soldier-group">
-                                {{ battlefield[type + 'Soldier'][u_i] }}
+                                {{ battlefield[type + 'Soldier'][u_i]
+                                }}<span v-if="type == 'defence'">/1萬</span>
                               </div>
                             </div>
                           </div>
@@ -1412,6 +1413,14 @@ export default Vue.extend({
         }
       }
       return min
+    },
+    battalSoldierMax: function () {
+      const battlefield = this.storage.battlefield
+      let max = this.soldier
+      if (this.currUser.countryId === battlefield.defenceCountryId) {
+        max = 10000
+      }
+      return max
     },
     infoTitle: function () {
       let text = '活動公告'
@@ -2207,10 +2216,7 @@ export default Vue.extend({
     },
     disabledBattlefieldJoinBtn: function (battlefield, key, type) {
       // 到期、已加入、行動力不足
-      if (
-        battlefield.timestampLimit < this.dateFormat ||
-        (this.currUser.actPoint == 0 && (type == 'attack' || (type == 'defence' && this.currUser.mapNowId != battlefield.mapId)))
-      ) {
+      if (battlefield.timestampLimit < this.dateFormat) {
         return true
       }
 
@@ -2221,7 +2227,11 @@ export default Vue.extend({
             (!battlefield.map.route.includes(this.currUser.mapNowId) &&
               this.currUser.mapNowId != battlefield.mapId) ||
             this.currUser.soldier == 0 ||
-            this.currUser.alreadyJoined
+            this.currUser.alreadyJoined ||
+            (this.currUser.actPoint == 0 &&
+              (type == 'attack' ||
+                (type == 'defence' &&
+                  this.currUser.mapNowId != battlefield.mapId)))
           ) {
             return true
           }
@@ -2232,7 +2242,8 @@ export default Vue.extend({
               battlefield.defenceCountry.id,
               battlefield.attackCountry.id
             ].includes(this.currUser.countryId) ||
-            this.currUser.alreadeyWorking
+            this.currUser.alreadeyWorking ||
+            this.currUser.actPoint == 0
           ) {
             return true
           }

@@ -1,5 +1,9 @@
 [
   {
-    "code": "R064"
+    "code": "R064",
+    "role": 2,
+    "occupationId": 0,
+    "countryName": "空幹",
+    "countryColor": "#ffffff,#111111"
   }
 ]
