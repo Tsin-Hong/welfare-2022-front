@@ -22,6 +22,8 @@ const global = {
     battleRecordDetails: { id: 0, winnerCountryId: 0, defenceCountryId: 0, attackCountryIds: [0], atkUserIds: [0,0,0,0], defUserIds: [0,0,0,0], judgeId: 0, toolmanId: 0, gameId: 0, timestamp: '', detail: {}},
     itemMap: {},
     items: [],
+    itemSellerMap: {/* name: mapId */},
+    itemShop: [],
     selectedItemId: 0,
     io: null
   },
@@ -44,20 +46,23 @@ const global = {
             state.notifications.sort((a: any, b: any) => b[0] - a[0])
           }
           if (payload.domesticMessages) {
-            state.domesticMessages = payload.domesticMessages.map(e => [new Date(e[0]), e[1]]);
-            state.domesticMessages.sort((a,b) => b[0] - a[0]);
+            state.domesticMessages = payload.domesticMessages.map(e => [new Date(e[0]), e[1]])
+            state.domesticMessages.sort((a,b) => b[0] - a[0])
           }
           if (payload.battlefieldMap) {
-            state.battlefieldMap = payload.battlefieldMap;
+            state.battlefieldMap = payload.battlefieldMap
           }
           if (payload.occupationMap) {
-            state.occupationMap = payload.occupationMap;
+            state.occupationMap = payload.occupationMap
           }
           if (payload.gameMap) {
-            state.gameMap = payload.gameMap;
+            state.gameMap = payload.gameMap
           }
           if (payload.itemMap) {
-            state.itemMap = payload.itemMap;
+            state.itemMap = payload.itemMap
+            state.itemShop = payload.itemShop
+            state.itemSellerMap = payload.itemSellerMap
+            // console.log('itemSellerMap: ', state.itemSellerMap)
           }
           valication.cacheGlobal(state)
           break
@@ -110,12 +115,23 @@ const global = {
           const nextBattlefield = { ...state.battlefieldMap };
           delete nextBattlefield[mapId];
           state.battlefieldMap = nextBattlefield;
-          state.warRecords = state.warRecords.concat([payload]);
+          state.warRecords = state.warRecords.concat([payload])
           state.warRecords.sort((a,b) => b.id - a.id);
         } break
         case enums.ACT_NOTIFICATION_DOMESTIC: {
           const newmsg = [new Date(payload[0]), payload[1]]
           state.domesticMessages = [newmsg].concat(state.domesticMessages)
+        } break
+        case enums.ACT_RAISE_COUNTRY: {
+          const newCountry = payload.newCountry
+          const mapId = payload.mapId
+          const gameType = payload.gameType
+          const idx = state.maps.findIndex(m => m.id == mapId)
+          state.maps[idx].gameType = gameType
+          state.maps[idx].ownCountryId = newCountry.id
+          const newCountries = state.countries.slice()
+          newCountries.push(newCountry)
+          state.countries = newCountries
         } break
         case enums.ACT_BATTLE_GAME_SELECTED: {
           const mapId = payload.mapId;
@@ -129,8 +145,10 @@ const global = {
         } break
         case enums.ACT_GET_ITEMS: {
           state.items = payload
-          break
-        }
+        } break
+        case enums.ACT_GET_ITEM_SELLER: {
+          state.itemSellerMap = payload.itemSellerMap;
+        } break
         default:
       }
     },
@@ -370,6 +388,13 @@ const global = {
        */
       content.dispatch('emitMessage', {act: enums.ACT_USE_ITEM, payload: args});
     },
+    actBuyItem: (content: any, args: any) => {
+      /**
+       * 交易錦囊
+       * @param {number} itemId
+       */
+      content.dispatch('emitMessage', {act: enums.ACT_BUY_ITEM, payload: args});
+    },
   },
   getters: {
     mapIdMap (state) {
@@ -414,7 +439,20 @@ const global = {
         }
         return filterMaps
       }
-    }
+    },
+    hashMapSellers (state) {
+      const result = {}
+      const itemSellerMap = state.itemSellerMap
+      itemSellerMap && Object.keys(itemSellerMap).map(key => {
+        const mapId = itemSellerMap[key]
+        if (result[mapId]) {
+          result[mapId].push(key)
+        } else {
+          result[mapId] = [key]
+        }
+      });
+      return result
+    },
   }
 }
 

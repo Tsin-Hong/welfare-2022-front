@@ -225,7 +225,7 @@ export default Vue.extend({
             id: 3005,
             icon: '',
             title: '交易',
-            is_show: false,
+            is_show: true,
             couldBeUseRoleIds: [1, 2],
             couldBeUseByCity: true,
             couldBeUseByOther: true
@@ -291,7 +291,7 @@ export default Vue.extend({
             id: 5004,
             icon: '',
             title: '錦囊',
-            is_show: false,
+            is_show: true,
             couldBeUseRoleIds: [1, 2],
             couldBeUseByCity: true,
             couldBeUseByOther: true
@@ -313,7 +313,7 @@ export default Vue.extend({
 
   computed: {
     ...mapState(['user', 'global', 'client']),
-    ...mapGetters(['getUser']),
+    ...mapGetters(['getUser', 'hashMapSellers']),
     currUser: function () {
       return this.getUser()
     },
@@ -473,9 +473,14 @@ export default Vue.extend({
                 !userInBattle
             }
             break
-          case '錦囊':
+          // case '錦囊':
+          //   {
+          //     show = this.currUser.role == 1 || this.currUser.occupationId > 0
+          //   }
+          //   break
+          case '交易':
             {
-              show = this.currUser.role == 1 || this.currUser.occupationId > 0
+              show = !!this.hashMapSellers[this.currUser.mapNowId]
             }
             break
           default:
@@ -532,7 +537,7 @@ export default Vue.extend({
             )
             break
           case 3005: // 交易
-            console.log('交易!')
+            this.startTrade()
             break
           case 3006: // 俘虜
             // this.handlePromptCaptives()
@@ -828,6 +833,38 @@ export default Vue.extend({
       console.log('global: ', this.global)
       this.getItems()
       this.ChangeState(['dialog_item', true])
+    },
+    startTrade: function () {
+      const curUser = this.currUser
+      const sellers = this.hashMapSellers[curUser.mapNowId] || []
+      const itemShop = this.global.itemShop;
+      if (sellers.length == 0) {
+        window.alert('沒有發現隱士!')
+      } else {
+        const dispatchFn = this.$store.dispatch
+        const products = [];
+        itemShop.map(itemdata => {
+          if (sellers.includes(itemdata.seller)) {
+            products.push(itemdata)
+          }
+        });
+        console.log('products: ', products)
+        const gcsData = [{text: '選擇要購買的錦囊', options: products.map(product => {
+          return {
+            display: `(${product.seller}) ${product.name}  -  $${product.price.toLocaleString()}`,
+            value: product.itemId,
+            enable: curUser.money >= product.price
+          }
+        })}]
+        this.showDialogGCSelection(
+          '交易',
+          gcsData,
+          (res) => {
+            const selectedItemId = res[0]
+            dispatchFn('actBuyItem', {itemId: selectedItemId})
+          }
+        )
+      }
     }
   }
 
