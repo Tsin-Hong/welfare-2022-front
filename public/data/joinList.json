@@ -3,7 +3,16 @@
     "code": "R064",
     "role": 2,
     "occupationId": 0,
+    "name": "程寶寶",
     "countryName": "空幹",
     "countryColor": "#ffffff,#111111"
+  },
+  {
+    "code": "R001",
+    "role": 2,
+    "occupationId": 0,
+    "name": "侯米奇",
+    "countryName": "風",
+    "countryColor": "#ffffff,#4A148C"
   }
 ]
