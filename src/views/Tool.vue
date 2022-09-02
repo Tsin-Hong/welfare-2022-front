@@ -46,7 +46,7 @@
         :key="index"
         style="width: 5%"
         class="img-area m-5-px"
-        :class="{ active: false }"
+        :class="{ active: item.disable, selected: animationSelectedCode == item.code }"
       >
         <v-img
           :src="getUserImgUrl(item)"
@@ -60,6 +60,7 @@
 </template>
 
 <script>
+
 export default {
   name: 'Tool',
 
@@ -93,6 +94,14 @@ export default {
       list: [],
       // vsList: 對抗清單
       vsList: [],
+      animationSelectedCode: '',
+      results: [],
+    }
+  },
+
+  computed: {
+    enableList() {
+      return this.list.filter(e => !e.disable)
     }
   },
 
@@ -100,12 +109,20 @@ export default {
     fetch('./data/joinList.json')
       .then((res) => res.json())
       .then((data) => {
-        this.list = data.map((item) => {
-          item.countryColor = item.countryColor.split(',')
-          return item
+        const userMap = {}
+        data[1].map(user => {
+          user.countryColor = user.countryColor.split(',')
+          user.disable = false
+          userMap[user.code] = user
         })
+        this.list = data[0].map((item) => {
+          return userMap[item.code]
+        }).filter(e => !!e)
+        console.log('list: ', this.list)
 
         this.resetVsList()
+        this.bindKeyboardEvent()
+        this.load()
       })
   },
 
@@ -117,6 +134,170 @@ export default {
       const useUserKey = user.occupationId > 0 ? 'occupationId' : 'role'
       const mapObj = this[useUserKey + 'MapObj']
       return '/images/user/' + user.code + mapObj[user[useUserKey]] + '.png'
+    },
+    onKeyboard(evt) {
+      console.log('enter key: ', evt.key)
+      switch (evt.key) {
+        case 'Enter':
+          this.goNext()
+          break
+        case 'd':
+          window.confirm('移除當前結果嗎?') && this.delete()
+          break
+        case 'l':
+          if (window.confirm('重選左側玩家嗎?')) {
+            this.reRandomAgain('left')
+          } 
+          break
+        case 'r':
+          if (window.confirm('重選右側玩家嗎?')) {
+            this.reRandomAgain('right')
+          }
+          break
+        case 'Control':
+          this.download()
+          break
+        default:
+
+      }
+    },
+    bindKeyboardEvent() {
+      if (window.binded) {return}
+      window.binded = true
+      document.addEventListener('keydown', this.onKeyboard)
+    },
+    goNext() {
+      if (this.tmpLock) { return }
+      this.tmpLock = true;
+      const vs = this.vsList
+      if (vs.filter(e => e.code != 'R000').length == 2) {
+        // 確認有兩角色
+        if (vs[0].countryName == vs[1].countryName) {
+          const yes = window.confirm('對戰雙方為同國家，是否重新配對?')
+          if (yes) {
+            return this.reRandomAgain('right').then(() => {
+              this.tmpLock = false;
+            })
+          }
+        }
+        this.results.push(vs.map(e => e.code))
+        this.save()
+        this.resetVsList()
+        this.tmpLock = false
+      } else {
+        // 有一邊需要隨機
+        const key = this.vsList[0].code == 'R000' ? 'left' : 'right'
+        this.randCode(key).then(() => {
+          this.tmpLock = false
+        })
+      }
+      
+    },
+    randCode(key) {
+      return this.enableList.length == 0 ? 
+        new Promise(() => true)
+        : this.animationResult().then(code => {
+        console.log('animationResult: ', code)
+        const nextItem = this.list.find(e => e.code == code)
+        if (key == 'left') {
+          this.vsList = [nextItem, this.vsList[1]]
+        } else {
+          this.vsList = [this.vsList[0], nextItem]
+        }
+        nextItem.disable = true
+        this.list = this.list.slice()
+        return code
+      }).catch(err => {
+        console.log('err: ', err)
+      })
+    },
+    reRandomAgain(key) {
+      const idx = key == 'left' ? 0 : 1
+      const oldCode = this.vsList[idx].code;
+      return this.randCode(key).then(() => {
+        const _item = this.list.find(e => e.code == oldCode)
+        _item.disable = false
+        this.list = this.list.slice()
+      })
+    },
+    animationResult() {
+      return new Promise(this.aniLoop);
+    },
+    aniLoop(resolve, reject) {
+      const _list = this.enableList
+      let times = 42
+      let randCode = ''
+      const loopFn = () => {
+        let go = true
+        if (times <= 30) {
+          go = times % 2 == 0
+        } else if (times <= 10) {
+          go = times % 5 == 0
+        }
+        if (go) {
+          randCode = _list[Math.floor(Math.random() * _list.length)].code
+          this.animationSelectedCode = randCode
+        }
+        if (times <= 0) {
+          window.clearInterval(_timer);
+          resolve(randCode)
+        }
+        times -= 1
+      }
+      const _timer = window.setInterval(loopFn, 100)
+    },
+    save() {
+      const vsResults = this.results
+      localStorage.setItem('__event9__result__', JSON.stringify(vsResults))
+    },
+    load() {
+      const resultstr = localStorage.getItem('__event9__result__')
+      if (resultstr) {
+        const _ary = JSON.parse(resultstr)
+        if (typeof _ary == 'object' && Array.isArray(_ary)) {
+          this.results = _ary
+          const codes = this.list.map(e => e.code);
+          const nextList = this.list.slice();
+          _ary.map(vs => {
+            vs.map(_ => {
+              const cidx = codes.indexOf(_)
+              if (cidx >= 0) nextList[cidx].disable = true
+            })
+          })
+          this.list = nextList
+        }
+      }
+    },
+    delete() {
+      this.results = []
+      this.list.map(e => {
+        e.disable = false
+      })
+      this.list = this.list.slice()
+      this.resetVsList()
+      localStorage.removeItem('__event9__result__')
+    },
+    download() {
+      let csvContent = "data:text/csv;charset=utf-8,";
+      const listMap = {};
+      this.list.map(e => {
+        listMap[e.code] = e;
+      })
+      this.results.forEach((ary) => {
+          let codeLeft = ary[0]
+          let codeRight = ary[1]
+          let leftName = listMap[codeLeft].name
+          let rightName = listMap[codeRight].name
+          let row = `${codeLeft} [${leftName}] ,  VS  ,  ${codeRight} [${rightName}]`
+          csvContent += row + "\r\n";
+      });
+      const universalBOM = "\uFEFF";
+      const encodedUri = encodeURI(csvContent)
+      const link = document.createElement("a")
+      link.setAttribute("href", encodedUri)
+      link.setAttribute("download", "event9_match.csv")
+      document.body.appendChild(link)
+      link.click(); 
     }
   }
 }
@@ -127,7 +308,7 @@ export default {
   width: 100vw;
   height: 100vh;
   background: url('/images/left_menu_bg - 複製.jpg') center center no-repeat;
-  background-size: 100vw;
+  background-size: cover;
   .list,
   .vs {
     height: 50vh;
@@ -143,8 +324,12 @@ export default {
     border: 2px solid #777777;
     background: #fff;
     border-radius: 3px;
-    .active {
+    &.active {
       border-color: #d8b585;
+      filter: opacity(0.5);
+    }
+    &.selected {
+      border-color: #00ed14;
     }
   }
   .vs {

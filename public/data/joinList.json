@@ -1,18 +1,55 @@
 [
-  {
-    "code": "R064",
-    "role": 2,
-    "occupationId": 0,
-    "name": "程寶寶",
-    "countryName": "空幹",
-    "countryColor": "#ffffff,#111111"
-  },
-  {
-    "code": "R001",
-    "role": 2,
-    "occupationId": 0,
-    "name": "侯米奇",
-    "countryName": "風",
-    "countryColor": "#ffffff,#4A148C"
-  }
+  [
+    {
+      "code": "R049",
+      "name": "萊恩"
+    },
+    {
+      "code": "R008",
+      "name": "龜龜"
+    },
+    {
+      "code": "R018",
+      "name": "邱鬼客"
+    },
+    {
+      "code": "R023",
+      "name": "楊水晶"
+    },
+    {
+      "code": "R027",
+      "name": "欣欣"
+    },
+    {
+      "code": "R045",
+      "name": "華特"
+    },
+    {
+      "code": "R043",
+      "name": "墾丁"
+    },
+    {
+      "code": "R323",
+      "name": "tommy"
+    },
+    {
+      "code": "R297",
+      "name": "bella"
+    },
+    {
+      "code": "R343",
+      "name": "snow"
+    },
+    {
+      "code": "R064",
+      "name": "程寶寶"
+    },
+    {
+      "code": "R001",
+      "name": "侯米奇"
+    }
+  ],
+
+  [{"code":"R002","role":2,"occupationId":9,"name":"張理查","countryName":"叡迅","countryColor":"#558B2F,#ffffff"},{"code":"R001","role":2,"occupationId":0,"name":"侯米奇","countryName":"覓","countryColor":"#ffffff,#111111"},{"code":"R006","role":2,"occupationId":0,"name":"全彼得","countryName":"鬆露","countryColor":"#3949AB,#ffffff"},{"code":"R008","role":1,"occupationId":0,"name":"黃龜龜","countryName":"鬆露","countryColor":"#3949AB,#ffffff"},{"code":"R007","role":2,"occupationId":0,"name":"林波奇","countryName":"覓","countryColor":"#ffffff,#111111"},{"code":"R009","role":2,"occupationId":0,"name":"楊哈子","countryName":"覓","countryColor":"#ffffff,#111111"},{"code":"R011","role":2,"occupationId":9,"name":"何噠噠","countryName":"覓","countryColor":"#ffffff,#111111"},{"code":"R013","role":2,"occupationId":0,"name":"焦婕西","countryName":"叡迅","countryColor":"#558B2F,#ffffff"},{"code":"R015","role":2,"occupationId":0,"name":"甘肯","countryName":"覓","countryColor":"#ffffff,#111111"},{"code":"R017","role":3,"occupationId":0,"name":"黃杰夫","countryName":"國家","countryColor":"#ffffff,#a1a1a1"},{"code":"R018","role":2,"occupationId":0,"name":"邱鬼客","countryName":"琥","countryColor":"#F57C00,#ffffff"},{"code":"R021","role":2,"occupationId":9,"name":"楊祿","countryName":"琥","countryColor":"#F57C00,#ffffff"},{"code":"R024","role":2,"occupationId":0,"name":"許瑞塔","countryName":"琥","countryColor":"#F57C00,#ffffff"},{"code":"R023","role":2,"occupationId":2,"name":"楊水晶","countryName":"叡迅","countryColor":"#558B2F,#ffffff"},{"code":"R022","role":2,"occupationId":0,"name":"林強壯","countryName":"覓","countryColor":"#ffffff,#111111"},{"code":"R027","role":2,"occupationId":0,"name":"林欣欣","countryName":"空幹","countryColor":"#111111,#ffffff"},{"code":"R026","role":1,"occupationId":0,"name":"趙強森","countryName":"琥","countryColor":"#F57C00,#ffffff"},{"code":"R031","role":1,"occupationId":0,"name":"林桑","countryName":"叡迅","countryColor":"#558B2F,#ffffff"},{"code":"R035","role":2,"occupationId":0,"name":"陳羅壹","countryName":"琥","countryColor":"#F57C00,#ffffff"},{"code":"R037","role":2,"occupationId":0,"name":"黃義鯊","countryName":"鬆露","countryColor":"#3949AB,#ffffff"},{"code":"R040","role":2,"occupationId":0,"name":"陳杰德","countryName":"空幹","countryColor":"#111111,#ffffff"},{"code":"R045","role":2,"occupationId":0,"name":"張華特","countryName":"琥","countryColor":"#F57C00,#ffffff"},{"code":"R044","role":2,"occupationId":0,"name":"余鱗","countryName":"空幹","countryColor":"#111111,#ffffff"},{"code":"R043","role":2,"occupationId":0,"name":"鄒墾丁","countryName":"琥","countryColor":"#F57C00,#ffffff"},{"code":"R046","role":2,"occupationId":0,"name":"林特","countryName":"風","countryColor":"#AB47BC,#ffffff"},{"code":"R049","role":2,"occupationId":0,"name":"宋萊恩","countryName":"空幹","countryColor":"#111111,#ffffff"},{"code":"R052","role":2,"occupationId":0,"name":"林單單","countryName":"覓","countryColor":"#ffffff,#111111"},{"code":"R050","role":2,"occupationId":0,"name":"吳玫","countryName":"鬆露","countryColor":"#3949AB,#ffffff"},{"code":"R056","role":2,"occupationId":0,"name":"高茯苓","countryName":"空幹","countryColor":"#111111,#ffffff"},{"code":"R055","role":2,"occupationId":8,"name":"譚雅各","countryName":"空幹","countryColor":"#111111,#ffffff"},{"code":"R053","role":2,"occupationId":0,"name":"徐司","countryName":"空幹","countryColor":"#111111,#ffffff"},{"code":"R059","role":2,"occupationId":0,"name":"陳爩繘戫","countryName":"鬆露","countryColor":"#3949AB,#ffffff"},{"code":"R064","role":2,"occupationId":0,"name":"程寶寶","countryName":"空幹","countryColor":"#111111,#ffffff"},{"code":"R067","role":2,"occupationId":0,"name":"王福康","countryName":"叡迅","countryColor":"#558B2F,#ffffff"},{"code":"R069","role":1,"occupationId":0,"name":"許維克","countryName":"空幹","countryColor":"#111111,#ffffff"},{"code":"R075","role":2,"occupationId":0,"name":"洪零","countryName":"風","countryColor":"#AB47BC,#ffffff"},{"code":"R082","role":2,"occupationId":0,"name":"林森","countryName":"琥","countryColor":"#F57C00,#ffffff"},{"code":"R094","role":2,"occupationId":0,"name":"王筆的","countryName":"鬆露","countryColor":"#3949AB,#ffffff"},{"code":"R100","role":2,"occupationId":0,"name":"葉威力","countryName":"空幹","countryColor":"#111111,#ffffff"},{"code":"R109","role":2,"occupationId":0,"name":"李莫爾","countryName":"風","countryColor":"#AB47BC,#ffffff"},{"code":"R113","role":2,"occupationId":0,"name":"張灰","countryName":"鬆露","countryColor":"#3949AB,#ffffff"},{"code":"R123","role":2,"occupationId":0,"name":"賴克西亞","countryName":"鬆露","countryColor":"#3949AB,#ffffff"},{"code":"R133","role":2,"occupationId":0,"name":"李提姆","countryName":"風","countryColor":"#AB47BC,#ffffff"},{"code":"R147","role":2,"occupationId":0,"name":"蔡迪桑","countryName":"鬆露","countryColor":"#3949AB,#ffffff"},{"code":"R164","role":2,"occupationId":0,"name":"謝多南","countryName":"鬆露","countryColor":"#3949AB,#ffffff"},{"code":"R179","role":1,"occupationId":0,"name":"李維克","countryName":"風","countryColor":"#AB47BC,#ffffff"},{"code":"R178","role":2,"occupationId":4,"name":"陳苓苓","countryName":"琥","countryColor":"#F57C00,#ffffff"},{"code":"R176","role":2,"occupationId":0,"name":"于凱琳","countryName":"空幹","countryColor":"#111111,#ffffff"},{"code":"R185","role":2,"occupationId":0,"name":"許亨利","countryName":"風","countryColor":"#AB47BC,#ffffff"},{"code":"R187","role":2,"occupationId":0,"name":"王大衛","countryName":"鬆露","countryColor":"#3949AB,#ffffff"},{"code":"R192","role":2,"occupationId":0,"name":"黃賓娜","countryName":"鬆露","countryColor":"#3949AB,#ffffff"},{"code":"R198","role":2,"occupationId":0,"name":"李戎龍","countryName":"鬆露","countryColor":"#3949AB,#ffffff"},{"code":"R196","role":2,"occupationId":9,"name":"柯安格斯","countryName":"空幹","countryColor":"#111111,#ffffff"},{"code":"R205","role":2,"occupationId":0,"name":"方傑克","countryName":"風","countryColor":"#AB47BC,#ffffff"},{"code":"R209","role":2,"occupationId":0,"name":"郭棣","countryName":"風","countryColor":"#AB47BC,#ffffff"},{"code":"R231","role":2,"occupationId":0,"name":"李雪倫","countryName":"風","countryColor":"#AB47BC,#ffffff"},{"code":"R230","role":2,"occupationId":0,"name":"劉厄普頓","countryName":"風","countryColor":"#AB47BC,#ffffff"},{"code":"R235","role":2,"occupationId":0,"name":"曾吉米","countryName":"風","countryColor":"#AB47BC,#ffffff"},{"code":"R246","role":2,"occupationId":0,"name":"黃霍華德","countryName":"覓","countryColor":"#ffffff,#111111"},{"code":"R251","role":2,"occupationId":0,"name":"廖姆濕","countryName":"風","countryColor":"#AB47BC,#ffffff"},{"code":"R255","role":2,"occupationId":0,"name":"黃史改","countryName":"覓","countryColor":"#ffffff,#111111"},{"code":"R264","role":3,"occupationId":0,"name":"陳安柏","countryName":"國家","countryColor":"#ffffff,#a1a1a1"},{"code":"R269","role":2,"occupationId":0,"name":"吳琳達","countryName":"覓","countryColor":"#ffffff,#111111"},{"code":"R276","role":2,"occupationId":0,"name":"楊傑","countryName":"琥","countryColor":"#F57C00,#ffffff"},{"code":"R279","role":2,"occupationId":0,"name":"趙斯特","countryName":"風","countryColor":"#AB47BC,#ffffff"},{"code":"R281","role":2,"occupationId":0,"name":"古曼蒂","countryName":"空幹","countryColor":"#111111,#ffffff"},{"code":"R285","role":2,"occupationId":0,"name":"謝謝泥","countryName":"鬆露","countryColor":"#3949AB,#ffffff"},{"code":"R289","role":3,"occupationId":0,"name":"廖尚恩","countryName":"國家","countryColor":"#ffffff,#a1a1a1"},{"code":"R293","role":3,"occupationId":0,"name":"許山姆","countryName":"國家","countryColor":"#ffffff,#a1a1a1"},{"code":"R297","role":1,"occupationId":0,"name":"施琲琲","countryName":"覓","countryColor":"#ffffff,#111111"},{"code":"R300","role":2,"occupationId":0,"name":"葉尚恩","countryName":"空幹","countryColor":"#111111,#ffffff"},{"code":"R305","role":2,"occupationId":0,"name":"張艾比","countryName":"風","countryColor":"#AB47BC,#ffffff"},{"code":"R313","role":2,"occupationId":0,"name":"葉蘿拉","countryName":"覓","countryColor":"#ffffff,#111111"},{"code":"R312","role":2,"occupationId":0,"name":"楊薇薇","countryName":"琥","countryColor":"#F57C00,#ffffff"},{"code":"R323","role":2,"occupationId":0,"name":"高湯米","countryName":"覓","countryColor":"#ffffff,#111111"},{"code":"R322","role":2,"occupationId":0,"name":"楊斯坦","countryName":"叡迅","countryColor":"#558B2F,#ffffff"},{"code":"R332","role":2,"occupationId":0,"name":"魏漢克","countryName":"叡迅","countryColor":"#558B2F,#ffffff"},{"code":"R339","role":2,"occupationId":0,"name":"盧瑞秋","countryName":"鬆露","countryColor":"#3949AB,#ffffff"},{"code":"R343","role":2,"occupationId":0,"name":"莊雪","countryName":"覓","countryColor":"#ffffff,#111111"},{"code":"R348","role":2,"occupationId":0,"name":"駱傑克","countryName":"空幹","countryColor":"#111111,#ffffff"},{"code":"R350","role":2,"occupationId":2,"name":"曾文森","countryName":"琥","countryColor":"#F57C00,#ffffff"},{"code":"R349","role":2,"occupationId":0,"name":"楊艾倫","countryName":"叡迅","countryColor":"#558B2F,#ffffff"},{"code":"R356","role":3,"occupationId":0,"name":"吳阿爾維斯","countryName":"國家","countryColor":"#ffffff,#a1a1a1"},{"code":"R358","role":2,"occupationId":0,"name":"楊凱文","countryName":"叡迅","countryColor":"#558B2F,#ffffff"},{"code":"R359","role":2,"occupationId":0,"name":"林利歐","countryName":"琥","countryColor":"#F57C00,#ffffff"},{"code":"R366","role":2,"occupationId":0,"name":"周尚恩","countryName":"覓","countryColor":"#ffffff,#111111"},{"code":"R368","role":2,"occupationId":0,"name":"葉魏詩","countryName":"覓","countryColor":"#ffffff,#111111"},{"code":"R369","role":2,"occupationId":0,"name":"陳大衛","countryName":"覓","countryColor":"#ffffff,#111111"},{"code":"R370","role":3,"occupationId":0,"name":"林愛文","countryName":"國家","countryColor":"#ffffff,#a1a1a1"},{"code":"R371","role":2,"occupationId":0,"name":"柯單利","countryName":"琥","countryColor":"#F57C00,#ffffff"}]
+
 ]
