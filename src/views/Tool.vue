@@ -19,7 +19,7 @@
               class="country-name"
               :style="{
                 color: item.countryColor[0],
-                'text-shadow': '0px 0px 80px ' + item.countryColor[1]
+                'text-shadow': '0px 0px 10px ' + item.countryColor[1]
               }"
             >
               {{ item.countryName }}
@@ -27,7 +27,7 @@
             <div
               class="country-name-bg"
               :style="{
-                background: item.countryColor[1]
+                background: item.countryColor[0]
               }"
             ></div>
           </div>
@@ -36,7 +36,7 @@
       <div class="title-area-bg"></div>
       <div class="title-area d-flex">
         <div class="title">官渡之戰 個人賽</div>
-        <div class="times align-self-end">第一輪</div>
+        <div class="times align-self-end">第二輪</div>
       </div>
       <div class="vs-icon"></div>
     </div>
@@ -46,21 +46,25 @@
         :key="index"
         style="width: 5%"
         class="img-area m-5-px"
-        :class="{ active: item.disable, selected: animationSelectedCode == item.code }"
+        :class="{
+          active: item.disable,
+          selected: animationSelectedCode == item.code
+        }"
       >
-        <v-img
-          :src="getUserImgUrl(item)"
-          :aspect-ratio="9 / 12"
-          class="pt-5"
-          style="top: -30px"
-        />
+        <div class="w-100-pct">
+          <v-img
+            :src="getUserImgUrl(item)"
+            :aspect-ratio="9 / 12"
+            class="pt-5"
+            style="top: -30px"
+          />
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-
 export default {
   name: 'Tool',
 
@@ -88,20 +92,20 @@ export default {
         name: '武將',
         occupationId: 0,
         countryName: '國家',
-        countryColor: ['#FFF', '#A1A1A1']
+        countryColor: ['#A1A1A1', '#FFF']
       },
       // list:人選清單
       list: [],
       // vsList: 對抗清單
       vsList: [],
       animationSelectedCode: '',
-      results: [],
+      results: []
     }
   },
 
   computed: {
     enableList() {
-      return this.list.filter(e => !e.disable)
+      return this.list.filter((e) => !e.disable)
     }
   },
 
@@ -110,14 +114,16 @@ export default {
       .then((res) => res.json())
       .then((data) => {
         const userMap = {}
-        data[1].map(user => {
+        data[1].map((user) => {
           user.countryColor = user.countryColor.split(',')
           user.disable = false
           userMap[user.code] = user
         })
-        this.list = data[0].map((item) => {
-          return userMap[item.code]
-        }).filter(e => !!e)
+        this.list = data[0]
+          .map((item) => {
+            return userMap[item.code]
+          })
+          .filter((e) => !!e)
         console.log('list: ', this.list)
 
         this.resetVsList()
@@ -147,7 +153,7 @@ export default {
         case 'l':
           if (window.confirm('重選左側玩家嗎?')) {
             this.reRandomAgain('left')
-          } 
+          }
           break
         case 'r':
           if (window.confirm('重選右側玩家嗎?')) {
@@ -158,29 +164,32 @@ export default {
           this.download()
           break
         default:
-
       }
     },
     bindKeyboardEvent() {
-      if (window.binded) {return}
+      if (window.binded) {
+        return
+      }
       window.binded = true
       document.addEventListener('keydown', this.onKeyboard)
     },
     goNext() {
-      if (this.tmpLock) { return }
-      this.tmpLock = true;
+      if (this.tmpLock) {
+        return
+      }
+      this.tmpLock = true
       const vs = this.vsList
-      if (vs.filter(e => e.code != 'R000').length == 2) {
+      if (vs.filter((e) => e.code != 'R000').length == 2) {
         // 確認有兩角色
         if (vs[0].countryName == vs[1].countryName) {
           const yes = window.confirm('對戰雙方為同國家，是否重新配對?')
           if (yes) {
             return this.reRandomAgain('right').then(() => {
-              this.tmpLock = false;
+              this.tmpLock = false
             })
           }
         }
-        this.results.push(vs.map(e => e.code))
+        this.results.push(vs.map((e) => e.code))
         this.save()
         this.resetVsList()
         this.tmpLock = false
@@ -191,37 +200,38 @@ export default {
           this.tmpLock = false
         })
       }
-      
     },
     randCode(key) {
-      return this.enableList.length == 0 ? 
-        new Promise(() => true)
-        : this.animationResult().then(code => {
-        console.log('animationResult: ', code)
-        const nextItem = this.list.find(e => e.code == code)
-        if (key == 'left') {
-          this.vsList = [nextItem, this.vsList[1]]
-        } else {
-          this.vsList = [this.vsList[0], nextItem]
-        }
-        nextItem.disable = true
-        this.list = this.list.slice()
-        return code
-      }).catch(err => {
-        console.log('err: ', err)
-      })
+      return this.enableList.length == 0
+        ? new Promise(() => true)
+        : this.animationResult()
+            .then((code) => {
+              console.log('animationResult: ', code)
+              const nextItem = this.list.find((e) => e.code == code)
+              if (key == 'left') {
+                this.vsList = [nextItem, this.vsList[1]]
+              } else {
+                this.vsList = [this.vsList[0], nextItem]
+              }
+              nextItem.disable = true
+              this.list = this.list.slice()
+              return code
+            })
+            .catch((err) => {
+              console.log('err: ', err)
+            })
     },
     reRandomAgain(key) {
       const idx = key == 'left' ? 0 : 1
-      const oldCode = this.vsList[idx].code;
+      const oldCode = this.vsList[idx].code
       return this.randCode(key).then(() => {
-        const _item = this.list.find(e => e.code == oldCode)
+        const _item = this.list.find((e) => e.code == oldCode)
         _item.disable = false
         this.list = this.list.slice()
       })
     },
     animationResult() {
-      return new Promise(this.aniLoop);
+      return new Promise(this.aniLoop)
     },
     aniLoop(resolve, reject) {
       const _list = this.enableList
@@ -239,7 +249,7 @@ export default {
           this.animationSelectedCode = randCode
         }
         if (times <= 0) {
-          window.clearInterval(_timer);
+          window.clearInterval(_timer)
           resolve(randCode)
         }
         times -= 1
@@ -256,10 +266,10 @@ export default {
         const _ary = JSON.parse(resultstr)
         if (typeof _ary == 'object' && Array.isArray(_ary)) {
           this.results = _ary
-          const codes = this.list.map(e => e.code);
-          const nextList = this.list.slice();
-          _ary.map(vs => {
-            vs.map(_ => {
+          const codes = this.list.map((e) => e.code)
+          const nextList = this.list.slice()
+          _ary.map((vs) => {
+            vs.map((_) => {
               const cidx = codes.indexOf(_)
               if (cidx >= 0) nextList[cidx].disable = true
             })
@@ -270,7 +280,7 @@ export default {
     },
     delete() {
       this.results = []
-      this.list.map(e => {
+      this.list.map((e) => {
         e.disable = false
       })
       this.list = this.list.slice()
@@ -278,26 +288,26 @@ export default {
       localStorage.removeItem('__event9__result__')
     },
     download() {
-      let csvContent = "data:text/csv;charset=utf-8,";
-      const listMap = {};
-      this.list.map(e => {
-        listMap[e.code] = e;
+      let csvContent = 'data:text/csv;charset=utf-8,'
+      const listMap = {}
+      this.list.map((e) => {
+        listMap[e.code] = e
       })
       this.results.forEach((ary) => {
-          let codeLeft = ary[0]
-          let codeRight = ary[1]
-          let leftName = listMap[codeLeft].name
-          let rightName = listMap[codeRight].name
-          let row = `${codeLeft} [${leftName}] ,  VS  ,  ${codeRight} [${rightName}]`
-          csvContent += row + "\r\n";
-      });
-      const universalBOM = "\uFEFF";
+        let codeLeft = ary[0]
+        let codeRight = ary[1]
+        let leftName = listMap[codeLeft].name
+        let rightName = listMap[codeRight].name
+        let row = `${codeLeft} [${leftName}] ,  VS  ,  ${codeRight} [${rightName}]`
+        csvContent += row + '\r\n'
+      })
+      const universalBOM = '\uFEFF'
       const encodedUri = encodeURI(csvContent)
-      const link = document.createElement("a")
-      link.setAttribute("href", encodedUri)
-      link.setAttribute("download", "event9_match.csv")
+      const link = document.createElement('a')
+      link.setAttribute('href', encodedUri)
+      link.setAttribute('download', 'event9_match.csv')
       document.body.appendChild(link)
-      link.click(); 
+      link.click()
     }
   }
 }
@@ -319,17 +329,31 @@ export default {
   }
   .img-area {
     position: relative;
-    overflow: hidden;
     height: 60px;
     border: 2px solid #777777;
     background: #fff;
     border-radius: 3px;
+    & > div {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
     &.active {
       border-color: #d8b585;
-      filter: opacity(0.5);
+      filter: opacity(0.3);
     }
     &.selected {
-      border-color: #00ed14;
+      &::after {
+        content: '';
+        display: block;
+        position: absolute;
+        left: -5px;
+        top: -5px;
+        border: 5px solid #f82e27;
+        box-shadow: 0 0 8px #f82e27;
+        width: calc(100% + 10px);
+        height: calc(100% + 10px);
+      }
     }
   }
   .vs {
