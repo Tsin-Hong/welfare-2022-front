@@ -186,7 +186,10 @@
         <template v-for="(stronghold, stronghold_i) in strongholds">
           <div
             :class="strongholdClass(stronghold)"
-            :style="{ left: stronghold.x + 'px', top: stronghold.y + 'px' }"
+            :style="[
+              { left: stronghold.x + 'px', top: stronghold.y + 'px' },
+              stronghold.seller.length > 0 && { index: 12 }
+            ]"
             :id="'stronghold_' + stronghold_i"
             :key="stronghold_i"
             :disabled="
@@ -258,6 +261,8 @@
                     :style="[
                       stronghold.type == 1
                         ? { color: stronghold.conutry.t_color }
+                        : stronghold.seller.length > 0
+                        ? { color: '#ffc107' }
                         : { color: '#FFF' }
                     ]"
                   >
@@ -555,7 +560,7 @@
                   <div>{{ battlefield.map.name }}之戰</div>
                   <div
                     v-if="battlefield.gameId > 0"
-                    class="fz-22-px mt-80-px grey--text text--darken-1"
+                    class="fz-32-px mt-80-px red--text text--darken-1"
                   >
                     {{ battlefield.game.name }}
                   </div>
@@ -1081,6 +1086,22 @@
                 <v-btn small @click="showInfoArea(2)">查看</v-btn>
               </div>
             </template>
+            <template v-if="selectedMapInfo.seller.length > 0">
+              <v-card-subtitle class="grey--text mt-15-px"
+                >發現的隱士</v-card-subtitle
+              >
+              <v-divider class="mb-10-px"></v-divider>
+              <span
+                class="user-blcok w-120-px"
+                v-for="(s, s_i) in selectedMapInfo.seller"
+                :key="s_i"
+              >
+                <v-avatar size="26" class="grey">
+                  <img src="/images/隱士icon.png" alt="" />
+                </v-avatar>
+                <span class="user-name ml-6-px">{{ s }}</span>
+              </span>
+            </template>
             <v-card-subtitle class="grey--text mt-15-px"
               >在據點中的人員名冊</v-card-subtitle
             >
@@ -1091,7 +1112,15 @@
               :key="uu.id"
               :class="{ captived: !!uu.captiveDate }"
             >
-              <span class="title-name">{{ uu.occupation }}</span>
+              <v-avatar size="26" class="grey">
+                <img
+                  :src="
+                    '/images/' + (uu.role === 3 ? '浪人' : '臣子') + 'icon.png'
+                  "
+                  alt=""
+                />
+              </v-avatar>
+              <span class="title-name ml-6-px">{{ uu.occupation }}</span>
               <span class="user-name" :title="uu.code">{{ uu.nickname }}</span>
               <span class="user-other-info">( {{ uu.soldier }} )</span>
             </span>
@@ -1324,7 +1353,12 @@ export default Vue.extend({
 
   computed: {
     ...mapState(['user', 'global', 'client', 'info']),
-    ...mapGetters(['getUser', 'mapIdMap', 'getItemAllowedMapIds']),
+    ...mapGetters([
+      'getUser',
+      'mapIdMap',
+      'getItemAllowedMapIds',
+      'hashMapSellers'
+    ]),
     dateFormat: function () {
       return this.$moment(this.date).format(this.formateStr)
     },
@@ -1416,8 +1450,11 @@ export default Vue.extend({
     },
     battalSoldierMax: function () {
       const battlefield = this.storage.battlefield
-      let max = this.soldier
-      if (this.currUser.countryId === battlefield.defenceCountryId) {
+      let max = this.currUser.soldier
+      if (
+        battlefield &&
+        this.currUser.countryId === battlefield.defenceCountryId
+      ) {
         max = 10000
       }
       return max
@@ -1442,8 +1479,11 @@ export default Vue.extend({
       const battles = Object.values(
         JSON.parse(JSON.stringify(this.global.battlefieldMap))
       )
+      const sellers = this.hashMapSellers
       const result = state.global.maps
         ? state.global.maps.map((m: any) => {
+            const currSellers = !sellers[m.id] ? [] : sellers[m.id]
+            console.log(m.name, currSellers)
             const cid = m.ownCountryId
             const country = state.global.countries.find((e) => e.id === cid)
             const cname = country ? country.name : '空'
@@ -1475,14 +1515,15 @@ export default Vue.extend({
                 name: cname,
                 color: colors[0],
                 t_color: colors[1]
-              }
+              },
+              seller: currSellers
             }
           })
         : []
       return result
     },
     selectedMapInfo: function () {
-      const _maps = JSON.parse(JSON.stringify(this.global.maps))
+      const _maps = JSON.parse(JSON.stringify(this.strongholds))
       if (this.openMapInfoIdx == -1) {
         return false
       }
@@ -3579,6 +3620,7 @@ html {
   .user-blcok {
     display: inline-block;
     border: 1px solid rgb(139, 139, 139);
+    border-radius: 6px;
     margin: 1%;
     padding: 6px 10px;
     width: 48%;
