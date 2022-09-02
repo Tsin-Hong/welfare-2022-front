@@ -133,11 +133,11 @@
       </div>
       <div class="right-top-area">
         <div class="btn-group">
-          <span class="battle" :disabled="false" @click="showInfoArea(2)">
+          <span class="battle" @click="showInfoArea(2)">
             <img src="/images/戰役.png" alt="" />
             <div class="text">戰役</div>
           </span>
-          <span class="battle" :disabled="false" @click="showInfoArea(3)">
+          <span class="battle" @click="showInfoArea(3)">
             <img src="/images/競賽說明.png" alt="" />
             <div class="text">競賽說明</div>
           </span>
@@ -682,7 +682,7 @@
                               </div>
                               <div v-if="battlefield" class="soldier-group">
                                 {{ battlefield[type + 'Soldier'][u_i]
-                                }}<span v-if="type == 'defence' && false"
+                                }}<span v-if="type == 'defence'"
                                   >/1萬</span
                                 >
                               </div>
@@ -1455,8 +1455,7 @@ export default Vue.extend({
       let max = this.currUser.soldier
       if (
         battlefield &&
-        this.currUser.countryId === battlefield.defenceCountryId &&
-        false
+        this.currUser.countryId === battlefield.defenceCountryId
       ) {
         max = 10000
       }
@@ -2212,7 +2211,7 @@ export default Vue.extend({
           if (
             soldier < this.battalSoldierMin ||
             soldier > this.currUser.soldier ||
-            (false && isDef && soldier > 10000)
+            (isDef && soldier > 10000)
           ) {
             this.ChangeApiResult({
               title: '',

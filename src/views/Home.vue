@@ -243,7 +243,7 @@ export default Vue.extend({
             id: 3007,
             icon: '',
             title: '叛亂',
-            is_show: false,
+            is_show: true,
             couldBeUseRoleIds: [2],
             couldBeUseByCity: true,
             couldBeUseByOther: false
