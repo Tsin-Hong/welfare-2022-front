@@ -1,25 +1,9 @@
 <template>
   <div class="tool-page">
-    <div class="list d-flex justify-center flex-wrap">
-      <div
-        v-for="(item, index) in list"
-        :key="index"
-        style="width: 5%"
-        class="img-area m-5-px"
-        :class="{ active: false }"
-      >
-        <v-img
-          :src="getUserImgUrl(item)"
-          :aspect-ratio="9 / 12"
-          class="pt-5"
-          style="top: -30px"
-        />
-      </div>
-    </div>
     <div class="vs">
       <div class="group d-flex">
         <div v-for="(item, index) in vsList" :key="index" class="vs-block">
-          <div class="vs-user-area">
+          <div class="vs-user-area" :class="[item.name == '武將' && 'no-one']">
             <v-img
               class="img"
               :src="getUserImgUrl(item)"
@@ -49,9 +33,27 @@
           </div>
         </div>
       </div>
+      <div class="title-area-bg"></div>
       <div class="title-area d-flex">
         <div class="title">官渡之戰 個人賽</div>
         <div class="times align-self-end">第一輪</div>
+      </div>
+      <div class="vs-icon"></div>
+    </div>
+    <div class="list d-flex justify-center flex-wrap">
+      <div
+        v-for="(item, index) in list"
+        :key="index"
+        style="width: 5%"
+        class="img-area m-5-px"
+        :class="{ active: false }"
+      >
+        <v-img
+          :src="getUserImgUrl(item)"
+          :aspect-ratio="9 / 12"
+          class="pt-5"
+          style="top: -30px"
+        />
       </div>
     </div>
   </div>
@@ -79,10 +81,18 @@ export default {
         8: '_3',
         9: '_4'
       },
+      defaultVsObj: {
+        code: 'R000',
+        role: 2,
+        name: '武將',
+        occupationId: 0,
+        countryName: '國家',
+        countryColor: ['#FFF', '#A1A1A1']
+      },
       // list:人選清單
       list: [],
       // vsList: 對抗清單
-      vsList: []
+      vsList: [],
     }
   },
 
@@ -95,13 +105,15 @@ export default {
           return item
         })
 
-        // 正式資料來要刪掉的
-        this.vsList = this.vsList.concat(data)
+        this.resetVsList()
       })
   },
 
   methods: {
-    getUserImgUrl: function (user) {
+    resetVsList() {
+      this.vsList = [this.defaultVsObj, this.defaultVsObj]
+    },
+    getUserImgUrl(user) {
       const useUserKey = user.occupationId > 0 ? 'occupationId' : 'role'
       const mapObj = this[useUserKey + 'MapObj']
       return '/images/user/' + user.code + mapObj[user[useUserKey]] + '.png'
@@ -114,8 +126,8 @@ export default {
 .tool-page {
   width: 100vw;
   height: 100vh;
-  background: url('/images/left_menu_bg - 複製.jpg') center center;
-  background-size: contain;
+  background: url('/images/left_menu_bg - 複製.jpg') center center no-repeat;
+  background-size: 100vw;
   .list,
   .vs {
     height: 50vh;
@@ -137,28 +149,47 @@ export default {
   }
   .vs {
     width: 100%;
-    padding: 0 120px;
+    padding: 1px 120px;
     position: relative;
+    .title-area-bg,
     .title-area {
       position: absolute;
       left: calc(50% - 50px);
       width: 100px;
-      background: #d8b585;
-      top: 0;
+      top: 20px;
       z-index: 5;
-      padding: 30px 10px;
+      padding: 25px 10px;
+    }
+
+    .title-area-bg {
+      background: #d8b585;
+      height: calc(100% - 25px);
+    }
+    .title-area {
       div {
         font-family: '華康行楷體W5' !important;
         writing-mode: vertical-lr;
         font-size: 36px !important;
       }
     }
+    .vs-icon {
+      width: 160px;
+      height: 160px;
+      position: absolute;
+      bottom: 0;
+      left: calc(50% - 85px);
+      z-index: 6;
+      background-color: #f82e27;
+      mask: url('/images/vs.png') center center no-repeat;
+      mask-size: contain;
+    }
   }
   .group {
     width: 100%;
     border: 1px solid #d8b585;
-    margin-bottom: 30px;
+    margin-top: 20px;
     height: 95%;
+    border-radius: 15px;
   }
   .vs-block {
     position: relative;
@@ -167,10 +198,17 @@ export default {
     background: #00000086;
     overflow: hidden;
     font-family: '華康行楷體W5';
+    border-radius: 15px;
     .vs-user-area {
       position: relative;
       width: 100%;
       height: 100%;
+      &.no-one {
+        .img {
+          filter: drop-shadow(5px 0 #ccc) !important;
+          transform: translateX(0px) !important;
+        }
+      }
       .user-name {
         position: absolute;
         z-index: 3;
@@ -186,26 +224,23 @@ export default {
     }
     .country-name {
       position: absolute;
-      top: 0;
+      bottom: 0;
       z-index: 0;
       font-size: 120px;
-      height: 100%;
       width: 60%;
       right: 0;
       text-align: right;
-      padding-right: 10%;
+      padding-right: 8%;
     }
     .country-name-bg {
       position: absolute;
       top: 0;
       z-index: 1;
-      height: 70%;
-      width: 76%;
-      -webkit-clip-path: polygon(100% 0, 100% 100%, 0 0);
-      clip-path: polygon(100% 0, 100% 100%, 0 0);
+      height: 100%;
+      width: 100%;
+      clip-path: polygon(100% 45%, 0% 100%, 100% 100%);
       right: 0;
       text-align: right;
-      padding-right: 10%;
       opacity: 0.6;
     }
 
@@ -213,13 +248,12 @@ export default {
       border-right: 1px solid #d8b585;
       .country-name {
         left: 0;
-        padding-left: 10%;
+        padding-left: 8%;
         padding-right: 0;
         text-align: left;
       }
       .country-name-bg {
-        -webkit-clip-path: polygon(100% 0, 0 0, 0 100%);
-        clip-path: polygon(100% 0, 0 0, 0 100%);
+        clip-path: polygon(100% 100%, 0 45%, 0 100%);
         left: 0;
       }
       .user-name {
