@@ -181,7 +181,7 @@ export default {
       const vs = this.vsList
       if (vs.filter((e) => e.code != 'R000').length == 2) {
         // 確認有兩角色
-        if (vs[0].countryName == vs[1].countryName) {
+        if (vs[0].countryName == vs[1].countryName && this.enableList.length > 0 && this.enableList.filter(item => item.countryName !== vs[0].countryName).length > 0) {
           const yes = window.confirm('對戰雙方為同國家，是否重新配對?')
           if (yes) {
             return this.reRandomAgain('right').then(() => {
