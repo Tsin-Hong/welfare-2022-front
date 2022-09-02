@@ -1,66 +1,153 @@
 <template>
   <div class="tool-page">
-    <div class="vs">
-      <div class="group d-flex">
-        <div v-for="(item, index) in vsList" :key="index" class="vs-block">
-          <div class="vs-user-area" :class="[item.name == '武將' && 'no-one']">
-            <v-img
-              class="img"
-              :src="getUserImgUrl(item)"
-              contain
-              max-height="100%"
-            />
-            <div class="user-name">
-              {{ item.name }}
+    <div v-if="finished" class="final">
+      <div class="final-title">
+        <div class="main-title">{{ title }}</div>
+        <div class="sub-title">{{ subTitle }} 對戰配對結果</div>
+      </div>
+      <v-row class="p-24-px">
+        <v-col
+          class="p-6-px"
+          cols="3"
+          v-for="(items, indexs) in results"
+          :key="indexs"
+        >
+          <div class="vs">
+            <div class="group d-flex">
+              <div v-for="(code, index) in items" :key="index" class="vs-block">
+                <div
+                  class="vs-user-area"
+                  :class="[listObj[code].name == '武將' && 'no-one']"
+                >
+                  <v-img
+                    v-if="listObj[code] && !listObj[code].userImageDone"
+                    class="img"
+                    :src="'/images/user/' + listObj[code].code + '.png'"
+                    contain
+                    max-height="100%"
+                  />
+                  <v-img
+                    v-else
+                    class="img unImg"
+                    contain
+                    max-height="100%"
+                    :src="getUserImgUrl(listObj[code])"
+                  />
+                  <div class="user-name">
+                    {{ listObj[code].name }}
+                  </div>
+                </div>
+                <div class="w-50-pct">
+                  <div
+                    class="country-name"
+                    :style="{
+                      color: listObj[code].countryColor[0],
+                      'text-shadow':
+                        '0px 0px 10px ' + listObj[code].countryColor[1]
+                    }"
+                  >
+                    {{ listObj[code].countryName }}
+                  </div>
+                  <div
+                    class="country-name-bg"
+                    :style="{
+                      background: listObj[code].countryColor[0]
+                    }"
+                  ></div>
+                </div>
+              </div>
             </div>
+            <div class="title-area-bg"></div>
+            <div class="vs-icon"></div>
           </div>
-          <div class="w-50-pct">
+        </v-col>
+      </v-row>
+    </div>
+    <template v-else>
+      <div class="vs">
+        <div class="group d-flex">
+          <div v-for="(item, index) in vsList" :key="index" class="vs-block">
             <div
-              class="country-name"
-              :style="{
-                color: item.countryColor[0],
-                'text-shadow': '0px 0px 10px ' + item.countryColor[1]
-              }"
+              class="vs-user-area"
+              :class="[item.name == '武將' && 'no-one']"
             >
-              {{ item.countryName }}
+              <v-img
+                v-if="
+                  item.code === 'R000' || (item.code && item.userImageDone)
+                "
+                class="img"
+                :src="getUserImgUrl(item)"
+                contain
+                max-height="100%"
+              />
+              <v-img
+                v-else
+                class="img unImg"
+                contain
+                max-height="100%"
+                :src="'/images/user/' + item.code + '.png'"
+              />
+              <div class="user-name">
+                {{ item.name }}
+              </div>
             </div>
-            <div
-              class="country-name-bg"
-              :style="{
-                background: item.countryColor[0]
-              }"
-            ></div>
+            <div class="w-50-pct">
+              <div
+                class="country-name"
+                :style="{
+                  color: item.countryColor[0],
+                  'text-shadow': '0px 0px 10px ' + item.countryColor[1]
+                }"
+              >
+                {{ item.countryName }}
+              </div>
+              <div
+                class="country-name-bg"
+                :style="{
+                  background: item.countryColor[0]
+                }"
+              ></div>
+            </div>
+          </div>
+        </div>
+        <div class="title-area-bg"></div>
+        <div class="title-area d-flex">
+          <div class="title">{{ title }}</div>
+          <div class="times align-self-end">{{ subTitle }}</div>
+        </div>
+        <div class="vs-icon"></div>
+      </div>
+      <div class="list d-flex justify-center flex-wrap">
+        <div
+          v-for="(item, index) in list"
+          :key="index"
+          style="width: 8%; height: 100px"
+          class="img-area m-5-px"
+          :class="{
+            active: item.disable,
+            selected: animationSelectedCode == item.code
+          }"
+        >
+          <div class="w-100-pct">
+            <v-img
+              v-if="item.code && !item.userImageDone"
+              :src="'/images/user/' + item.code + '.png'"
+              :aspect-ratio="9 / 12"
+              class="pt-5 real-img"
+              style="top: -30px"
+            />
+            <v-img
+              v-else
+              class="pt-5 un-img"
+              :aspect-ratio="9 / 12"
+              style="top: -30px"
+              :src="getUserImgUrl(item)"
+              @error="onUserImgLoad(index)"
+            />
           </div>
         </div>
       </div>
-      <div class="title-area-bg"></div>
-      <div class="title-area d-flex">
-        <div class="title">官渡之戰 個人賽</div>
-        <div class="times align-self-end">第二輪</div>
-      </div>
-      <div class="vs-icon"></div>
-    </div>
-    <div class="list d-flex justify-center flex-wrap">
-      <div
-        v-for="(item, index) in list"
-        :key="index"
-        style="width: 5%"
-        class="img-area m-5-px"
-        :class="{
-          active: item.disable,
-          selected: animationSelectedCode == item.code
-        }"
-      >
-        <div class="w-100-pct">
-          <v-img
-            :src="getUserImgUrl(item)"
-            :aspect-ratio="9 / 12"
-            class="pt-5"
-            style="top: -30px"
-          />
-        </div>
-      </div>
-    </div>
+    </template>
   </div>
 </template>
 
@@ -70,6 +157,8 @@ export default {
 
   data() {
     return {
+      title: '官渡之戰 個人賽',
+      subTitle: '第二輪',
       roleMapObj: {
         1: '_1',
         2: '',
@@ -104,8 +193,17 @@ export default {
   },
 
   computed: {
+    finished() {
+      return this.results.length * 2 === this.list.length
+    },
     enableList() {
       return this.list.filter((e) => !e.disable)
+    },
+    listObj() {
+      return this.list.reduce(function (target, key, index) {
+        target[key.code] = key
+        return target
+      }, {})
     }
   },
 
@@ -117,6 +215,7 @@ export default {
         data[1].map((user) => {
           user.countryColor = user.countryColor.split(',')
           user.disable = false
+          user.userImageDone = true
           userMap[user.code] = user
         })
         this.list = data[0]
@@ -133,6 +232,9 @@ export default {
   },
 
   methods: {
+    onUserImgLoad(index) {
+      this.list[index].userImageDone = false
+    },
     resetVsList() {
       this.vsList = [this.defaultVsObj, this.defaultVsObj]
     },
@@ -181,7 +283,13 @@ export default {
       const vs = this.vsList
       if (vs.filter((e) => e.code != 'R000').length == 2) {
         // 確認有兩角色
-        if (vs[0].countryName == vs[1].countryName && this.enableList.length > 0 && this.enableList.filter(item => item.countryName !== vs[0].countryName).length > 0) {
+        if (
+          vs[0].countryName == vs[1].countryName &&
+          this.enableList.length > 0 &&
+          this.enableList.filter(
+            (item) => item.countryName !== vs[0].countryName
+          ).length > 0
+        ) {
           const yes = window.confirm('對戰雙方為同國家，是否重新配對?')
           if (yes) {
             return this.reRandomAgain('right').then(() => {
@@ -235,7 +343,7 @@ export default {
     },
     aniLoop(resolve, reject) {
       const _list = this.enableList
-      let times = 42
+      let times = 32
       let randCode = ''
       const loopFn = () => {
         let go = true
@@ -329,7 +437,6 @@ export default {
   }
   .img-area {
     position: relative;
-    height: 60px;
     border: 2px solid #777777;
     background: #fff;
     border-radius: 3px;
@@ -426,7 +533,6 @@ export default {
         right: 65%;
         font-size: 70px;
         writing-mode: vertical-lr;
-        -webkit-text-stroke: 1px black;
         text-shadow: 5px 5px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000,
           -1px 1px 0 #000, 1px 1px 0 #000;
       }
@@ -472,6 +578,65 @@ export default {
     .img {
       position: relative;
       z-index: 2;
+    }
+  }
+  .final {
+    .final-title {
+      text-align: center;
+      color: #d8b585;
+      .main-title,
+      .sub-title {
+        font-family: '華康行楷體W5';
+      }
+      .main-title {
+        font-size: 58px;
+      }
+      .sub-title {
+        font-size: 32px;
+      }
+    }
+    .group {
+      margin: 0;
+    }
+    .vs {
+      height: 120px;
+      width: 100%;
+      padding: 0;
+      .vs-icon {
+        width: 60px;
+        height: 60px;
+        top: 20%;
+        left: calc(50% - 30px);
+      }
+      .title-area-bg,
+      .title-area {
+        left: calc(50% - 8px);
+        width: 16px;
+        z-index: 5;
+        top: 0;
+        padding: 10px 10px;
+      }
+      .title-area-bg {
+        display: none;
+        height: calc(100% - 6px);
+      }
+      .title-area {
+        div {
+          font-size: 18px !important;
+        }
+      }
+      .vs-block {
+        .country-name {
+          font-size: 30px;
+        }
+      }
+      .vs-user-area {
+        .user-name {
+          bottom: 10%;
+          right: 65%;
+          font-size: 22px;
+        }
+      }
     }
   }
 }

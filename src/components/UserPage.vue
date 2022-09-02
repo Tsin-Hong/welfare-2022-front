@@ -27,7 +27,7 @@
               v-if="currUser.code && userImageDone"
               class="user-img"
               :src="getUserImgUrl()"
-              @load="onUserImgLoad"
+              @error="onUserImgLoad"
               alt=""
             />
             <img
@@ -682,7 +682,9 @@
                               </div>
                               <div v-if="battlefield" class="soldier-group">
                                 {{ battlefield[type + 'Soldier'][u_i]
-                                }}<span v-if="type == 'defence'">/1萬</span>
+                                }}<span v-if="type == 'defence' && false"
+                                  >/1萬</span
+                                >
                               </div>
                             </div>
                           </div>
@@ -1236,7 +1238,7 @@ export default Vue.extend({
 
   data: () => ({
     date: new Date(),
-    userImageDone: false,
+    userImageDone: true,
     battleTypeTab: 0,
     tab: 0,
     // inCurrStrongholdIndex: '',
@@ -1453,7 +1455,8 @@ export default Vue.extend({
       let max = this.currUser.soldier
       if (
         battlefield &&
-        this.currUser.countryId === battlefield.defenceCountryId
+        this.currUser.countryId === battlefield.defenceCountryId &&
+        false
       ) {
         max = 10000
       }
@@ -1483,7 +1486,6 @@ export default Vue.extend({
       const result = state.global.maps
         ? state.global.maps.map((m: any) => {
             const currSellers = !sellers[m.id] ? [] : sellers[m.id]
-            console.log(m.name, currSellers)
             const cid = m.ownCountryId
             const country = state.global.countries.find((e) => e.id === cid)
             const cname = country ? country.name : '空'
@@ -1811,7 +1813,7 @@ export default Vue.extend({
       return '/images/user/' + user.code + mapObj[user[useUserKey]] + '.png'
     },
     onUserImgLoad: function () {
-      this.userImageDone = true
+      this.userImageDone = false
     },
     clickBattleRecord: function (data) {
       this.battleDetailCurrId = data.battleId
@@ -1932,7 +1934,7 @@ export default Vue.extend({
     },
     setNow: function () {
       this.timer = setInterval(function (this) {
-        console.log(this)
+        // console.log(this)
         this.date = new Date()
       }, 1000)
     },
@@ -2210,7 +2212,7 @@ export default Vue.extend({
           if (
             soldier < this.battalSoldierMin ||
             soldier > this.currUser.soldier ||
-            (isDef && soldier > 10000)
+            (false && isDef && soldier > 10000)
           ) {
             this.ChangeApiResult({
               title: '',
