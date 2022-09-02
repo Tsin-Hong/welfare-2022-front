@@ -32,6 +32,7 @@
                     contain
                     max-height="100%"
                     :src="getUserImgUrl(listObj[code])"
+                    @error="onUserImgLoadA(code)"
                   />
                   <div class="user-name">
                     {{ listObj[code].name }}
@@ -72,9 +73,7 @@
               :class="[item.name == '武將' && 'no-one']"
             >
               <v-img
-                v-if="
-                  item.code === 'R000' || (item.code && item.userImageDone)
-                "
+                v-if="item.code === 'R000' || (item.code && item.userImageDone)"
                 class="img"
                 :src="getUserImgUrl(item)"
                 contain
@@ -232,6 +231,10 @@ export default {
   },
 
   methods: {
+    onUserImgLoadA(code) {
+      const index = this.list.findIndex((item) => item.code === code)
+      this.list[index].userImageDone = false
+    },
     onUserImgLoad(index) {
       this.list[index].userImageDone = false
     },
