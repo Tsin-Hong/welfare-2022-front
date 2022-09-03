@@ -837,10 +837,10 @@
                     <span
                       class="country-name"
                       :style="{
-                        color: battleRecordDetails.attackCountry.color[1],
-                        background: battleRecordDetails.attackCountry.color[0]
+                        color: battleRecordDetails.winnerCountryId === battleRecordDetails.defenceCountryId ? battleRecordDetails.defenceCountry.color[1] : battleRecordDetails.attackCountry.color[1],
+                        background: battleRecordDetails.winnerCountryId === battleRecordDetails.defenceCountryId ? battleRecordDetails.defenceCountry.color[0] : battleRecordDetails.attackCountry.color[0]
                       }"
-                      >{{ battleRecordDetails.attackCountry.name }}</span
+                      >{{ battleRecordDetails.winnerCountryId === battleRecordDetails.defenceCountryId ? battleRecordDetails.defenceCountry.name : battleRecordDetails.attackCountry.name }}</span
                     >
                     <!-- <span>{{ battleRecordDetails.attackSoldierTotal }}</span> -->
                   </div>
@@ -1684,6 +1684,7 @@ export default Vue.extend({
       if (detail.id != 0) {
         detail = this.setBattleFieldData(detail)
       }
+      console.log('battleRecordDetails: ', detail)
       return detail
     },
     battleRecords: function () {

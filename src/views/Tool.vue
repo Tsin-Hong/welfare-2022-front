@@ -268,6 +268,12 @@ export default {
         case 'Control':
           this.download()
           break
+        case 'Escape':
+          if (window.confirm('是否離開?')) {
+            window.localStorage.removeItem('isTool')
+            window.location.href = '/'
+          }
+          break
         default:
       }
     },
@@ -350,7 +356,7 @@ export default {
       let randCode = ''
       const loopFn = () => {
         let go = true
-        if (times <= 30) {
+        if (times <= 24) {
           go = times % 2 == 0
         } else if (times <= 10) {
           go = times % 5 == 0

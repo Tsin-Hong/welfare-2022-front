@@ -239,7 +239,7 @@
       "role": 3,
       "occupationId": 0,
       "name": "黃杰夫",
-      "countryName": "國家",
+      "countryName": "浪",
       "countryColor": "#ffffff,#a1a1a1"
     },
     {
@@ -655,7 +655,7 @@
       "role": 3,
       "occupationId": 0,
       "name": "陳安柏",
-      "countryName": "國家",
+      "countryName": "浪",
       "countryColor": "#ffffff,#a1a1a1"
     },
     {
@@ -703,7 +703,7 @@
       "role": 3,
       "occupationId": 0,
       "name": "廖尚恩",
-      "countryName": "國家",
+      "countryName": "浪",
       "countryColor": "#ffffff,#a1a1a1"
     },
     {
@@ -711,7 +711,7 @@
       "role": 3,
       "occupationId": 0,
       "name": "許山姆",
-      "countryName": "國家",
+      "countryName": "浪",
       "countryColor": "#ffffff,#a1a1a1"
     },
     {
@@ -820,11 +820,11 @@
     },
     {
       "code": "R356",
-      "role": 3,
+      "role": 2,
       "occupationId": 0,
       "name": "吳阿爾維斯",
-      "countryName": "國家",
-      "countryColor": "#ffffff,#a1a1a1"
+      "countryName": "空幹",
+      "countryColor": "#111111,#ffffff"
     },
     {
       "code": "R358",
@@ -871,7 +871,7 @@
       "role": 3,
       "occupationId": 0,
       "name": "林愛文",
-      "countryName": "國家",
+      "countryName": "浪",
       "countryColor": "#ffffff,#a1a1a1"
     },
     {
