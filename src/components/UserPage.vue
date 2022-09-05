@@ -23,11 +23,11 @@
       <div class="user-area">
         <div class="user-info">
           <div class="img-area d-inline-block" @click="onClickHeadImage">
-            <img
-              v-if="currUser.code && userImageDone"
+            <!-- <img
+              v-if="currUser.code && !userFailedImageHashMap[currUser.code]"
               class="user-img"
               :src="getUserImgUrl()"
-              @error="onUserImgLoad"
+              @error="onUserImgLoadFailed(currUser.code, $event)"
               alt=""
             />
             <img
@@ -35,7 +35,8 @@
               class="user-img"
               :src="'/images/user/' + user.code + '.png'"
             />
-            <img class="img-border" src="/images/人物頭像框.png" alt="" />
+            <img class="img-border" src="/images/人物頭像框.png" alt="" /> -->
+            <UserHeadImage :userCode="currUser.code" :showBorder="true" />
           </div>
           <div class="info-area">
             <div class="info-content">
@@ -636,11 +637,12 @@
                                     battlefield[type + 'Country'].color[0]
                                 }"
                               ></div>
-                              <img
+                              <UserHeadImage v-if="user" :userCode="user.code" :showBorder="false" />
+                              <!-- <img
                                 v-if="user"
                                 :src="'/images/user/' + user.code + '.png'"
                                 alt=""
-                              />
+                              /> -->
                             </div>
                             <div class="bd">
                               <img :src="'/images/border03.png'" alt="" />
@@ -708,12 +710,13 @@
                             background: battlefield[key].country.color[0]
                           }"
                         ></div>
-                        <img
+                        <!-- <img
                           :src="
                             '/images/user/' + battlefield[key].code + '.png'
                           "
                           alt=""
-                        />
+                        /> -->
+                        <UserHeadImage :userCode="battlefield[key].code" :showBorder="false" />
                       </div>
                       <div class="bd">
                         <img :src="'/images/border03.png'" alt="" />
@@ -897,11 +900,12 @@
                                       .color[0]
                                 }"
                               ></div>
-                              <img
+                              <!-- <img
                                 v-if="user"
                                 :src="'/images/user/' + user.code + '.png'"
                                 alt=""
-                              />
+                              /> -->
+                              <UserHeadImage :userCode="user.code" :showBorder="false"/>
                             </div>
                             <div class="bd">
                               <img :src="'/images/border03.png'" alt="" />
@@ -963,14 +967,15 @@
                               battleRecordDetails[key].country.color[0]
                           }"
                         ></div>
-                        <img
+                        <!-- <img
                           :src="
                             '/images/user/' +
                             battleRecordDetails[key].code +
                             '.png'
                           "
                           alt=""
-                        />
+                        /> -->
+                        <UserHeadImage :userCode="battleRecordDetails[key].code" :showBorder="false"/>
                       </div>
                       <div class="bd">
                         <img :src="'/images/border03.png'" alt="" />
@@ -1230,6 +1235,7 @@ import Vue from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import DailogGCSection from '@/components/DailogGCSelection.vue'
 import DailogItem from '@/components/DailogItem.vue'
+import UserHeadImage from '@/components/UserHeadImage.vue'
 
 export default Vue.extend({
   name: 'UserPage',
@@ -1350,7 +1356,8 @@ export default Vue.extend({
     },
     setWiner: {},
     setGame: {},
-    battleDetailCurrId: 0
+    battleDetailCurrId: 0,
+    userFailedImageHashMap: {},
   }),
 
   computed: {
@@ -1806,12 +1813,12 @@ export default Vue.extend({
       'actUseItem',
       'getWarRecord'
     ]),
-    getUserImgUrl: function () {
-      const user = this.currUser
-      const useUserKey = user.occupationId > 0 ? 'occupationId' : 'role'
-      const mapObj = this[useUserKey + 'MapObj']
-      return '/images/user/' + user.code + mapObj[user[useUserKey]] + '.png'
-    },
+    // getUserImgUrl: function () {
+    //   const user = this.currUser
+    //   const useUserKey = user.occupationId > 0 ? 'occupationId' : 'role'
+    //   const mapObj = this[useUserKey + 'MapObj']
+    //   return '/images/user/' + user.code + mapObj[user[useUserKey]] + '4.png'
+    // },
     onUserImgLoad: function () {
       this.userImageDone = false
     },
@@ -2406,7 +2413,8 @@ export default Vue.extend({
 
   components: {
     DailogGCSection,
-    DailogItem
+    DailogItem,
+    UserHeadImage
   }
 })
 </script>
