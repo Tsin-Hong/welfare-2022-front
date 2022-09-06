@@ -905,7 +905,7 @@
                                 :src="'/images/user/' + user.code + '.png'"
                                 alt=""
                               /> -->
-                              <UserHeadImage :userCode="user.code" :showBorder="false"/>
+                              <UserHeadImage v-if="user && user.code" :userCode="user.code" :showBorder="false"/>
                             </div>
                             <div class="bd">
                               <img :src="'/images/border03.png'" alt="" />
@@ -935,7 +935,7 @@
                                 class="soldier-group"
                               >
                                 {{ battleRecordDetails[type + 'Soldier'][u_i] }}
-                                <span style="color: red">
+                                <span style="color: red; position: absolute; top: 30%; left: 110px; font-size: 18px;">
                                   -
                                   {{
                                     battleRecordDetails[type + 'SoldierLoses'][
