@@ -1464,7 +1464,7 @@ export default Vue.extend({
         battlefield &&
         this.currUser.countryId === battlefield.defenceCountryId
       ) {
-        max = 10000
+        max = Math.min(max, 10000)
       }
       return max
     },
