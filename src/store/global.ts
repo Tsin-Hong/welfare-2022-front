@@ -25,6 +25,8 @@ const global = {
     itemSellerMap: {/* name: mapId */},
     itemShop: [],
     selectedItemId: 0,
+    datetime: null,
+    keepAliveNum: 0,
     io: null
   },
   mutations: {
@@ -64,6 +66,9 @@ const global = {
             state.itemSellerMap = payload.itemSellerMap
             // console.log('itemSellerMap: ', state.itemSellerMap)
           }
+          if (payload.datetime) {
+            state.datetime = new Date(payload.datetime)
+          }
           valication.cacheGlobal(state)
           break
         case enums.ACT_GET_GLOBAL_CHANGE_DATA: {
@@ -88,6 +93,9 @@ const global = {
         } break
         case enums.ACT_GET_GLOBAL_USERS_INFO: {
           state.users = parser.parseArraiesToObjects(payload.users, enums.UserGlobalAttributes)
+          if (payload.datetime) {
+            state.datetime = new Date(payload.datetime);
+          }
         } break
         case enums.ACT_NOTIFICATION: {
           const newNoti = [new Date(payload[0]), payload[1]]
@@ -149,6 +157,12 @@ const global = {
         case enums.ACT_GET_ITEM_SELLER: {
           state.itemSellerMap = payload.itemSellerMap;
         } break
+        case enums.ACT_GET_TIME: {
+          if (payload.datetime) {
+            state.datetime = new Date(payload.datetime);
+            state.keepAliveNum = 0;
+          }
+        } break
         default:
       }
     },
@@ -166,6 +180,13 @@ const global = {
         })
       } else {
         console.log('global mutation failed: ', payload)
+      }
+    },
+    addDatetimeSeconds: (state: any, seconds = 1) => {
+      // console.log('state.datetime: ', state.datetime);
+      if (state.datetime) {
+        state.datetime = new Date(state.datetime.getTime() + (seconds*1000));
+        state.keepAliveNum = state.keepAliveNum + 1;
       }
     }
   },

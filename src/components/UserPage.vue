@@ -54,7 +54,7 @@
                 <img src="/images/旗幟_內.png" alt="" />
               </div>
               <div class="info-block">
-                <div class="date">{{ today[0] }}{{ today[1] }}</div>
+                <div class="date">{{ today }}</div>
                 <div class="user">
                   <div class="block block-1">
                     <span class="name w-33-pct"
@@ -446,7 +446,7 @@
                 >
                   <v-list-item-content>
                     <v-list-item-subtitle
-                      v-text="numCN[i]"
+                      v-text="numCN[i+1]"
                     ></v-list-item-subtitle>
                     <v-list-item-title
                       class="fz-20-px"
@@ -1029,7 +1029,7 @@
               <span>{{ selectedMapInfo.name }}</span>
               <span
                 v-if="selectedMapInfo.buildingTime"
-                style="padding-left: 20px; font-size: 0.4em"
+                style="padding-left: 20px; font-size: 0.8em"
                 >🔨{{ selectedMapInfo.buildingTime }}</span
               >
             </v-toolbar-title>
@@ -1243,7 +1243,7 @@ export default Vue.extend({
   props: ['initData'],
 
   data: () => ({
-    date: new Date(),
+    localDate: new Date(),
     userImageDone: true,
     battleTypeTab: 0,
     tab: 0,
@@ -1264,6 +1264,7 @@ export default Vue.extend({
     curStronghold: {},
     constructionName: enums.CHINESE_CONSTRUCTION_NAMES,
     numCN: [
+      '零',
       '壹',
       '貳',
       '叁',
@@ -1279,6 +1280,7 @@ export default Vue.extend({
       '壹拾叁',
       '壹拾肆'
     ],
+    skyearth: '子丑寅卯辰巳午未申酉戌亥'.split(''),
     selectedItem: 2,
     leftList: [
       {
@@ -1441,6 +1443,7 @@ export default Vue.extend({
           }
         }
       }
+      newBattles.sort((a,b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
       return newBattles
     },
     battalSoldierMin: function () {
@@ -1682,9 +1685,13 @@ export default Vue.extend({
       return user
     },
     today: function () {
-      const curr = this.$moment()
-      const days = ['日', '一', '二', '三', '四', '五', '六']
-      return [curr.format('YYYY年 MM月 DD日 星期'), days[curr.day()]]
+      // 時辰 = 2小時  一刻 = 15分  一炷香 = 5分
+      // const curr = this.$moment(this.global.datetime)
+      return this.getChineseDatetime(this.date, true, true) + (this.global.datetime ? '' : ' (客戶端時間)')
+    },
+    date: function() {
+      const _ = this.global.datetime
+      return _ && _.getDay ? _ : this.localDate
     },
     battleRecordDetails: function () {
       let detail = JSON.parse(JSON.stringify(this.global.battleRecordDetails))
@@ -1714,7 +1721,8 @@ export default Vue.extend({
         const map = this.global.maps.find((e) => e.id == record.mapId)
         record.mapName = map ? map.name : ''
 
-        record.date = this.$moment(record.timestamp).format('YYYY-MM-DD HH:mm')
+        record.date = this.$moment(record.timestamp).format('武朝末年 MM月 DD日 HH:mm')
+        // record.date = this.getChineseDatetime(record.timestamp)
       }
       return records
     },
@@ -1776,6 +1784,7 @@ export default Vue.extend({
 
   mounted: function () {
     this._mouse_dataset = {}
+    this.setTimer()
     // localStorage.setItem('show_country_details', 'true')
   },
 
@@ -1819,8 +1828,34 @@ export default Vue.extend({
     //   const mapObj = this[useUserKey + 'MapObj']
     //   return '/images/user/' + user.code + mapObj[user[useUserKey]] + '4.png'
     // },
-    onUserImgLoad: function () {
-      this.userImageDone = false
+    // onUserImgLoad: function () {
+    //   this.userImageDone = false
+    // },
+    getChineseDatetime: function (datetime, appendQuarter = true, appendFive = false) {
+      const nc = this.numCN
+      const skyearth = this.skyearth
+      const date = new Date(datetime)
+      const month = nc[date.getMonth()+1]
+      const days = String(date.getDate()).split('').filter(e => e != '0').map((idx) => {
+        return nc[idx]
+      })
+      const hour = date.getHours()
+      const minute = date.getMinutes()
+      const chiNumHour = Math.floor(((hour + 1) % 24) / 2)
+      const chHour = skyearth[chiNumHour]
+      let result = `武朝末年 ${month}月 ${days.join(nc[10])}日 ${chHour}時`
+      if (appendQuarter) {
+        const chQuarters = ['初', '一', '二',  '三']
+        const quarter = Math.floor(minute / 15)
+        result += hour % 2 == 0 ? ' 正' : ' 初'
+        result += `${chQuarters[quarter]}刻`
+      }
+      if (appendFive) {
+        const quarterLeft = minute % 15
+        const fires = Math.floor(quarterLeft / 5)
+        result += '🧨'.repeat(fires)
+      }
+      return result
     },
     clickBattleRecord: function (data) {
       this.battleDetailCurrId = data.battleId
@@ -1939,11 +1974,13 @@ export default Vue.extend({
         this.ChangeApiCheck({ id: 9004, key: '', index: -1 })
       }
     },
-    setNow: function () {
-      this.timer = setInterval(function (this) {
-        // console.log(this)
-        this.date = new Date()
-      }, 1000)
+    setTimer: function () {
+      if (this.timer) {
+        clearInterval(this.timer)
+      }
+      this.timer = setInterval(() => {
+        this.localDate = new Date()
+      }, 30* 1000)
     },
     createBattle: function () {
       if (this.goToBattleTime == -1) {

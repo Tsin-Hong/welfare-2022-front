@@ -15,6 +15,8 @@ import Login from '@/views/Login.vue'
 import Home from '@/views/Home.vue'
 import Tool from '@/views/Tool.vue'
 
+const offlineTimeoutSecond = 20
+
 export default Vue.extend({
   name: 'App',
   components: {
@@ -28,6 +30,7 @@ export default Vue.extend({
   },
   mounted: function () {
     this.changePage()
+    this.checkKeepAliveTimer()
   },
   watch: {
     'client.tempName': function (val, oldVal) {
@@ -39,7 +42,21 @@ export default Vue.extend({
     }
   },
   methods: {
-    ...mapMutations(['ChangeState']),
+    ...mapMutations(['ChangeState', 'addDatetimeSeconds']),
+    checkKeepAliveTimer() {
+      if (typeof window['secondInterval'] == 'undefined') {
+        window['secondInterval'] = window.setInterval(() => {
+          if (this.global.keepAliveNum > offlineTimeoutSecond) {
+            window.clearInterval(window['secondInterval']);
+            window.alert('已離線超時');
+            localStorage.removeItem('_token_')
+            window.location.reload()
+          } else if (this.global.datetime) {
+            this.addDatetimeSeconds(1);
+          }
+        }, 1000);
+      }
+    },
     changePage: function () {
       const token = window.localStorage.getItem('_token_')
       const isTool = localStorage.getItem('isTool')

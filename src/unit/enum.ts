@@ -43,6 +43,7 @@ const enums = {
   ACT_GET_ITEMS: 43,
   ACT_GET_ITEM_SELLER: 44,
   ACT_BUY_ITEM: 45,
+  ACT_GET_TIME: 46,
   UserGlobalAttributes: ['id', 'code', 'nickname', 'countryId', 'loyalty', 'loyalUserId', 'contribution', 'occupationId', 'role', 'mapNowId', 'soldier', 'captiveDate', 'actPointMax'],
   MapsGlobalAttributes: ['id', 'name', 'x', 'y', 'route', 'cityId', 'ownCountryId', 'gameType', 'adventureId'],
   CityGlobalAttributes: ['id', 'money', 'addResource', 'timeBeAttacked', 'jsonConstruction'],
