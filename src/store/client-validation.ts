@@ -221,15 +221,22 @@ function isExistGame(gameId, global) {
 function availableSetGameInBattle(gameId, mapId, global) {
   const game = global.gameMap[gameId];
   const battle = global.battlefieldMap[mapId];
-  const now = new Date();
+  const now = global.datetime || new Date();
   now.setDate(now.getDate()+3);
-  if (now > new Date(battle.timestamp)) {
+  if (now >= new Date(battle.timestamp)) {
       return '戰役超過備戰期間';
   }
   const vsAry = [battle.atkUserIds.filter((u: number)=> u > 0).length, battle.defUserIds.filter((u: number) => u > 0).length];
   vsAry.sort((a,b) => a-b);
   const vs = `b${vsAry.join('v')}`;
   return battle.gameId == 0 && game[vs] ? '' : '不予許設置.';
+}
+
+function availableBattleTime(mapId, global) {
+  const battle = global.battlefieldMap[mapId];
+  const now = global.datetime || new Date();
+  now.setDate(now.getDate()+3);
+  return (now < new Date(battle.timestamp))  ? '' : '戰役超過備戰期間';
 }
 
 function isAllowedRecurit(user, global) {
@@ -293,7 +300,7 @@ export default {
         const battleId = payload.battleId;
         const position = payload.position;
         return (position <= 3 ? isNoTarget(user) || haveMoney(user, 100) || havePoint(user, mapId == user.mapNowId ? 0 : 1) : haveNoWorking(user, global) || havePoint(user, 1)) || hasBattle(mapId, battleId, global)
-            || isEmptyBattlePosition(user, position, mapId, global) || isNotInvolvedBattle(user, position, mapId, global) || isNotBeCaptived(user)
+            || isEmptyBattlePosition(user, position, mapId, global) || isNotInvolvedBattle(user, position, mapId, global) || isNotBeCaptived(user) || availableBattleTime(mapId, global)
       }
       case enums.ACT_BATTLE_JUDGE: {
         const mapId = payload.mapId;
