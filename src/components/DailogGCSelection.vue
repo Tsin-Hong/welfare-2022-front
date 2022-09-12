@@ -22,23 +22,33 @@
                                 <ul class="gc-selection-inputs">
                                     <li v-for="(inp, inpidx) in dd.inputs" :key="inp.label">
                                         <label>{{inp.label}} [{{inp.min}} - {{inp.max}}] : </label>
-                                        <v-text-field
-                                            v-model="tmpinputs[inpidx]"
-                                            class="mt-0 pt-0"
-                                            hide-details
-                                            single-line
-                                            :max="inp.max"
-                                            :min="inp.min"
-                                            type="number"
-                                            style="width: 80px; display: inline-block"
-                                        ></v-text-field>
-                                        <v-slider
-                                            v-model="tmpinputs[inpidx]"
-                                            class="align-center"
-                                            :max="inp.max"
-                                            :min="inp.min"
-                                            hide-details
-                                        ></v-slider>
+                                        <template v-if="inp.type=='number'">
+                                            <v-text-field
+                                                v-model="tmpinputs[inpidx]"
+                                                class="mt-0 pt-0"
+                                                hide-details
+                                                single-line
+                                                :max="inp.max"
+                                                :min="inp.min"
+                                                type="number"
+                                                style="width: 80px; display: inline-block"
+                                            ></v-text-field>
+                                            <v-slider
+                                                v-model="tmpinputs[inpidx]"
+                                                class="align-center"
+                                                :max="inp.max"
+                                                :min="inp.min"
+                                                hide-details
+                                            ></v-slider>
+                                        </template>
+                                        <template v-if="inp.type=='select'">
+                                            <select v-model="tmpinputs[inpidx]" style="color: #fff; backgroundColor: #333; cursor: pointer;">
+                                                <option :value="0">無</option>
+                                                <option v-for="(item) in inp.options()" :key="item.value" :value="item.value">
+                                                    {{item.display}}
+                                                </option>
+                                            </select>
+                                        </template>
                                     </li>
                                 </ul>
                             </div>

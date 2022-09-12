@@ -673,6 +673,7 @@ export default Vue.extend({
       }
     },
     getShareData: function () {
+      this.$store.dispatch('getItems');
       const result = []
       const myself = this.user
       const users = this.global.users
@@ -695,7 +696,14 @@ export default Vue.extend({
         text: '欲配給的數量',
         inputs: [
           { label: '黃金', type: 'number', max: myself.money, min: 0 },
-          { label: '兵力', type: 'number', max: myself.soldier, min: 0 }
+          { label: '兵力', type: 'number', max: myself.soldier, min: 0 },
+          { label: '錦囊', type: 'select', options: () => {
+            const itemMap = this.global.itemMap
+            const itemIds = this.global.items.map(item => item.itemId)
+            return Object.values(itemMap).filter((item: any) => itemIds.includes(item.id)).map((item: any) => {
+              return {value: item.id, display: item.name}
+            })
+          } }
         ]
       })
       return result
@@ -704,11 +712,14 @@ export default Vue.extend({
       // console.log('handleShare: ', selectedValues)
       const money = selectedValues[1][0]
       const soldier = selectedValues[1][1]
+      const itemId = selectedValues[1][2]
+      const item = this.global.itemMap[itemId]
+      const itemName = item && item.name ? item.name : '無'
       const yes = window.confirm(
-        `確定配給 [ ${selectedValues[0].nickname} ] 黃金: ${money}, 士兵: ${soldier} 嗎?`
+        `確定配給 [ ${selectedValues[0].nickname} ] 黃金: ${money}, 士兵: ${soldier}, 錦囊: ${itemName} 嗎?`
       )
       if (yes) {
-        this.actShare({ userId: selectedValues[0].id, money, soldier })
+        this.actShare({ userId: selectedValues[0].id, money, soldier, itemId })
       }
     },
     getRecuritData: function () {

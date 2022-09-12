@@ -40,7 +40,10 @@ const info = {
             }  break
             case enums.ACT_SEARCH_WILD: {
               const adds = received.payload.money - content.rootState.user.money
-              msg = `探索成功! 找到了【黃金】X ${adds}`
+              msg = `探索成功! 找到了【黃金】X ${adds} `
+              if (received.payload.success) {
+                msg += ` 發現了隱士 【 ${received.payload.name} 】`
+              }
             } break
             case enums.ACT_INCREASE_SOLDIER: {
               const adds = received.payload.soldier - content.rootState.user.soldier
