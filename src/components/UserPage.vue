@@ -54,7 +54,15 @@
                 <img src="/images/旗幟_內.png" alt="" />
               </div>
               <div class="info-block">
-                <div class="date">{{ today }}</div>
+                <div class="date">
+                  {{ today }}
+                  <v-icon
+                    class="fz-16-px"
+                    dark
+                    title="一時辰 分八個刻，初初刻、初一刻、初二刻、初三刻、正初刻、正一刻、正二刻、正三刻"
+                    >mdi-progress-question</v-icon
+                  >
+                </div>
                 <div class="user">
                   <div class="block block-1">
                     <span class="name w-33-pct"
@@ -446,7 +454,7 @@
                 >
                   <v-list-item-content>
                     <v-list-item-subtitle
-                      v-text="numCN[i+1]"
+                      v-text="numCN[i + 1]"
                     ></v-list-item-subtitle>
                     <v-list-item-title
                       class="fz-20-px"
@@ -637,7 +645,11 @@
                                     battlefield[type + 'Country'].color[0]
                                 }"
                               ></div>
-                              <UserHeadImage v-if="user" :userCode="user.code" :showBorder="false" />
+                              <UserHeadImage
+                                v-if="user"
+                                :userCode="user.code"
+                                :showBorder="false"
+                              />
                               <!-- <img
                                 v-if="user"
                                 :src="'/images/user/' + user.code + '.png'"
@@ -684,9 +696,7 @@
                               </div>
                               <div v-if="battlefield" class="soldier-group">
                                 {{ battlefield[type + 'Soldier'][u_i]
-                                }}<span v-if="type == 'defence'"
-                                  >/1萬</span
-                                >
+                                }}<span v-if="type == 'defence'">/1萬</span>
                               </div>
                             </div>
                           </div>
@@ -716,7 +726,10 @@
                           "
                           alt=""
                         /> -->
-                        <UserHeadImage :userCode="battlefield[key].code" :showBorder="false" />
+                        <UserHeadImage
+                          :userCode="battlefield[key].code"
+                          :showBorder="false"
+                        />
                       </div>
                       <div class="bd">
                         <img :src="'/images/border03.png'" alt="" />
@@ -840,10 +853,23 @@
                     <span
                       class="country-name"
                       :style="{
-                        color: battleRecordDetails.winnerCountryId === battleRecordDetails.defenceCountryId ? battleRecordDetails.defenceCountry.color[1] : battleRecordDetails.attackCountry.color[1],
-                        background: battleRecordDetails.winnerCountryId === battleRecordDetails.defenceCountryId ? battleRecordDetails.defenceCountry.color[0] : battleRecordDetails.attackCountry.color[0]
+                        color:
+                          battleRecordDetails.winnerCountryId ===
+                          battleRecordDetails.defenceCountryId
+                            ? battleRecordDetails.defenceCountry.color[1]
+                            : battleRecordDetails.attackCountry.color[1],
+                        background:
+                          battleRecordDetails.winnerCountryId ===
+                          battleRecordDetails.defenceCountryId
+                            ? battleRecordDetails.defenceCountry.color[0]
+                            : battleRecordDetails.attackCountry.color[0]
                       }"
-                      >{{ battleRecordDetails.winnerCountryId === battleRecordDetails.defenceCountryId ? battleRecordDetails.defenceCountry.name : battleRecordDetails.attackCountry.name }}</span
+                      >{{
+                        battleRecordDetails.winnerCountryId ===
+                        battleRecordDetails.defenceCountryId
+                          ? battleRecordDetails.defenceCountry.name
+                          : battleRecordDetails.attackCountry.name
+                      }}</span
                     >
                     <!-- <span>{{ battleRecordDetails.attackSoldierTotal }}</span> -->
                   </div>
@@ -905,7 +931,11 @@
                                 :src="'/images/user/' + user.code + '.png'"
                                 alt=""
                               /> -->
-                              <UserHeadImage v-if="user && user.code" :userCode="user.code" :showBorder="false"/>
+                              <UserHeadImage
+                                v-if="user && user.code"
+                                :userCode="user.code"
+                                :showBorder="false"
+                              />
                             </div>
                             <div class="bd">
                               <img :src="'/images/border03.png'" alt="" />
@@ -935,7 +965,15 @@
                                 class="soldier-group"
                               >
                                 {{ battleRecordDetails[type + 'Soldier'][u_i] }}
-                                <span style="color: red; position: absolute; top: 30%; left: 110px; font-size: 18px;">
+                                <span
+                                  style="
+                                    color: red;
+                                    position: absolute;
+                                    top: 30%;
+                                    left: 110px;
+                                    font-size: 18px;
+                                  "
+                                >
                                   -
                                   {{
                                     battleRecordDetails[type + 'SoldierLoses'][
@@ -975,7 +1013,10 @@
                           "
                           alt=""
                         /> -->
-                        <UserHeadImage :userCode="battleRecordDetails[key].code" :showBorder="false"/>
+                        <UserHeadImage
+                          :userCode="battleRecordDetails[key].code"
+                          :showBorder="false"
+                        />
                       </div>
                       <div class="bd">
                         <img :src="'/images/border03.png'" alt="" />
@@ -1359,7 +1400,7 @@ export default Vue.extend({
     setWiner: {},
     setGame: {},
     battleDetailCurrId: 0,
-    userFailedImageHashMap: {},
+    userFailedImageHashMap: {}
   }),
 
   computed: {
@@ -1443,7 +1484,10 @@ export default Vue.extend({
           }
         }
       }
-      newBattles.sort((a,b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+      newBattles.sort(
+        (a, b) =>
+          new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      )
       return newBattles
     },
     battalSoldierMin: function () {
@@ -1687,9 +1731,12 @@ export default Vue.extend({
     today: function () {
       // 時辰 = 2小時  一刻 = 15分  一炷香 = 5分
       // const curr = this.$moment(this.global.datetime)
-      return this.getChineseDatetime(this.date, true, true) + (this.global.datetime ? '' : ' (客戶端時間)')
+      return (
+        this.getChineseDatetime(this.date, true, true) +
+        (this.global.datetime ? '' : ' (客戶端時間)')
+      )
     },
-    date: function() {
+    date: function () {
       const _ = this.global.datetime
       return _ && _.getDay ? _ : this.localDate
     },
@@ -1721,7 +1768,9 @@ export default Vue.extend({
         const map = this.global.maps.find((e) => e.id == record.mapId)
         record.mapName = map ? map.name : ''
 
-        record.date = this.$moment(record.timestamp).format('武朝末年 MM月 DD日 HH:mm')
+        record.date = this.$moment(record.timestamp).format(
+          '武朝末年 MM月 DD日 HH:mm'
+        )
         // record.date = this.getChineseDatetime(record.timestamp)
       }
       return records
@@ -1831,21 +1880,28 @@ export default Vue.extend({
     // onUserImgLoad: function () {
     //   this.userImageDone = false
     // },
-    getChineseDatetime: function (datetime, appendQuarter = true, appendFive = false) {
+    getChineseDatetime: function (
+      datetime,
+      appendQuarter = true,
+      appendFive = false
+    ) {
       const nc = this.numCN
       const skyearth = this.skyearth
       const date = new Date(datetime)
-      const month = nc[date.getMonth()+1]
-      const days = String(date.getDate()).split('').filter(e => e != '0').map((idx) => {
-        return nc[idx]
-      })
+      const month = nc[date.getMonth() + 1]
+      const days = String(date.getDate())
+        .split('')
+        .filter((e) => e != '0')
+        .map((idx) => {
+          return nc[idx]
+        })
       const hour = date.getHours()
       const minute = date.getMinutes()
       const chiNumHour = Math.floor(((hour + 1) % 24) / 2)
       const chHour = skyearth[chiNumHour]
       let result = `武朝末年 ${month}月 ${days.join(nc[10])}日 ${chHour}時`
       if (appendQuarter) {
-        const chQuarters = ['初', '一', '二',  '三']
+        const chQuarters = ['初', '一', '二', '三']
         const quarter = Math.floor(minute / 15)
         result += hour % 2 == 0 ? ' 正' : ' 初'
         result += `${chQuarters[quarter]}刻`
@@ -1980,7 +2036,7 @@ export default Vue.extend({
       }
       this.timer = setInterval(() => {
         this.localDate = new Date()
-      }, 30* 1000)
+      }, 30 * 1000)
     },
     createBattle: function () {
       if (this.goToBattleTime == -1) {
