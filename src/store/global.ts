@@ -458,6 +458,9 @@ const global = {
         if (typeof filterFn == 'function') {
           filterMaps = filterMaps.filter(filterFn)
         }
+        if (itemdata.staticKey == '_STRATEGY_SNEAK_' || itemdata.staticKey == '_STRATEGY_SEIZE_') {
+          filterMaps = filterMaps.filter(mid => !state.battlefieldMap[mid])
+        }
         return filterMaps
       }
     },
