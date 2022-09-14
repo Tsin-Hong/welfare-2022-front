@@ -14,6 +14,14 @@
                 label="員編"
                 required
               ></v-text-field>
+              <v-chip
+                v-if="error.staffCode.includes(account)"
+                class="mb-2 red red--text"
+                label
+                outlined
+              >
+                因違反福委網站安全性規範，即刻起禁用至 {{ error.endDate }} 恢復。
+              </v-chip>
               <v-text-field
                 v-model="password"
                 label="密碼"
@@ -66,10 +74,22 @@ export default {
     passwordShow: false,
     passwordCheckShow: false,
     password: '',
-    passwordCheck: ''
+    passwordCheck: '',
+    error: {
+      staffCode: [],
+      endDate: ''
+    }
   }),
   computed: {
     ...mapState(['user', 'client'])
+  },
+  created: function () {
+    fetch('./data/errorStaff.json')
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data)
+        this.error = data
+      })
   },
   updated: function () {
     this.checkLoginStaus()
@@ -111,7 +131,10 @@ export default {
     },
     showTool: function () {
       const { toolMen, toolKey } = this.client
-      return (toolMen.includes(this.account) && toolKey === this.password) || localStorage.getItem('isTool')
+      return (
+        (toolMen.includes(this.account) && toolKey === this.password) ||
+        localStorage.getItem('isTool')
+      )
     },
     tool: function () {
       if (this.showTool()) {

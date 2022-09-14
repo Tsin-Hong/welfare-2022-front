@@ -59,54 +59,55 @@
                   <v-icon
                     class="fz-16-px"
                     dark
-                    title="一時辰 分八個刻，初初刻、初一刻、初二刻、初三刻、正初刻、正一刻、正二刻、正三刻"
-                    >mdi-progress-question</v-icon
+                    title="一時辰 分八個刻，初初刻、初一刻、初二刻、初三刻、正初刻、正一刻、正二刻、正三刻；一刻鐘為三根蠟燭，第三根即進位不顯示。"
                   >
+                    mdi-progress-question
+                  </v-icon>
                 </div>
                 <div class="user">
                   <div class="block block-1">
-                    <span class="name w-33-pct"
-                      >{{ user.nickname }}
-                      <i class="role_type" v-if="currUser.loyalUserId !== 0"
-                        >元老</i
-                      ></span
-                    ><span class="type w-33-pct"
-                      >{{ currUser.roleName
-                      }}<i
+                    <span class="name w-33-pct">
+                      {{ user.nickname }}
+                      <i class="role_type" v-if="currUser.loyalUserId !== 0">
+                        元老
+                      </i>
+                    </span>
+                    <span class="type w-33-pct">
+                      {{ currUser.roleName }}
+                      <i
                         class="role_type"
                         v-if="
                           currUser.occupationId > 0 &&
                           global.occupationMap[currUser.occupationId]
                         "
-                        >{{
-                          global.occupationMap[currUser.occupationId].name
-                        }}</i
-                      ></span
-                    >
-                    <span class="class-1 w-33-pct"
-                      >{{ currUser.mapNowName }}
+                      >
+                        {{ global.occupationMap[currUser.occupationId].name }}
+                      </i>
+                    </span>
+                    <span class="class-1 w-33-pct">
+                      {{ currUser.mapNowName }}
                       <v-btn
                         x-small
                         elevation="2"
                         color="primary"
                         @click="goToXY(currUser.mapNowIndex)"
                         >前往</v-btn
-                      ></span
-                    >
+                      >
+                    </span>
                   </div>
                   <div class="block resource">
-                    <span class="class-1 w-33-pct"
-                      >兵力 {{ user.soldier }}</span
-                    >
+                    <span class="class-1 w-33-pct">
+                      兵力 {{ user.soldier }}
+                    </span>
                     <span class="class-1 w-33-pct">黃金 {{ user.money }}</span>
                   </div>
                   <div class="block block-3">
-                    <span class="class-1 w-33-pct"
-                      >貢獻 {{ user.contribution }}</span
-                    >
-                    <span class="class-1 w-33-pct"
-                      >行動力 {{ user.actPoint }}</span
-                    >
+                    <span class="class-1 w-33-pct">
+                      貢獻 {{ user.contribution }}
+                    </span>
+                    <span class="class-1 w-33-pct">
+                      行動力 {{ user.actPoint }}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -2039,6 +2040,7 @@ export default Vue.extend({
       }, 30 * 1000)
     },
     createBattle: function () {
+      this.errorText = ''
       if (this.goToBattleTime == -1) {
         this.errorText = '請選擇戰爭發生時間。'
         return
