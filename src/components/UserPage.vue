@@ -1260,7 +1260,7 @@
       </v-card>
     </v-dialog>
     <v-dialog v-model="client.dialog_gc_selection" width="600">
-      <DailogGCSection />
+      <DailogGCSection v-if="client.dialog_gc_selection" />
     </v-dialog>
     <v-dialog v-model="client.dialog_item" width="600">
       <DailogItem />

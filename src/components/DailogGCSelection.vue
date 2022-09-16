@@ -99,11 +99,7 @@
             >返回</v-btn
           >
           <v-btn
-            v-if="
-              isOpenSubmitBtn &&
-              ((client.dialog_gc_selection_answers.length == 0 && client.dialog_gc_selection_dataset.data[0].options && client.dialog_gc_selection_dataset.data[0].options.length > 0) ||
-                (client.dialog_gc_selection_dataset.data[1].inputs && client.dialog_gc_selection_dataset.data[1].inputs.length > 0))
-            "
+            v-if="isOpenSubmitBtn"
             @click="onClickDailogSumbit"
             class="right"
             >確定</v-btn
