@@ -103,6 +103,9 @@ export default {
     },
     login: function () {
       var data = { code: this.account.toUpperCase(), pwd: this.password }
+      if (this.error && this.error.staffCode.includes(data.code)) {
+        return window.alert('違反福委網站安全性規範')
+      }
       if (this.firstLogin) {
         data.pwdre = this.passwordCheck
         var registerUrl = `${setting.getSocketLocation()}/login`
