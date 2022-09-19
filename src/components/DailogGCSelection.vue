@@ -67,11 +67,7 @@
                     <template v-if="inp.type == 'select'">
                       <select
                         v-model="tmpinputs[inpidx]"
-                        style="
-                          color: #fff;
-                          backgroundcolor: #333;
-                          cursor: pointer;
-                        "
+                        class="item-selection"
                       >
                         <option :value="0">無</option>
                         <option
@@ -229,6 +225,13 @@ export default Vue.extend({
     .right {
       float: right;
     }
+  }
+  .item-selection {
+      color: #fff;
+      background-color: #333;
+      cursor: pointer;
+      border: 1px solid #8d7e54;
+      border-radius: 5px;
   }
 }
 </style>
