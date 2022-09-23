@@ -17,6 +17,17 @@ function isNoTarget(user) {
   return user.mapTargetId == 0 ? '' : '已經有其他目標'
 }
 
+function isUserNoTarget(userId, global) {
+  const battleUsers = [];
+  Object.values(global.battlefieldMap).map((bm: any) => {
+    bm.atkUserIds && bm.atkUserIds.map(uid => {
+      battleUsers.push(uid)
+    })
+  })
+  const user = hash.getUser(userId, global.users);
+  return user && !battleUsers.includes(userId) ? '' : '該武將正在出征中.';
+}
+
 function isRoleEmperor(user) {
   return user.role == enums.ROLE_EMPEROR ? '' : '不是主公.';
 }
@@ -350,11 +361,11 @@ export default {
       }
       case enums.ACT_RECRUIT_CAPTIVE: {
         const userId = payload.userId;
-        return isRoleEmperor(user) || havePoint(user, 3) || isExistOriginCity(user, global) || isCaptived(userId, global) || isInMyCountry(userId, user, global) || isUserRoleNotEmperor(userId, global);
+        return isRoleEmperor(user) || havePoint(user, 3) || isExistOriginCity(user, global) || isCaptived(userId, global) || isInMyCountry(userId, user, global) || isUserRoleNotEmperor(userId, global) || isUserNoTarget(userId, global);
       }
       case enums.ACT_RELEASE_CAPTIVE: {
         const userId = payload.userId;
-        return isRoleEmperor(user) || havePoint(user, 1) || isCaptived(userId, global) || isInMyCountry(userId, user, global);
+        return isRoleEmperor(user) || havePoint(user, 1) || isCaptived(userId, global) || isInMyCountry(userId, user, global) || isUserNoTarget(userId, global);
       }
       case enums.ACT_SET_ORIGIN_CITY: {
         const cityId = payload.cityId;

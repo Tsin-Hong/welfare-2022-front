@@ -790,6 +790,12 @@ export default Vue.extend({
       const ownMapIds = this.global.maps
         .filter((map) => map.ownCountryId == myself.countryId)
         .map((map) => map.id)
+      const battleUsers = [];
+      Object.values(this.global.battlefieldMap).map((bm: any) => {
+        bm.atkUserIds && bm.atkUserIds.map(uid => {
+          battleUsers.push(uid)
+        })
+      })
       const users = this.global.users
         .filter((user) => user.captiveDate && ownMapIds.includes(user.mapNowId))
         .map((user: any) => {
@@ -798,13 +804,13 @@ export default Vue.extend({
             Math.ceil(timeGap / 1000 / 60 / 60 / 24) * 2.5 + 25,
             100
           )
+          const enable = !battleUsers.includes(user.id)
+          const displayAfter = enable ? `受俘日 (${new Date(user.captiveDate).toLocaleDateString()})  招募成功率: ${ratio}%` : '(未捕獲)'
           return {
             ratio,
-            display: `${user.nickname} - 受俘日 (${new Date(
-              user.captiveDate
-            ).toLocaleDateString()})  招募成功率: ${ratio}%`,
+            display: `${user.nickname} - ${displayAfter}`,
             value: user,
-            enable: true
+            enable,
           }
         })
       users.sort((a, b) => b.timeGap - a.timeGap)
